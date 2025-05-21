@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zeitungsartikel-Archiv</title>
+    <style>
+        :root {
+            --primary-color: #334155;
+            --secondary-color: #94a3b8;
+            --accent-color: #0ea5e9;
+            --background-color: #f8fafc;
+            --text-color: #1e293b;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 0;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        nav a:hover {
+            color: var(--accent-color);
+        }
+        
+        section {
+            padding: 2rem 0;
+        }
+        
+        h1, h2, h3 {
+            color: var(--primary-color);
+        }
+        
+        /* About section */
+        .footnote {
+            font-size: 0.8rem;
+            color: var(--secondary-color);
+            vertical-align: super;
+            cursor: pointer;
+        }
+        
+        .footnote-content {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--secondary-color);
+            font-size: 0.9rem;
+        }
+        
+        /* Archive section */
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .filter-group {
+            margin-bottom: 1rem;
+        }
+        
+        .filter-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .filter-group select, .filter-group input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--secondary-color);
+            border-radius: 4px;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--secondary-color);
+        }
+        
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        
+        tr:hover {
+            background-color: rgba(148, 163, 184, 0.1);
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #0284c7;
+        }
+        
+        footer {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 1rem 0;
+            margin-top: 2rem;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                padding: 1rem;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 0;
+            }
+            
+            .filters {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <h1>Zeitungsartikel-Archiv</h1>
+            <ul>
+                <li><a href="#about">Über das Projekt</a></li>
+                <li><a href="#archive">Archiv</a></li>
+                <li><a href="#literature">Literaturverzeichnis</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main class="container">
+        <section id="about">
+            <h2>Über das Projekt</h2>
+            <div class="about-content">
+                <p>Willkommen zum Zeitungsartikel-Archiv. Dieses Projekt sammelt und kategorisiert Nachrichtenartikel aus verschiedenen Quellen weltweit. Es dient als Ressource für Forscher, Journalisten und alle, die sich für Medienberichterstattung interessieren<span class="footnote" onclick="showFootnote(1)">1</span>.</p>
+                
+                <p>Unser Ziel ist es, einen umfassenden Überblick über die globale Medienlandschaft zu bieten und verschiedene Perspektiven zu wichtigen Themen zugänglich zu machen<span class="footnote" onclick="showFootnote(2)">2</span>.</p>
+                
+                <div class="footnote-content">
+                    <p id="footnote-1"><strong>1.</strong> Die Sammlung begann im Jahr 2023 und wird kontinuierlich erweitert.</p>
+                    <p id="footnote-2"><strong>2.</strong> Alle Artikel sind mit den Originalquellen verlinkt und entsprechend kategorisiert.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="archive">
+            <h2>Archiv der Artikel</h2>
+            
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="date-filter">Veröffentlichungsdatum:</label>
+                    <input type="date" id="date-filter">
+                </div>
+                
+                <div class="filter-group">
+                    <label for="outlet-filter">Medium:</label>
+                    <select id="outlet-filter">
+                        <option value="">Alle Medien</option>
+                        <!-- Will be populated dynamically -->
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="country-filter">Land:</label>
+                    <select id="country-filter">
+                        <option value="">Alle Länder</option>
+                        <!-- Will be populated dynamically -->
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="type-filter">Typ:</label>
+                    <select id="type-filter">
+                        <option value="">Alle Typen</option>
+                        <!-- Will be populated dynamically -->
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="category-filter">Kategorie:</label>
+                    <select id="category-filter">
+                        <option value="">Alle Kategorien</option>
+                        <!-- Will be populated dynamically -->
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="search">Suche:</label>
+                    <input type="text" id="search" placeholder="Titel oder Autor...">
+                </div>
+                
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button class="btn" onclick="resetFilters()">Filter zurücksetzen</button>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table id="articles-table">
+                    <thead>
+                        <tr>
+                            <th>Datum</th>
+                            <th>Titel</th>
+                            <th>Medium</th>
+                            <th>Land</th>
+                            <th>Typ</th>
+                            <th>Kategorie</th>
+                            <th>Autoren</th>
+                            <th>Tags</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Table rows will be dynamically populated -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        
+        <section id="literature">
+            <h2>Literaturverzeichnis</h2>
+            <div class="table-container">
+                <table id="literature-table">
+                    <thead>
+                        <tr>
+                            <th>Titel</th>
+                            <th>Autor</th>
+                            <th>Jahr</th>
+                            <th>Verlag</th>
+                            <th>Link</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Table rows will be dynamically populated -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <p>&copy; 2025 Zeitungsartikel-Archiv | Alle Rechte vorbehalten</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script>
+        // Sample data structure (will be replaced with CSV data)
+        let articlesData = [];
+        let literatureData = [];
+        
+        // Filter states
+        let filters = {
+            date: '',
+            outlet: '',
+            country: '',
+            type: '',
+            category: '',
+            search: ''
+        };
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load data from CSV
+            loadCSVData();
+            
+            // Setup event listeners for filters
+            document.getElementById('date-filter').addEventListener('change', function() {
+                filters.date = this.value;
+                renderArticlesTable();
+            });
+            
+            document.getElementById('outlet-filter').addEventListener('change', function() {
+                filters.outlet = this.value;
+                renderArticlesTable();
+            });
+            
+            document.getElementById('country-filter').addEventListener('change', function() {
+                filters.country = this.value;
+                renderArticlesTable();
+            });
+            
+            document.getElementById('type-filter').addEventListener('change', function() {
+                filters.type = this.value;
+                renderArticlesTable();
+            });
+            
+            document.getElementById('category-filter').addEventListener('change', function() {
+                filters.category = this.value;
+                renderArticlesTable();
+            });
+            
+            document.getElementById('search').addEventListener('input', function() {
+                filters.search = this.value.toLowerCase();
+                renderArticlesTable();
+            });
+        });
+        
+        // Load data from CSV files
+        function loadCSVData() {
+            // For demonstration purposes, we'll use sample data
+            // In a real application, you would load this from actual CSV files
+            
+            // Sample articles data
+            articlesData = [
+                { 
+                    date: '2025-05-01', 
+                    title: 'Die Zukunft der erneuerbaren Energien', 
+                    link: 'https://example.com/article1',
+                    outlet: 'Der Spiegel', 
+                    country: 'Deutschland', 
+                    type: 'Nachrichtenartikel', 
+                    category: 'Umwelt',
+                    authors: 'Max Mustermann',
+                    tags: 'Energie, Klima'
+                },
+                { 
+                    date: '2025-04-15', 
+                    title: 'New Economic Policies Announced', 
+                    link: 'https://example.com/article2',
+                    outlet: 'New York Times', 
+                    country: 'USA', 
+                    type: 'Analyse', 
+                    category: 'Wirtschaft',
+                    authors: 'Jane Doe',
+                    tags: 'Economy, Policy'
+                },
+                { 
+                    date: '2025-03-22', 
+                    title: 'Cultural Shifts in Urban Areas', 
+                    link: 'https://example.com/article3',
+                    outlet: 'Le Monde', 
+                    country: 'Frankreich', 
+                    type: 'Feature', 
+                    category: 'Gesellschaft',
+                    authors: 'Jean Dupont, Marie Leclerc',
+                    tags: 'Urban, Culture'
+                }
+            ];
+            
+            // Sample literature data
+            literatureData = [
+                {
+                    title: 'Media in the Digital Age',
+                    author: 'John Smith',
+                    year: '2023',
+                    publisher: 'Academic Press',
+                    link: 'https://example.com/book1'
+                },
+                {
+                    title: 'Journalism Ethics',
+                    author: 'Emily Johnson',
+                    year: '2022',
+                    publisher: 'University Press',
+                    link: 'https://example.com/book2'
+                }
+            ];
+            
+            // In a real implementation, you would use PapaParse to load CSV data:
+            /*
+            Papa.parse('articles.csv', {
+                download: true,
+                header: true,
+                complete: function(results) {
+                    articlesData = results.data;
+                    populateFilters();
+                    renderArticlesTable();
+                }
+            });
+            
+            Papa.parse('literature.csv', {
+                download: true,
+                header: true,
+                complete: function(results) {
+                    literatureData = results.data;
+                    renderLiteratureTable();
+                }
+            });
+            */
+            
+            // For the demo, we'll proceed with our sample data
+            populateFilters();
+            renderArticlesTable();
+            renderLiteratureTable();
+        }
+        
+        // Populate filter dropdowns with unique values from the data
+        function populateFilters() {
+            // Get unique outlets
+            const outlets = [...new Set(articlesData.map(item => item.outlet))];
+            const outletFilter = document.getElementById('outlet-filter');
+            outlets.forEach(outlet => {
+                const option = document.createElement('option');
+                option.value = outlet;
+                option.textContent = outlet;
+                outletFilter.appendChild(option);
+            });
+            
+            // Get unique countries
+            const countries = [...new Set(articlesData.map(item => item.country))];
+            const countryFilter = document.getElementById('country-filter');
+            countries.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country;
+                option.textContent = country;
+                countryFilter.appendChild(option);
+            });
+            
+            // Get unique types
+            const types = [...new Set(articlesData.map(item => item.type))];
+            const typeFilter = document.getElementById('type-filter');
+            types.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = type;
+                typeFilter.appendChild(option);
+            });
+            
+            // Get unique categories
+            const categories = [...new Set(articlesData.map(item => item.category))];
+            const categoryFilter = document.getElementById('category-filter');
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categoryFilter.appendChild(option);
+            });
+        }
+        
+        // Render articles table with applied filters
+        function renderArticlesTable() {
+            const tableBody = document.querySelector('#articles-table tbody');
+            tableBody.innerHTML = '';
+            
+            // Apply filters
+            const filteredData = articlesData.filter(article => {
+                return (!filters.date || article.date === filters.date) &&
+                       (!filters.outlet || article.outlet === filters.outlet) &&
+                       (!filters.country || article.country === filters.country) &&
+                       (!filters.type || article.type === filters.type) &&
+                       (!filters.category || article.category === filters.category) &&
+                       (!filters.search || 
+                        article.title.toLowerCase().includes(filters.search) || 
+                        article.authors.toLowerCase().includes(filters.search));
+            });
+            
+            // Create table rows
+            filteredData.forEach(article => {
+                const row = document.createElement('tr');
+                
+                // Date column
+                const dateCell = document.createElement('td');
+                dateCell.textContent = formatDate(article.date);
+                row.appendChild(dateCell);
+                
+                // Title column with link
+                const titleCell = document.createElement('td');
+                const titleLink = document.createElement('a');
+                titleLink.href = article.link;
+                titleLink.textContent = article.title;
+                titleLink.target = '_blank';
+                titleCell.appendChild(titleLink);
+                row.appendChild(titleCell);
+                
+                // Other columns
+                const outletCell = document.createElement('td');
+                outletCell.textContent = article.outlet;
+                row.appendChild(outletCell);
+                
+                const countryCell = document.createElement('td');
+                countryCell.textContent = article.country;
+                row.appendChild(countryCell);
+                
+                const typeCell = document.createElement('td');
+                typeCell.textContent = article.type;
+                row.appendChild(typeCell);
+                
+                const categoryCell = document.createElement('td');
+                categoryCell.textContent = article.category;
+                row.appendChild(categoryCell);
+                
+                const authorsCell = document.createElement('td');
+                authorsCell.textContent = article.authors;
+                row.appendChild(authorsCell);
+                
+                const tagsCell = document.createElement('td');
+                tagsCell.textContent = article.tags;
+                row.appendChild(tagsCell);
+                
+                tableBody.appendChild(row);
+            });
+            
+            // Show a message if no results found
+            if (filteredData.length === 0) {
+                const row = document.createElement('tr');
+                const cell = document.createElement('td');
+                cell.colSpan = 8;
+                cell.textContent = 'Keine Artikel gefunden, die den Filterkriterien entsprechen.';
+                cell.style.textAlign = 'center';
+                row.appendChild(cell);
+                tableBody.appendChild(row);
+            }
+        }
+        
+        // Render literature table
+        function renderLiteratureTable() {
+            const tableBody = document.querySelector('#literature-table tbody');
+            tableBody.innerHTML = '';
+            
+            literatureData.forEach(item => {
+                const row = document.createElement('tr');
+                
+                const titleCell = document.createElement('td');
+                titleCell.textContent = item.title;
+                row.appendChild(titleCell);
+                
+                const authorCell = document.createElement('td');
+                authorCell.textContent = item.author;
+                row.appendChild(authorCell);
+                
+                const yearCell = document.createElement('td');
+                yearCell.textContent = item.year;
+                row.appendChild(yearCell);
+                
+                const publisherCell = document.createElement('td');
+                publisherCell.textContent = item.publisher;
+                row.appendChild(publisherCell);
+                
+                const linkCell = document.createElement('td');
+                const link = document.createElement('a');
+                link.href = item.link;
+                link.textContent = 'Link';
+                link.target = '_blank';
+                linkCell.appendChild(link);
+                row.appendChild(linkCell);
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Reset all filters
+        function resetFilters() {
+            filters = {
+                date: '',
+                outlet: '',
+                country: '',
+                type: '',
+                category: '',
+                search: ''
+            };
+            
+            document.getElementById('date-filter').value = '';
+            document.getElementById('outlet-filter').value = '';
+            document.getElementById('country-filter').value = '';
+            document.getElementById('type-filter').value = '';
+            document.getElementById('category-filter').value = '';
+            document.getElementById('search').value = '';
+            
+            renderArticlesTable();
+        }
+        
+        // Format date for display
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('de-DE');
+        }
+        
+        // Show footnote when clicked
+        function showFootnote(number) {
+            const footnote = document.getElementById(`footnote-${number}`);
+            footnote.scrollIntoView({ behavior: 'smooth' });
+            // Add highlight effect
+            footnote.style.backgroundColor = '#fef9c3';
+            setTimeout(() => {
+                footnote.style.backgroundColor = 'transparent';
+                footnote.style.transition = 'background-color 2s';
+            }, 100);
+        }
+        
+        // Function to load real CSV data
+        function loadRealCSVData(url) {
+            Papa.parse(url, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                dynamicTyping: true,
+                complete: function(results) {
+                    articlesData = results.data;
+                    populateFilters();
+                    renderArticlesTable();
+                    console.log("Loaded data:", results.data);
+                },
+                error: function(error) {
+                    console.error("Error loading CSV:", error);
+                }
+            });
+        }
+        
+        // Function to connect to Google Sheets (would require server-side implementation)
+        function loadGoogleSheetsData() {
+            // This would typically require a server-side component or Google Sheets API
+            // For demo purposes, we'll keep using our sample data
+            alert("Google Sheets integration would require additional backend setup.");
+        }
+    </script>
+</body>
+</html>
