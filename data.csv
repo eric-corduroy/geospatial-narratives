@@ -1,2 +1,4 @@
 Date,Title,Link,Outlet,Country,Context,Category,Data use,Provider,Platform,Resolution,Representation,Viz,Interaction
-2024-03-15,Experts waarschuwen: Rusland bouwt lanceerinstallaties voor hypermoderne kernraket,http://example.com/article1,The New York Times,Ukraine,Military analysis,Security,2024;2023;2000,ESA;Planet Labs;Planet Labs,Sentinel-2;PlanetScope;SkySat,>10m;1-10m;<1m,Optical;Optical;Optical,RGB;RGB;RGB,On-Scroll;Slider;Zoom
+2024-03-15,Experts waarschuwen: Rusland bouwt lanceerinstallaties voor hypermoderne kernraket,http://example.com/article1,The New York Times,Ukraine,Military analysis,Security,2024,ESA,Sentinel-2,>10m,Optical,RGB,On-Scroll
+2024-03-15,Experts waarschuwen: Rusland bouwt lanceerinstallaties voor hypermoderne kernraket,http://example.com/article1,The New York Times,Ukraine,Military analysis,Security,2023,Planet Labs,PlanetScope,1-10m,Optical,RGB,Slider
+2024-03-15,Experts waarschuwen: Rusland bouwt lanceerinstallaties voor hypermoderne kernraket,http://example.com/article1,The New York Times,Ukraine,Military analysis,Security,2000,Planet Labs,SkySat,<1m,Optical,RGB,Zoom
