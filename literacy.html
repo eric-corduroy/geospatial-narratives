@@ -1087,8 +1087,8 @@
             clickedPill.classList.add('active');
         } else {
             // If another pill is clicked, deactivate "All" if it's active
-            const allPill = parentContainer.querySelector('.pill[data-value="all"]');
-            if (allPill && allPell.classList.contains('active')) {
+            const allPill = parentContainer.querySelector('.pill[data-value="all"]'); // Corrected typo here
+            if (allPill && allPill.classList.contains('active')) { // Corrected typo here
                 allPill.classList.remove('active');
             }
             clickedPill.classList.toggle('active');
