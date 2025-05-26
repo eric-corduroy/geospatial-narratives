@@ -408,7 +408,27 @@
         line-height: 0.9; /* Adjusted line height to be smaller */
         color: #000;
         margin-top: 10px; /* Add margin for spacing between terms and letter */
+        cursor: pointer; /* Indicate clickability */
     }
+
+    .term-definition {
+        font-family: 'Geist Mono', monospace;
+        font-size: 14px;
+        line-height: 1.2; /* Adjust for readability */
+        color: #333; /* Darker grey than term, but not black */
+        margin-top: 5px; /* Small space below term */
+        margin-bottom: 15px; /* Space before next term or letter */
+        padding: 2px; /* Some padding around the definition */
+        background-color: #ffffff; /* Light background for definition box */
+        border-radius: 4px; /* Slightly rounded corners */
+        display: none; /* Initially hidden */
+        word-break: break-word; /* Ensure long words break */
+    }
+
+    .term-definition.active {
+        display: block; /* Show when active */
+    }
+
 
     /* --- Responsive Design --- */
 
@@ -481,6 +501,9 @@
       .terms-view-container .term-item {
           font-size: 36px; /* Adjusted for responsive */
       }
+      .term-definition {
+          font-size: 16px;
+      }
     }
 
     /* For screens smaller than 480px (mobile phones) */
@@ -549,6 +572,9 @@
       }
       .terms-view-container .term-item {
           font-size: 28px; /* Adjusted for responsive */
+      }
+      .term-definition {
+          font-size: 14px;
       }
     }
   </style>
@@ -662,6 +688,7 @@
     let termsData = {}; // To store terms loaded from CSV
     let filtersActive = false;
     let currentView = 'table'; // 'table', 'quote', or 'terms'
+    let currentOpenDefinitionElement = null; // Global variable to track the currently open definition
 
     // --- GLOBAL FUNCTIONS ---
     function extractYears(yearString) {
@@ -848,12 +875,13 @@
                         results.data.forEach(row => {
                             const term = row.Term || '';
                             const meaningType = row['Meaning Type'] || ''; // New column for terms
+                            const definition = row.Definition || ''; // NEW: Read Definition column
                             if (term) {
                                 const firstLetter = term.charAt(0).toUpperCase();
                                 if (!termsData[firstLetter]) {
                                     termsData[firstLetter] = [];
                                 }
-                                termsData[firstLetter].push({ term: term, meaningType: meaningType });
+                                termsData[firstLetter].push({ term: term, meaningType: meaningType, definition: definition }); // NEW: Store definition
                             }
                         });
                         // Sort terms alphabetically within each letter group
@@ -996,41 +1024,42 @@
 
     function loadSampleTermsData() {
         const sampleTerms = [
-            { Term: 'Before/After', 'Meaning Type': 'Media Theoretical/Philosophical' },
-            { Term: 'Co-operative aerial images', 'Meaning Type': 'Technical/Scientific' },
-            { Term: 'Deepfake Geography', 'Meaning Type': 'Media Theoretical/Philosophical' },
-            { Term: 'Earth Observation', 'Meaning Type': 'Technical/Scientific' },
-            { Term: 'Eye(s) in the Sky', 'Meaning Type': 'Media Theoretical/Philosophical' },
-            { Term: 'Geomedia', 'Meaning Type': 'Media Theoretical/Philosophical' },
-            { Term: 'Ground Truth', 'Meaning Type': 'Technical/Scientific' },
-            { Term: 'Keyhole', 'Meaning Type': 'Technical/Scientific' },
-            { Term: 'Kyl–Bingaman Amendment', 'Meaning Type': 'Media Theoretical/Philosophical' },
-            { Term: 'Machine gaze', 'Meaning Type': 'Media Theoretical/Philosophical' },
-            { Term: 'Mosaic', 'Meaning Type': 'Technical/Scientific' },
-            { Term: 'Nadir', 'Meaning Type': 'Technical/Scientific' },
-            { Term: 'Nonhuman Photography', 'Meaning Type': 'Media Theoretical/Philosophical' },
-            { Term: 'Oblique', 'Meaning Type': 'Technical/Scientific' },
-            { Term: 'Operational images', 'Meaning Type': 'Media Theoretical/Philosophical' },
-            { Term: 'Orbital Geopolitics', 'Meaning Type': 'Media Theoretical/Philosophical' },
-            { Term: 'Orbital Truth', 'Meaning Type': 'Media Theoretical/Philosophical' },
-            { Term: 'Remote Sensing', 'Meaning Type': 'Technical/Scientific' },
-            { Term: 'Technosphere', 'Meaning Type': 'Media Theoretical/Philosophical' },
-            { Term: 'Visual spatial imaginaries', 'Meaning Type': 'Media Theoretical/Philosophical' },
-            { Term: 'Vertical Perspective', 'Meaning Type': 'Technical/Scientific' },
-            { Term: 'Verticality', 'Meaning Type': 'Media Theoretical/Philosophical' },
-            { Term: 'View from above', 'Meaning Type': 'Media Theoretical/Philosophical' },
-            { Term: 'View from nowhere', 'Meaning Type': 'Media Theoretical/Philosophical' }
+            { Term: 'Before/After', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'A conceptual framework in media theory often used to describe the impact of a specific event or technology on perception and representation, particularly in visual media.' },
+            { Term: 'Co-operative aerial images', 'Meaning Type': 'Technical/Scientific', Definition: 'Aerial images produced through the collaborative efforts of multiple participants, often leveraging crowdsourcing or community science approaches for data collection and analysis.' },
+            { Term: 'Deepfake Geography', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'The manipulation of geospatial data or imagery to create misleading or entirely fabricated representations of geographic spaces, raising questions about authenticity and trust in maps.' },
+            { Term: 'Earth Observation', 'Meaning Type': 'Technical/Scientific', Definition: 'The gathering of information about Earth\'s physical, chemical and biological systems by means of remote sensing technologies, typically from satellites or aircraft.' },
+            { Term: 'Eye(s) in the Sky', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'A metaphorical term referring to the pervasive presence of aerial or satellite surveillance, implying constant observation from above and raising concerns about privacy.' },
+            { Term: 'Geomedia', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'A hybrid field exploring the intersections of geographical information and media studies, focusing on how spatial data is produced, disseminated, and consumed through various media forms.' },
+            { Term: 'Ground Truth', 'Meaning Type': 'Technical/Scientific', Definition: 'Information collected on location (on the ground) to verify and calibrate data acquired remotely, such as satellite imagery or aerial photographs.' },
+            { Term: 'Keyhole', 'Meaning Type': 'Technical/Scientific', Definition: 'A term originating from early spy satellite programs (e.g., KEYHOLE satellites) used to describe high-resolution reconnaissance imagery, implying detailed visual access.' },
+            { Term: 'Kyl–Bingaman Amendment', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'A US legislative amendment (1996) that restricts the commercial distribution of high-resolution satellite imagery of Israel, highlighting the geopolitical implications of geospatial data access.' },
+            { Term: 'Machine gaze', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'The perspective or \'vision\' of automated systems and algorithms as they process and interpret visual and spatial data, often differing significantly from human perception.' },
+            { Term: 'Mosaic', 'Meaning Type': 'Technical/Scientific', Definition: 'A composite image created by stitching together multiple individual images to form a larger, continuous view of an area, commonly used in cartography and remote sensing.' },
+            { Term: 'Nadir', 'Meaning Type': 'Technical/Scientific', Definition: 'The point on the celestial sphere directly below a given location; in remote sensing, it refers to the point directly beneath an aircraft or satellite.' },
+            { Term: 'Nonhuman Photography', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'A concept that examines images produced not by human intention or vision, but by autonomous machines or processes (e.g., algorithmic image generation, satellite feeds), challenging traditional notions of authorship.' },
+            { Term: 'Oblique', 'Meaning Type': 'Technical/Scientific', Definition: 'Refers to aerial imagery or perspectives taken at an angle, rather than directly from above (nadir), providing a more natural and recognizable view of the landscape.' },
+            { Term: 'Operational images', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'Images produced not for human viewing or aesthetic purposes, but for technical functions or operational control (e.g., surveillance footage, drone telemetry), often bypassing human interpretation.' },
+            { Term: 'Orbital Geopolitics', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'The study of how the control and use of orbital space, particularly for satellites, influences international relations, power dynamics, and global surveillance capabilities.' },
+            { Term: 'Orbital Truth', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'A concept exploring the authoritative status often granted to satellite imagery and data due to its \'objective\' and \'elevated\' perspective, despite potential biases or manipulations.' },
+            { Term: 'Remote Sensing', 'Meaning Type': 'Technical/Scientific', Definition: 'The acquisition of information about an object or phenomenon without making physical contact with the object, typically through the use of sensors on satellites or aircraft.' },
+            { Term: 'Technosphere', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'A concept referring to the sphere of human technological activity and its impact on the Earth\'s systems, often used to describe the pervasive influence of technology on the environment and human experience.' },
+            { Term: 'Visual spatial imaginaries', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'The collective mental images, narratives, and cultural understandings that shape how people perceive and interact with space and place, often influenced by media representations.' },
+            { Term: 'Vertical Perspective', 'Meaning Type': 'Technical/Scientific', Definition: 'A view directly from above, providing a map-like representation without foreshortening, commonly used in cartography and aerial photography.' },
+            { Term: 'Verticality', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'The philosophical and cultural implications of perceiving space from a vertical perspective, often associated with power, control, and surveillance, distinct from horizontal, lived experiences.' },
+            { Term: 'View from above', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'A perspective (literal or metaphorical) that implies a detached, omniscient, or authoritative gaze, often associated with military, governmental, or technological surveillance.' },
+            { Term: 'View from nowhere', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'A philosophical concept suggesting an objective or unbiased perspective, often critiqued in media studies for masking inherent biases in data collection and representation, particularly from aerial or satellite viewpoints.' }
         ];
         termsData = {};
         sampleTerms.forEach(row => {
             const term = row.Term || '';
             const meaningType = row['Meaning Type'] || '';
+            const definition = row.Definition || ''; // NEW: Read Definition from sample data
             if (term) {
                 const firstLetter = term.charAt(0).toUpperCase();
                 if (!termsData[firstLetter]) {
                     termsData[firstLetter] = [];
                 }
-                termsData[firstLetter].push({ term: term, meaningType: meaningType });
+                termsData[firstLetter].push({ term: term, meaningType: meaningType, definition: definition }); // NEW: Store definition
             }
         });
         for (const letter in termsData) {
@@ -1087,15 +1116,15 @@
             clickedPill.classList.add('active');
         } else {
             // If another pill is clicked, deactivate "All" if it's active
-            const allPill = parentContainer.querySelector('.pill[data-value="all"]'); // Corrected typo here
-            if (allPill && allPill.classList.contains('active')) { // Corrected typo here
+            const allPill = parentContainer.querySelector('.pill[data-value="all"]');
+            if (allPill && allPill.classList.contains('active')) {
                 allPill.classList.remove('active');
             }
             clickedPill.classList.toggle('active');
 
             // If no pills are active, activate "All"
             if (!parentContainer.querySelector('.pill.active')) {
-                allPill.classList.add('active');
+                if (allPill) allPill.classList.add('active'); // Ensure allPill exists
             }
         }
         filterTable();
@@ -1188,6 +1217,12 @@
         const termsContainer = document.getElementById('termsViewContainer');
         termsContainer.innerHTML = ''; // Clear existing terms
 
+        // NEW: Clear any open definition when re-rendering terms view
+        if (currentOpenDefinitionElement) {
+            currentOpenDefinitionElement.remove();
+            currentOpenDefinitionElement = null;
+        }
+
         const filteredTerms = {};
         const selectedMeaningTypes = getActivePillValues('meaning-type');
         const allMeaningTypesActive = selectedMeaningTypes.includes('all');
@@ -1225,6 +1260,58 @@
                 const termElement = document.createElement('div');
                 termElement.classList.add('term-item');
                 termElement.textContent = termItem.term;
+                termElement.setAttribute('data-term', termItem.term); // Store term text
+                termElement.setAttribute('data-definition', termItem.definition); // NEW: Store definition on the element for easy access
+
+                // NEW: Add click listener for definition display
+                termElement.addEventListener('click', function() {
+                    let definitionText = this.getAttribute('data-definition');
+                    const clickedTermElement = this;
+
+                    // If the clicked term's definition is already open, close it
+                    if (currentOpenDefinitionElement && currentOpenDefinitionElement.previousElementSibling === clickedTermElement) {
+                        currentOpenDefinitionElement.remove();
+                        currentOpenDefinitionElement = null;
+                        return; // Exit as definition is now closed
+                    }
+
+                    // If another definition is open, close it first
+                    if (currentOpenDefinitionElement) {
+                        currentOpenDefinitionElement.remove();
+                        currentOpenDefinitionElement = null; // Clear reference
+                    }
+
+                    // Open the new definition if definitionText exists
+                    if (definitionText) {
+                        // Apply line breaks to the definition text
+                        const maxCharsPerLine = 56;
+                        let formattedDefinition = '';
+                        let currentLine = '';
+                        const words = definitionText.split(' ');
+
+                        for (let i = 0; i < words.length; i++) {
+                            const word = words[i];
+                            if ((currentLine + word).length <= maxCharsPerLine) {
+                                currentLine += (currentLine === '' ? '' : ' ') + word;
+                            } else {
+                                formattedDefinition += currentLine + '<br>';
+                                currentLine = word;
+                            }
+                        }
+                        formattedDefinition += currentLine; // Add the last line
+
+                        const definitionElement = document.createElement('div');
+                        definitionElement.classList.add('term-definition');
+                        definitionElement.classList.add('active'); // Make it visible
+                        definitionElement.innerHTML = formattedDefinition; // Use innerHTML for <br> tags
+
+                        // Insert the definition right after the clicked term element
+                        clickedTermElement.parentNode.insertBefore(definitionElement, clickedTermElement.nextSibling);
+
+                        currentOpenDefinitionElement = definitionElement; // Store reference to the newly opened definition
+                    }
+                });
+
                 columns[currentColumnIndex].appendChild(termElement);
                 displayedTermCount++;
             });
