@@ -405,7 +405,7 @@
 
     .terms-view-container .term-item {
         font-size: 48px; /* Large font size for individual terms */
-        line-height: 1.2; /* Adjusted line height */
+        line-height: 0.9; /* Adjusted line height to be smaller */
         color: #000;
         margin-top: 10px; /* Add margin for spacing between terms and letter */
     }
@@ -615,6 +615,19 @@
               </div>
           </div>
       </div>
+
+      <div class="filter-group" id="terms-filter-group">
+          <div class="filter-group-header">TERMS</div>
+          <div class="filter-group-content">
+              <div class="filter-title">Filter by Meaning Type:</div>
+              <div class="filter-pills" id="meaning-type-filter-pills">
+                  <button class="pill active" data-type="meaning-type" data-value="all">All</button>
+                  <button class="pill" data-type="meaning-type" data-value="technical/scientific">Technical/Scientific</button>
+                  <button class="pill" data-type="meaning-type" data-value="media theoretical/philosophical">Media Theoretical/Philosophical</button>
+              </div>
+          </div>
+      </div>
+
     </div>
   </div>
 
@@ -834,17 +847,18 @@
                         termsData = {};
                         results.data.forEach(row => {
                             const term = row.Term || '';
+                            const meaningType = row['Meaning Type'] || ''; // New column for terms
                             if (term) {
                                 const firstLetter = term.charAt(0).toUpperCase();
                                 if (!termsData[firstLetter]) {
                                     termsData[firstLetter] = [];
                                 }
-                                termsData[firstLetter].push(term);
+                                termsData[firstLetter].push({ term: term, meaningType: meaningType });
                             }
                         });
                         // Sort terms alphabetically within each letter group
                         for (const letter in termsData) {
-                            termsData[letter].sort();
+                            termsData[letter].sort((a, b) => a.term.localeCompare(b.term));
                         }
                         console.log('Terms data loaded successfully:', Object.keys(termsData).length, 'letters, total terms:', Object.values(termsData).flat().length);
                         resolve();
@@ -982,44 +996,45 @@
 
     function loadSampleTermsData() {
         const sampleTerms = [
-            { Term: 'Before/After' },
-            { Term: 'Co-operative aerial images' },
-            { Term: 'Deepfake Geography' },
-            { Term: 'Earth Observation' },
-            { Term: 'Eye(s) in the Sky' },
-            { Term: 'Geomedia' },
-            { Term: 'Ground Truth' },
-            { Term: 'Keyhole' },
-            { Term: 'Kyl–Bingaman Amendment' },
-            { Term: 'Machine gaze' },
-            { Term: 'Mosaic' },
-            { Term: 'Nadir' },
-            { Term: 'Nonhuman Photography' },
-            { Term: 'Oblique' },
-            { Term: 'Operational images' },
-            { Term: 'Orbital Geopolitics' },
-            { Term: 'Orbital Truth' },
-            { Term: 'Remote Sensing' },
-            { Term: 'Technosphere' },
-            { Term: 'Visual spatial imaginaries' },
-            { Term: 'Vertical Perspective' },
-            { Term: 'Verticality' },
-            { Term: 'View from above' },
-            { Term: 'View from nowhere' }
+            { Term: 'Before/After', 'Meaning Type': 'Media Theoretical/Philosophical' },
+            { Term: 'Co-operative aerial images', 'Meaning Type': 'Technical/Scientific' },
+            { Term: 'Deepfake Geography', 'Meaning Type': 'Media Theoretical/Philosophical' },
+            { Term: 'Earth Observation', 'Meaning Type': 'Technical/Scientific' },
+            { Term: 'Eye(s) in the Sky', 'Meaning Type': 'Media Theoretical/Philosophical' },
+            { Term: 'Geomedia', 'Meaning Type': 'Media Theoretical/Philosophical' },
+            { Term: 'Ground Truth', 'Meaning Type': 'Technical/Scientific' },
+            { Term: 'Keyhole', 'Meaning Type': 'Technical/Scientific' },
+            { Term: 'Kyl–Bingaman Amendment', 'Meaning Type': 'Media Theoretical/Philosophical' },
+            { Term: 'Machine gaze', 'Meaning Type': 'Media Theoretical/Philosophical' },
+            { Term: 'Mosaic', 'Meaning Type': 'Technical/Scientific' },
+            { Term: 'Nadir', 'Meaning Type': 'Technical/Scientific' },
+            { Term: 'Nonhuman Photography', 'Meaning Type': 'Media Theoretical/Philosophical' },
+            { Term: 'Oblique', 'Meaning Type': 'Technical/Scientific' },
+            { Term: 'Operational images', 'Meaning Type': 'Media Theoretical/Philosophical' },
+            { Term: 'Orbital Geopolitics', 'Meaning Type': 'Media Theoretical/Philosophical' },
+            { Term: 'Orbital Truth', 'Meaning Type': 'Media Theoretical/Philosophical' },
+            { Term: 'Remote Sensing', 'Meaning Type': 'Technical/Scientific' },
+            { Term: 'Technosphere', 'Meaning Type': 'Media Theoretical/Philosophical' },
+            { Term: 'Visual spatial imaginaries', 'Meaning Type': 'Media Theoretical/Philosophical' },
+            { Term: 'Vertical Perspective', 'Meaning Type': 'Technical/Scientific' },
+            { Term: 'Verticality', 'Meaning Type': 'Media Theoretical/Philosophical' },
+            { Term: 'View from above', 'Meaning Type': 'Media Theoretical/Philosophical' },
+            { Term: 'View from nowhere', 'Meaning Type': 'Media Theoretical/Philosophical' }
         ];
         termsData = {};
         sampleTerms.forEach(row => {
             const term = row.Term || '';
+            const meaningType = row['Meaning Type'] || '';
             if (term) {
                 const firstLetter = term.charAt(0).toUpperCase();
                 if (!termsData[firstLetter]) {
                     termsData[firstLetter] = [];
                 }
-                termsData[firstLetter].push(term);
+                termsData[firstLetter].push({ term: term, meaningType: meaningType });
             }
         });
         for (const letter in termsData) {
-            termsData[letter].sort();
+            termsData[letter].sort((a, b) => a.term.localeCompare(b.term));
         }
         console.log('Sample terms data loaded.');
     }
@@ -1034,6 +1049,10 @@
 
         const uniquePlatformPublishers = ['all', ...new Set(allData.map(item => item.platformPublisher).filter(p => p))].sort();
         populatePills('platform-publisher-filter-pills', uniquePlatformPublishers, 'platform-publisher');
+
+        // Initialize Meaning Type filter pills
+        const meaningTypes = ['all', 'technical/scientific', 'media theoretical/philosophical'];
+        populatePills('meaning-type-filter-pills', meaningTypes, 'meaning-type');
     }
 
     function populatePills(containerId, values, type) {
@@ -1061,7 +1080,7 @@
         const value = clickedPill.getAttribute('data-value');
         const parentContainer = clickedPill.closest('.filter-pills');
 
-        // For all filter types on this page (category, author, platform-publisher)
+        // For all filter types on this page (category, author, platform-publisher, meaning-type)
         if (value === 'all') {
             // If "All" is clicked, activate "All" and deactivate others in the same group
             parentContainer.querySelectorAll('.pill').forEach(pill => pill.classList.remove('active'));
@@ -1069,7 +1088,7 @@
         } else {
             // If another pill is clicked, deactivate "All" if it's active
             const allPill = parentContainer.querySelector('.pill[data-value="all"]');
-            if (allPill && allPill.classList.contains('active')) {
+            if (allPill && allPell.classList.contains('active')) {
                 allPill.classList.remove('active');
             }
             clickedPill.classList.toggle('active');
@@ -1169,8 +1188,24 @@
         const termsContainer = document.getElementById('termsViewContainer');
         termsContainer.innerHTML = ''; // Clear existing terms
 
+        const filteredTerms = {};
+        const selectedMeaningTypes = getActivePillValues('meaning-type');
+        const allMeaningTypesActive = selectedMeaningTypes.includes('all');
+
+        for (const letter in termsData) {
+            const termsForLetter = termsData[letter].filter(termItem => {
+                if (!filtersActive) return true; // If filters are not active, show all
+                if (allMeaningTypesActive) return true;
+                return selectedMeaningTypes.includes(termItem.meaningType.toLowerCase());
+            });
+
+            if (termsForLetter.length > 0) {
+                filteredTerms[letter] = termsForLetter;
+            }
+        }
+
         // Sort letters alphabetically
-        const sortedLetters = Object.keys(termsData).sort();
+        const sortedLetters = Object.keys(filteredTerms).sort();
 
         // Determine the number of columns (e.g., 4 columns)
         const numColumns = 4;
@@ -1178,6 +1213,7 @@
         columns.forEach(col => col.classList.add('term-column'));
 
         let currentColumnIndex = 0;
+        let displayedTermCount = 0;
 
         sortedLetters.forEach(letter => {
             const letterHeader = document.createElement('div');
@@ -1185,11 +1221,12 @@
             letterHeader.textContent = letter;
             columns[currentColumnIndex].appendChild(letterHeader);
 
-            termsData[letter].forEach(term => {
-                const termItem = document.createElement('div');
-                termItem.classList.add('term-item');
-                termItem.textContent = term;
-                columns[currentColumnIndex].appendChild(termItem);
+            filteredTerms[letter].forEach(termItem => {
+                const termElement = document.createElement('div');
+                termElement.classList.add('term-item');
+                termElement.textContent = termItem.term;
+                columns[currentColumnIndex].appendChild(termElement);
+                displayedTermCount++;
             });
 
             currentColumnIndex = (currentColumnIndex + 1) % numColumns;
@@ -1197,13 +1234,13 @@
 
         columns.forEach(col => termsContainer.appendChild(col));
 
-        let totalTermsCount = 0;
-        for (const letter in termsData) {
-            totalTermsCount += termsData[letter].length;
-        }
-        updateFilterCount(totalTermsCount);
+        updateFilterCount(displayedTermCount);
     }
 
+    function getActivePillValues(type) {
+        const activePills = document.querySelectorAll(`.pill[data-type="${type}"].active`);
+        return Array.from(activePills).map(pill => pill.getAttribute('data-value').toLowerCase());
+    }
 
     function applyAllFiltersToLiteratureItem(item, fromYear, toYear) {
         if (!filtersActive) return true;
@@ -1262,7 +1299,9 @@
       if (statsDisplay) {
         if (currentView === 'table') {
           const totalCount = allData.length;
-          const hasActiveLiteratureFilters = document.querySelectorAll('.filter-pills .pill.active[data-value]:not([data-value="all"])').length > 0 ||
+          const hasActiveLiteratureFilters = document.querySelectorAll('.filter-pills .pill.active[data-type="category"]:not([data-value="all"])').length > 0 ||
+                                         document.querySelectorAll('.filter-pills .pill.active[data-type="author"]:not([data-value="all"])').length > 0 ||
+                                         document.querySelectorAll('.filter-pills .pill.active[data-type="platform-publisher"]:not([data-value="all"])').length > 0 ||
                                          document.getElementById('fromYearInput').value !== '' ||
                                          document.getElementById('toYearInput').value !== '';
           if (hasActiveLiteratureFilters && filtersActive) {
@@ -1272,7 +1311,9 @@
           }
         } else if (currentView === 'quote') {
           const totalQuotes = allData.filter(item => item.quote).length;
-          const hasActiveLiteratureFilters = document.querySelectorAll('.filter-pills .pill.active[data-value]:not([data-value="all"])').length > 0 ||
+          const hasActiveLiteratureFilters = document.querySelectorAll('.filter-pills .pill.active[data-type="category"]:not([data-value="all"])').length > 0 ||
+                                         document.querySelectorAll('.filter-pills .pill.active[data-type="author"]:not([data-value="all"])').length > 0 ||
+                                         document.querySelectorAll('.filter-pills .pill.active[data-type="platform-publisher"]:not([data-value="all"])').length > 0 ||
                                          document.getElementById('fromYearInput').value !== '' ||
                                          document.getElementById('toYearInput').value !== '';
           if (hasActiveLiteratureFilters && filtersActive) {
@@ -1281,12 +1322,17 @@
              statsDisplay.innerHTML = `Quotes: ${totalQuotes}`;
           }
         } else if (currentView === 'terms') {
-          let totalTermsCount = 0;
-          for (const letter in termsData) {
-              totalTermsCount += termsData[letter].length;
-          }
-          // For the terms view, filters do not apply to the *count* of terms displayed
-          statsDisplay.innerHTML = `Terms: ${totalTermsCount}`;
+            let totalTermsCount = 0;
+            for (const letter in termsData) {
+                totalTermsCount += termsData[letter].length;
+            }
+            const hasActiveTermsFilters = document.querySelectorAll('.pill.active[data-type="meaning-type"]:not([data-value="all"])').length > 0;
+
+            if (hasActiveTermsFilters && filtersActive) {
+                statsDisplay.innerHTML = `Terms: ${filteredCount}/${totalTermsCount}`;
+            } else {
+                statsDisplay.innerHTML = `Terms: ${totalTermsCount}`;
+            }
         }
       }
     }
