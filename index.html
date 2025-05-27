@@ -1,0 +1,1850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Geospatial Narratives</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist&family=Geist+Mono&display=swap" rel="stylesheet">
+  <style>
+    /* Add box-sizing to all elements for consistent box model behavior */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Geist', sans-serif;
+      background: #f2f2f2;
+      margin: 0;
+      padding: 0;
+      overflow: hidden; /* Prevents body from scrolling horizontally */
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    .nav {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 20px 40px 20px 20px; /* Increased top padding to move lower */
+      font-size: 21px;
+      font-weight: bold;
+      color: #000;
+      gap: 10px;
+      background: #f2f2f2;
+    }
+    .nav a {
+      font-size: 21px;
+      text-decoration: none;
+      color: #000;
+      border-bottom: 4px solid transparent;
+      padding: 5px 10px;
+    }
+    .nav a:hover {
+      border-bottom: 4px solid #000;
+    }
+    .nav a.active {
+      border-bottom: 4px solid #000; /* Changed from #5f56ff to #000 */
+      color: #000; /* Changed from #5f56ff to #000 */
+    }
+    .csv-upload {
+      display: none;
+    }
+    .stats {
+      font-size: 96px;
+      padding: 20px 40px 10px 40px;
+      background: #f2f2f2;
+    }
+    .filter-container {
+      padding: 0;
+      background: #f2f2f2;
+      /* border-top: 1px solid #000; /* Removed line on top */
+    }
+    .filter-group {
+      background: #fff;
+      border: none;
+      border-radius: 0;
+      margin-bottom: 0;
+      overflow: hidden;
+    }
+    .filter-group:not(:first-child) {
+      border-top: 1px solid #000;
+    }
+    .filter-group-header {
+      padding: 8px 20px; /* Adjusted padding */
+      font-size: 18px;
+      font-weight: bold;
+      background: #e6e6e6;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: none;
+      color: #999; /* Faint grey when inactive */
+      /* transition: color 0.3s ease; /* Smooth transition for color change - removed */
+    }
+
+    /* New rule for filter group headers when filters are generally active */
+    body.filters-active .filter-group-header {
+        color: #000; /* Black when main filter toggle is on */
+    }
+
+
+    .filter-group-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+      padding: 0 20px;
+      background-color: #e6e6e6;
+    }
+    .filter-group.active .filter-group-content {
+      max-height: 600px; /* Keep this to allow content to expand, actual height is content-driven */
+      padding-bottom: 10px; /* Adjusted padding */
+    }
+    .filter-title {
+      font-size: 14px; /* Made smaller */
+      font-weight: bold;
+      margin-top: 10px; /* Reduced space */
+      margin-bottom: 5px; /* Reduced space */
+      color: #666; /* Closer to background gray */
+    }
+    .filter-group-content .filter-title:first-of-type {
+        margin-top: 0;
+    }
+    .filter-pills {
+      display: flex;
+      flex-wrap: nowrap; /* Ensures horizontal scrolling */
+      gap: 8px;
+      overflow-x: auto; /* Enables horizontal scrolling */
+      padding-bottom: 8px;
+      -webkit-overflow-scrolling: touch; /* Smoother scrolling on iOS */
+    }
+    .filter-pills::-webkit-scrollbar {
+        display: none; /* Hide scrollbar for Webkit browsers */
+    }
+    .filter-pills {
+        -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
+        scrollbar-width: none; /* Hide scrollbar for Firefox */
+    }
+    .pill {
+      flex-shrink: 0;
+      padding: 6px 12px;
+      border-radius: 16px;
+      border: 1px solid #999;
+      background: transparent;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s ease;
+      color: #000;
+    }
+    .pill:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+    .pill.active {
+      background: #000; /* Changed from #5f56ff to #000 */
+      color: white;
+      border-color: #000; /* Changed from #5f56ff to #000 */
+    }
+    .year-range-filter {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .year-range-filter input[type="number"] {
+      padding: 6px 10px;
+      border: 1px solid #999;
+      border-radius: 4px;
+      font-size: 13px;
+      width: 80px;
+      color: #000;
+      background-color: #f9f9f9;
+    }
+    .table-view-container, .title-only-view-container {
+      margin: 0;
+      flex-grow: 1;
+      overflow-y: auto;
+      /* overflow-x: auto; This was removed to prevent horizontal scroll */
+      position: relative;
+      background: #f2f2f2;
+    }
+    table {
+      width: 100%;
+      /* min-width: 1200px; This was removed as we are adjusting font size instead of scrolling */
+      border-collapse: collapse;
+      background: #fff;
+      table-layout: fixed;
+    }
+    th, td {
+      text-align: left;
+      padding: 4px 12px;
+      border-bottom: 1px solid #D3D3D3;
+      border-top: 1px solid #D3D3D3;
+      font-family: 'Geist Mono', monospace;
+      vertical-align: top;
+      font-size: 12px; /* Base font size */
+      word-wrap: break-word; /* Allows text to break to the next line */
+    }
+    /* Specific styles for columns 1-8 */
+    th:nth-child(-n+7),
+    td:nth-child(-n+7) {
+      border-bottom: 1px solid #000;
+    }
+    th:nth-child(-n+7) {
+      border-top: none; /* No top border for header cells in columns 1-8 */
+    }
+    td:nth-child(-n+7) {
+      border-top: 1px solid #000;
+    }
+
+    /* Fixed width for specific columns */
+    th:nth-child(1),
+    td:nth-child(1) {
+      width: 6%; /* Date */
+      min-width: 6%;
+      max-width: 6%;
+    }
+    th:nth-child(2),
+    td:nth-child(2) {
+      width: 13%; /* Title */
+      min-width: 13%;
+      max-width: 13%;
+    }
+    th:nth-child(3),
+    td:nth-child(3) {
+      width: 4%; /* Link */
+      min-width: 4%;
+      max-width: 4%;
+    }
+    th:nth-child(4),
+    td:nth-child(4) {
+      width: 9%; /* Outlet */
+      min-width: 9%;
+      max-width: 9%;
+    }
+    th:nth-child(5),
+    td:nth-child(5) {
+      width: 7%; /* Country */
+      min-width: 7%;
+      max-width: 7%;
+    }
+    th:nth-child(6),
+    td:nth-child(6) {
+      width: 10%; /* Context */
+      min-width: 10%;
+      max-width: 10%;
+    }
+    th:nth-child(7),
+    td:nth-child(7) {
+      width: 8%; /* Category */
+      min-width: 8%;
+      max-width: 8%;
+    }
+    th:nth-child(8),
+    td:nth-child(8) {
+      width: 3.5%; /* Data use */
+      min-width: 3.5%;
+      max-width: 3.5%;
+    }
+    th:nth-child(9),
+    td:nth-child(9) {
+      width: 6.5%; /* Provider */
+      min-width: 6.5%;
+      max-width: 6.5%;
+    }
+    th:nth-child(10),
+    td:nth-child(10) {
+      width: 6%; /* Platform */
+      min-width: 6%;
+      max-width: 6%;
+    }
+    th:nth-child(11),
+    td:nth-child(11) {
+      width: 7%; /* Representation */
+      min-width: 7%;
+      max-width: 7%;
+    }
+    th:nth-child(12),
+    td:nth-child(12) {
+      width: 4%; /* Resolution */
+      min-width: 4%;
+      max-width: 4%;
+    }
+    th:nth-child(13),
+    td:nth-child(13) {
+      width: 4%; /* Viz */
+      min-width: 4%;
+      max-width: 4%;
+    }
+
+    thead {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    th {
+      background: #000;
+      color: white;
+      border-top: none;
+      border-bottom: 1px solid #000;
+    }
+    /* Explicitly left align headers of columns 8-14 and make them black */
+    th:nth-child(n+8) {
+      background-color: #000;
+      text-align: left;
+    }
+    /* Left align content of columns 8-14 */
+    td:nth-child(n+8) {
+      text-align: left;
+    }
+    a {
+      color: #1a73e8;
+      text-decoration: none;
+      border-bottom: none;
+    }
+    .month {
+      color: gray;
+    }
+    .provider-item {
+      display: block;
+      margin-bottom: 4px;
+      padding-bottom: 4px;
+    }
+    .provider-item:not(:last-child) {
+      border-bottom: 1px solid #ddd;
+    }
+    .provider-resolution-group {
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    /* Toggle Switches Container */
+    .toggles-container {
+      background: #f2f2f2;
+      padding: 0 40px 10px 20px;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 20px;
+      margin-top: 10px;
+    }
+
+    .filter-toggle-group, .feed-toggle-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .filter-toggle-label, .feed-toggle-label {
+      font-size: 18px;
+      font-weight: bold;
+      color: #000;
+    }
+
+    /* The switch - the box around the slider */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 24px;
+    }
+
+    /* Hide default HTML checkbox */
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    /* The slider */
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      -webkit-transition: .4s;
+      transition: .4s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      -webkit-transition: .4s;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #000;
+    }
+
+    input:focus + .slider {
+      box-shadow: 0 0 1px #000;
+    }
+
+    input:checked + .slider:before {
+      -webkit-transform: translateX(16px);
+      -ms-transform: translateX(16px);
+      transform: translateX(16px);
+    }
+
+    /* Overlay styles */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: transparent;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      font-size: 10em;
+      font-weight: bold;
+      color: #333;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+      pointer-events: none;
+      opacity: 1;
+      transition: opacity 0.5s ease-out;
+    }
+    .overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    /* Specific styles for data detail columns */
+    .data-detail-cell {
+      font-size: 12px; /* Base font size */
+      padding: 4px 8px;
+      background-color: rgb(156, 255, 154);
+      padding-left: 12px;
+    }
+
+    /* Light grey top border for the first row of each article, across all columns */
+    tr.article-start td {
+      border-top: 1px solid #D3D3D3;
+    }
+
+    /* FIX: Override the light grey top border for data-detail-cells when it's the article start */
+    tr.article-start .data-detail-cell {
+        border-top: 1px solid #000;
+    }
+
+    /* Black bottom border for the last data point row of an article, across all columns */
+    tr.last-cdp-of-article td {
+      border-bottom: 1px solid #000;
+    }
+    /* Ensure data-detail-cell gets a black bottom border if it's the last data point of an article */
+    tr.last-cdp-of-article .data-detail-cell {
+        border-bottom: 1px solid #000;
+    }
+
+    /* Override for data-detail-cells that are NOT the last cdp of an article */
+    /* This ensures they maintain light grey bottom borders if they are intermediate rows */
+    tr:not(.last-cdp-of-article) .data-detail-cell {
+        border-bottom: 1px solid #D3D3D3;
+    }
+
+    /* Show/Hide View Containers */
+    .table-view-container.hidden,
+    .title-only-view-container.hidden {
+      display: none;
+    }
+
+    /* Title-Only View Specific Styles */
+    .title-only-view-container {
+      padding: 20px 40px;
+      background: #fff;
+      overflow-y: auto;
+      border-top: 1px solid #000;
+    }
+
+    .title-only-view-container .article-title-item {
+      font-size: 120px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      line-height: 1.2;
+      color: #000;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 15px;
+      cursor: pointer;
+      display: block;
+      text-decoration: none;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-family: 'Geist', sans-serif;
+    }
+
+    .title-only-view-container .article-title-item:hover {
+        background-color: #f8f8f8;
+    }
+
+    .title-only-view-container .article-title-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+    .title-only-view-container .article-title-item a {
+        color: inherit;
+        text-decoration: none;
+    }
+
+
+    /* --- Responsive Design --- */
+
+    /* New media query for screens smaller than or equal to 1200px (e.g., 13.3-inch screen effective resolution) */
+    @media (max-width: 1600px) {
+      th, td, .data-detail-cell {
+        font-size: 11px; /* 11pt equivalent for smaller screens */
+      }
+    }
+
+    /* For screens smaller than 768px (tablets and smaller) */
+    @media (max-width: 768px) {
+      .nav {
+        padding: 15px 20px 15px 15px;
+        font-size: 18px;
+        gap: 5px;
+      }
+      .nav a {
+        font-size: 18px;
+        padding: 3px 8px;
+      }
+      .stats {
+        font-size: 60px;
+        padding: 15px 20px 5px 20px;
+      }
+      .toggles-container {
+        padding: 0 20px 10px 15px;
+        gap: 15px;
+      }
+      .filter-toggle-label, .feed-toggle-label {
+        font-size: 16px;
+      }
+      .filter-group-header {
+        font-size: 16px;
+        padding: 6px 15px; /* Adjusted padding */
+      }
+      .filter-group-content {
+        padding: 0 15px;
+      }
+      .filter-title {
+        font-size: 12px;
+      }
+      .pill {
+        font-size: 12px;
+        padding: 5px 10px;
+      }
+      .year-range-filter input[type="number"] {
+        font-size: 12px;
+        width: 60px;
+      }
+      th, td {
+        font-size: 11px; /* Maintain 11px or adjust further if needed */
+        padding: 6px 8px;
+      }
+      .overlay {
+        font-size: 7em;
+      }
+      .data-detail-cell {
+        font-size: 11px; /* Maintain 11px or adjust further if needed */
+        padding: 3px 6px;
+      }
+      .title-only-view-container {
+        padding: 15px 20px;
+      }
+      .title-only-view-container .article-title-item {
+        font-size: 60px;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+      }
+    }
+
+    /* For screens smaller than 480px (mobile phones) */
+    @media (max-width: 480px) {
+      .nav {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 10px;
+        font-size: 16px;
+      }
+      .nav a {
+        font-size: 16px;
+        padding: 2px 5px;
+        border-bottom: 2px solid transparent;
+      }
+      .stats {
+        font-size: 40px;
+        padding: 10px;
+      }
+      .filter-group-header {
+        font-size: 14px;
+        padding: 4px 10px; /* Adjusted padding */
+      }
+      .filter-group-content {
+        padding: 0 10px;
+      }
+      .filter-title {
+        font-size: 11px;
+      }
+      .pill {
+        font-size: 11px;
+        padding: 4px 8px;
+      }
+      .year-range-filter input[type="number"] {
+        width: 50px;
+      }
+      th, td {
+        font-size: 10px; /* Further reduced for very small screens */
+        padding: 4px 6px;
+      }
+      .overlay {
+        font-size: 4em;
+      }
+      .data-detail-cell {
+        font-size: 10px; /* Further reduced for very small screens */
+        padding: 2px 4px;
+      }
+      .toggles-container {
+        padding: 0 10px 10px 10px;
+        flex-wrap: wrap;
+      }
+      .title-only-view-container {
+        padding: 10px 15px;
+      }
+      .title-only-view-container .article-title-item {
+        font-size: 40px;
+        margin-bottom: 10px;
+        padding-bottom: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="fixed-header-area">
+    <div class="nav">
+      <a href="index.html" class="active">Index</a>
+      <a href="literacy.html">Literacy</a>
+      <a href="about.html">About</a>
+    </div>
+    <div class="stats">
+      <span id="loadingStatus">Loading data...</span>
+      <div id="statsDisplay" style="display: none;"></div>
+    </div>
+
+    <div class="toggles-container">
+        <div class="filter-toggle-group">
+            <span class="filter-toggle-label">FILTERS</span>
+            <label class="switch">
+                <input type="checkbox" id="filterToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="feed-toggle-group">
+            <span class="feed-toggle-label">FEED</span>
+            <label class="switch">
+                <input type="checkbox" id="feedToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <div class="filter-container">
+      <div class="filter-group" id="narrative-group">
+          <div class="filter-group-header">NARRATIVE</div>
+          <div class="filter-group-content">
+              <div class="filter-title">Filter by Publication Year Range:</div>
+              <div class="year-range-filter">
+                  <input type="number" id="fromYearInput" placeholder="From Year">
+                  <input type="number" id="toYearInput" placeholder="To Year">
+              </div>
+
+              <div class="filter-title">Filter by Region:</div>
+              <div class="filter-pills" id="region-filter-pills">
+                  <button class="pill active" data-type="region" data-value="all">All</button>
+                  <button class="pill" data-type="region" data-value="Europe">Europe</button>
+                  <button class="pill" data-type="region" data-value="Middle East">Middle East</button>
+                  <button class="pill" data-type="region" data-value="Americas">Americas</button>
+                  <button class="pill" data-type="region" data-value="Asia">Asia</button>
+              </div>
+
+              <div id="focus-filter-section" style="display: none;">
+                  <div class="filter-title">Filter by Country/Area:</div>
+                  <div class="filter-pills" id="focus-filter-pills">
+                      <button class="pill active" data-type="focus" data-value="all">All</button>
+                      </div>
+              </div>
+          </div>
+      </div>
+
+      <div class="filter-group" id="data-group">
+          <div class="filter-group-header">DATA</div>
+          <div class="filter-group-content">
+              <div class="filter-title">Filter by Resolution:</div>
+              <div class="filter-pills" id="meters-filter-pills">
+                  <button class="pill active" data-type="resolutionCategory" data-value="all">All</button>
+                  <button class="pill" data-type="resolutionCategory" data-value="<1m">&lt;1m</button>
+                  <button class="pill" data-type="resolutionCategory" data-value="1-10m">1-10m</button>
+                  <button class="pill" data-type="resolutionCategory" data-value=">10m">&gt;10m</button>
+              </div>
+
+              <div class="filter-title">Filter by Viz:</div>
+              <div class="filter-pills" id="viz-filter-pills">
+                  <button class="pill active" data-type="viz" data-value="all">All</button>
+              </div>
+
+              <div class="filter-title">Filter by Data Use Year:</div>
+              <div class="filter-pills" id="years-filter-pills">
+                  <button class="pill active" data-type="years" data-value="all">All</button>
+                  </div>
+
+              <div class="filter-title">Filter by Representation:</div>
+              <div class="filter-pills" id="representation-filter-pills">
+                  <button class="pill active" data-type="representation" data-value="all">All</button>
+              </div>
+          </div>
+      </div>
+
+      <div class="filter-group" id="source-group">
+          <div class="filter-group-header">SOURCE</div>
+          <div class="filter-group-content">
+              <div class="filter-title">Filter by outlet:</div>
+              <div class="filter-pills" id="outlet-filter-pills">
+                  <button class="pill active" data-type="outlet" data-value="all">All</button>
+                  <button class="pill" data-type="outlet" data-value="The New York Times">The New York Times</button>
+                  <button class="pill" data-type="outlet" data-value="Washington Post">Washington Post</button>
+                  <button class="pill" data-type="outlet" data-value="The Guardian">The Guardian</button>
+                  <button class="pill" data-type="outlet" data-value="BBC">BBC</button>
+                  <button class="pill" data-type="outlet" data-value="CNN">CNN</button>
+                  <button class="pill" data-type="outlet" data-value="Reuters">Reuters</button>
+                  <button class="pill" data-type="outlet" data-value="Sky News">Sky News</button>
+              </div>
+
+              <div class="filter-title">Filter by provider:</div>
+              <div class="filter-pills" id="provider-filter-pills">
+                  <button class="pill active" data-type="provider" data-value="all">All</button>
+                  <button class="pill" data-type="provider" data-value="Planet Labs">Planet Labs</button>
+                  <button class="pill" data-type="provider" data-value="Maxar">Maxar</button>
+                  <button class="pill" data-type="provider" data-value="ESA">ESA</button>
+                  <button class="pill" data-type="provider" data-value="NASA">NASA</button>
+                  <button class="pill" data-type="provider" data-value="USGS">USGS</button>
+                  <button class="pill" data-type="provider" data-value="Airbus">Airbus</button>
+              </div>
+          </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tableViewContainer" class="table-view-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Title</th>
+          <th>Link</th> <th>Outlet</th>
+          <th>Country</th> <th>Context</th>
+          <th>Category</th>
+          <th>Use</th>
+          <th>Provider</th>
+          <th>Platform</th>
+          <th>Sensor</th>
+          <th>Res</th>
+          <th>Viz</th>
+          </tr>
+      </thead>
+      <tbody>
+        </tbody>
+    </table>
+  </div>
+
+ 
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+  <script>
+    let allData = [];
+    let selectedRegion = 'all';
+    let selectedFocuses = ['all'];
+    let selectedYears = ['all'];
+    let filtersActive = false;
+    let currentView = 'table'; // 'table' or 'title'
+
+    const countryRegions = {
+      'Gaza Strip': 'Middle East',
+      'Ukraine': 'Europe',
+      'Russia': 'Europe',
+      'Guantanamo Bay': 'Americas',
+      'China': 'Asia',
+      'Amazon Rainforest': 'Americas',
+      'Syria': 'Middle East',
+      'Iraq': 'Middle East',
+      'Afghanistan': 'Asia',
+      'North Korea': 'Asia',
+      'United States': 'Americas',
+      'Canada': 'Americas',
+      'Brazil': 'Americas',
+      'Germany': 'Europe',
+      'France': 'Europe',
+      'United Kingdom': 'Europe',
+      'India': 'Asia',
+      'Japan': 'Asia',
+      'Australia': 'Asia',
+      'Egypt': 'Middle East',
+      'Iran': 'West Asia', // Added for sample data
+      'Sudan': 'Africa', // Added for sample data
+      'Italy': 'Europe', // Added for sample data
+    };
+
+    // --- GLOBAL FUNCTIONS ---
+    // Moved getMeterCategory here to be accessible by both loadDataFromBackend and loadSampleData
+    function getMeterCategory(resolution) {
+      if (!resolution) return '';
+      const lowerCaseResolution = resolution.toLowerCase();
+      // Exact string matches first for clarity and direct handling
+      if (lowerCaseResolution.includes('<1m')) {
+        return '<1m';
+      }
+      if (lowerCaseResolution.includes('1-10m')) {
+        return '1-10m';
+      }
+      if (lowerCaseResolution.includes('>10m')) {
+        return '>10m';
+      }
+      // Numerical parsing as a fallback or for specific number values
+      const numMatch = resolution.match(/(\d+\.?\d*)/);
+      if (numMatch) {
+        const res = parseFloat(numMatch[1]);
+        if (res > 0 && res < 1) {
+          return '<1m';
+        } else if (res >= 1 && res <= 10) {
+          return '1-10m';
+        } else if (res > 10) {
+          return '>10m';
+        }
+      }
+      return '';
+    }
+
+    function extractYears(dataUseString) {
+        if (!dataUseString) return [];
+        const yearMatches = dataUseString.match(/\b\d{4}\b/g);
+        return yearMatches ? Array.from(new Set(yearMatches)).sort() : [];
+    }
+
+    function adjustContentViewHeight() {
+      const fixedHeader = document.getElementById('fixed-header-area');
+      const togglesContainer = document.querySelector('.toggles-container');
+      const tableViewContainer = document.getElementById('tableViewContainer');
+      const titleOnlyViewContainer = document.getElementById('titleOnlyViewContainer');
+
+      if (fixedHeader && togglesContainer && (tableViewContainer || titleOnlyViewContainer)) {
+        const headerHeight = fixedHeader.offsetHeight;
+        const togglesHeight = togglesContainer.offsetHeight;
+        const remainingHeight = `calc(100vh - ${headerHeight}px - ${togglesHeight}px)`;
+
+        if (tableViewContainer) {
+            tableViewContainer.style.height = remainingHeight;
+        }
+        if (titleOnlyViewContainer) {
+            titleOnlyViewContainer.style.height = remainingHeight;
+        }
+      }
+    }
+    // --- END GLOBAL FUNCTIONS ---
+
+    document.addEventListener('DOMContentLoaded', function() {
+      loadDataFromBackend();
+
+      document.querySelectorAll('.filter-pills .pill').forEach(pill => {
+        pill.addEventListener('click', handlePillClick);
+      });
+
+      document.getElementById('fromYearInput').addEventListener('input', filterTable);
+      document.getElementById('toYearInput').addEventListener('input', filterTable);
+
+      document.querySelectorAll('.filter-group-header').forEach(header => {
+        header.addEventListener('click', function() {
+          const group = this.closest('.filter-group');
+          if (filtersActive) {
+            group.classList.toggle('active');
+            adjustContentViewHeight();
+          }
+        });
+      });
+
+      const filterToggle = document.getElementById('filterToggle');
+      filterToggle.addEventListener('change', function() {
+        filtersActive = this.checked;
+        if (filtersActive) {
+            document.body.classList.add('filters-active');
+        } else {
+            document.body.classList.remove('filters-active');
+        }
+        toggleAllFilters(true);
+        filterTable();
+      });
+
+      // Feed Toggle Switch
+      const feedToggle = document.getElementById('feedToggle');
+      feedToggle.addEventListener('change', function() {
+          currentView = this.checked ? 'title' : 'table';
+          updateView();
+      });
+
+
+      const currentPath = window.location.pathname.split('/').pop();
+      document.querySelectorAll('.nav a').forEach(link => {
+        if (link.getAttribute('href') === currentPath && link.getAttribute('href') !== 'index.html') {
+          document.querySelector('.nav a[href="index.html"]').classList.remove('active');
+          link.classList.add('active');
+        } else if (currentPath === '' && link.getAttribute('href') === 'index.html') {
+          // This ensures index.html is active when directly loading the root or index.html
+        }
+      });
+
+      adjustContentViewHeight();
+      window.addEventListener('resize', adjustContentViewHeight);
+
+      const initialOverlay = document.getElementById('initialOverlay');
+      const hideOverlay = () => {
+        if (initialOverlay && !initialOverlay.classList.contains('hidden')) {
+          initialOverlay.classList.add('hidden');
+          document.removeEventListener('mousemove', hideOverlay);
+          document.removeEventListener('scroll', hideOverlay);
+          document.removeEventListener('click', hideOverlay);
+          document.removeEventListener('keydown', hideOverlay);
+        }
+      };
+
+      document.addEventListener('mousemove', hideOverlay);
+      document.addEventListener('scroll', hideOverlay);
+      document.addEventListener('click', hideOverlay);
+      document.addEventListener('keydown', hideOverlay);
+    });
+
+    async function loadDataFromBackend() {
+        const loadingStatus = document.getElementById('loadingStatus');
+        const statsDisplay = document.getElementById('statsDisplay');
+        try {
+            loadingStatus.textContent = 'Loading data from server...';
+            const response = await fetch('./data.csv');
+            if (!response.ok) {
+                // If the file is not found or other HTTP error, trigger fallback
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const csvText = await response.text();
+            Papa.parse(csvText, {
+                header: true,
+                skipEmptyLines: true,
+                dynamicTyping: false,
+                complete: function(results) {
+                    const parsedData = results.data;
+                    allData = parsedData.map(row => {
+                        // Ensure required fields exist, provide defaults if missing
+                        const date = row.Date || '';
+                        const publicationYear = date ? new Date(date).getFullYear() : null;
+
+                        const providers = row.Provider ? row.Provider.split(/[,;]/).map(p => p.trim()).filter(p => p) : [''];
+                        const resolutions = row.Resolution ? row.Resolution.split(/[,;]/).map(r => r.trim()).filter(r => r) : [''];
+                        const platforms = row.Platform ? row.Platform.split(/[,;]/).map(p => p.trim()).filter(p => p) : [''];
+                        const representations = row.Representation ? row.Representation.split(/[,;]/).map(r => r.trim()).filter(r => r) : [''];
+                        const vizs = row.Viz ? row.Viz.split(/[,;]/).map(v => v.trim()).filter(v => v) : [''];
+
+                        const dataUseYears = extractYears(row['Data use'] || '');
+                        if (dataUseYears.length === 0) dataUseYears.push('');
+
+                        let combinedDataPoints = [];
+
+                        const hasProviderData = providers.some(p => p !== '') || resolutions.some(r => r !== '') || platforms.some(p => p !== '') ||
+                                                representations.some(r => r !== '') || vizs.some(v => v !== '');
+
+                        if (!hasProviderData && dataUseYears.length > 0) {
+                            dataUseYears.forEach(year => {
+                                combinedDataPoints.push({
+                                    dataUseYear: year,
+                                    provider: '',
+                                    platform: '',
+                                    resolution: '',
+                                    resolutionCategory: '',
+                                    representation: '',
+                                    viz: ''
+                                });
+                            });
+                        } else if (hasProviderData) {
+                            dataUseYears.forEach(year => {
+                                const currentMaxLength = Math.max(providers.length, resolutions.length, platforms.length, representations.length, vizs.length);
+                                for (let i = 0; i < currentMaxLength; i++) {
+                                    combinedDataPoints.push({
+                                        dataUseYear: year,
+                                        provider: providers[i] || providers[0] || '',
+                                        platform: platforms[i] || platforms[0] || '',
+                                        resolution: resolutions[i] || resolutions[0] || '',
+                                        resolutionCategory: getMeterCategory(resolutions[i] || resolutions[0] || ''),
+                                        representation: representations[i] || representations[0] || '',
+                                        viz: vizs[i] || vizs[0] || ''
+                                    });
+                                }
+                            });
+                        } else {
+                            combinedDataPoints.push({
+                                dataUseYear: '',
+                                provider: '',
+                                platform: '',
+                                resolution: '',
+                                resolutionCategory: '',
+                                viz: ''
+                            });
+                        }
+
+                        return {
+                            date: date,
+                            publicationYear: publicationYear,
+                            title: row.Title || '',
+                            link: row.Link || '',
+                            outlet: row.Outlet || '',
+                            country: row.Country || '',
+                            region: countryRegions[row.Country] || '',
+                            context: row.Context || '',
+                            category: row.Category || '',
+                            combinedDataPoints: combinedDataPoints,
+                        };
+                    });
+                    initializeFilters();
+                    filterTable();
+                    loadingStatus.style.display = 'none';
+                    statsDisplay.style.display = 'block';
+                }
+            });
+        } catch (error) {
+            console.error('Error loading data from backend, falling back to sample data:', error);
+            loadSampleData();
+        }
+    }
+
+    function loadSampleData() {
+        const loadingStatus = document.getElementById('loadingStatus');
+        const statsDisplay = document.getElementById('statsDisplay');
+
+        const resolutionsList = ['<1m', '1-10m', '>10m'];
+        // const interactionsList = ['On-Scroll', 'Slider', 'Zoom']; // Removed
+
+        const sampleData = [
+          {
+            Date: '2024-03-15',
+            Title: 'Experts waarschuwen: Rusland bouwt lanceerinstallaties voor hypermoderne kernraket',
+            Link: 'http://example.com/urban-expansion',
+            Outlet: 'The New York Times',
+            Country: 'United States',
+            Context: 'Urban development patterns',
+            Category: 'Environment',
+            'Data use': '2023; 2024',
+            Provider: 'Planet Labs; Maxar',
+            Platform: 'Sentinel-2; Landsat',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Optical; Hyperspectral',
+            Viz: 'RGB; NRG',
+            // Interaction: interactionsList[Math.floor(Math.random() * interactionsList.length)], // Removed
+            'How To': 'Tutorial available'
+          },
+          {
+            Date: '2023-11-20',
+            Title: 'Deforestation in Amazon',
+            Link: 'http://example.com/deforestation',
+            Outlet: 'The Guardian',
+            Country: 'Brazil',
+            Context: 'Environmental monitoring',
+            Category: 'Environment',
+            'Data use': '2022',
+            Provider: 'ESA',
+            Platform: 'Sentinel-1',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Optical',
+            Viz: 'NDVI',
+            // Interaction: interactionsList[Math.floor(Math.random() * interactionsList.length)], // Removed
+            'How To': 'N/A'
+          },
+          {
+            Date: '2024-01-05',
+            Title: 'Glacier Retreat in Alps',
+            Link: 'http://example.com/glacier-retreat',
+            Outlet: 'BBC',
+            Country: 'Germany',
+            Context: 'Climate change impact',
+            Category: 'Climate',
+            'Data use': '2020; 2024',
+            Provider: 'NASA',
+            Platform: 'MODIS',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Hyperspectral',
+            Viz: 'RGB',
+            // Interaction: interactionsList[Math.floor(Math.random() * interactionsList.length)], // Removed
+            'How To': 'Data publicly available'
+          },
+          {
+            Date: '2023-09-01',
+            Title: 'Crop Yield Analysis',
+            Link: 'http://example.com/crop-yield',
+            Outlet: 'Reuters',
+            Country: 'India',
+            Context: 'Agriculture and food security',
+            Category: 'Agriculture',
+            'Data use': '2023',
+            Provider: 'USGS',
+            Platform: 'Landsat',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Radar',
+            Viz: 'NRG',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'Contact for data'
+          },
+          {
+            Date: '2024-02-10',
+            Title: 'Coastal Erosion Study',
+            Link: 'http://example.com/coastal-erosion',
+            Outlet: 'CNN',
+            Country: 'Japan',
+            Context: 'Disaster preparedness',
+            Category: 'Environment',
+            'Data use': '2024',
+            Provider: 'Airbus',
+            Platform: 'SPOT',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Optical',
+            Viz: 'NDVI',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'Report access limited'
+          },
+          {
+            Date: '2023-07-25',
+            Title: 'Urban Population Density',
+            Link: 'http://example.com/urban-density',
+            Outlet: 'The New York Times',
+            Country: 'France',
+            Context: 'Demographic trends',
+            Category: 'Demographics',
+            'Data use': '2020; 2021; 2022',
+            Provider: 'OpenStreetMap',
+            Platform: 'Open Data',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Hyperspectral',
+            Viz: 'RGB',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'Data available via API'
+          },
+          {
+            Date: '2024-04-01',
+            Title: 'Arctic Ice Melt',
+            Link: 'http://example.com/arctic-ice',
+            Outlet: 'The Guardian',
+            Country: 'Canada',
+            Context: 'Climate change research',
+            Category: 'Climate',
+            'Data use': '2023; 2024',
+            Provider: 'NASA; ESA',
+            Platform: 'CryoSat-2; ICESat-2',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Radar; Optical',
+            Viz: 'NRG; NDVI',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'Scientific paper'
+          },
+          {
+            Date: '2023-10-10',
+            Title: 'Desertification in Africa',
+            Link: 'http://example.com/desertification',
+            Outlet: 'BBC',
+            Country: 'Sudan',
+            Context: 'Land degradation',
+            Category: 'Environment',
+            'Data use': '2021',
+            Provider: 'USGS',
+            Platform: 'Landsat',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Optical',
+            Viz: 'RGB',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'University study'
+          },
+          {
+            Date: '2024-03-01',
+            Title: 'Wildfire Tracking',
+            Link: 'http://example.com/wildfire',
+            Outlet: 'CNN',
+            Country: 'United States',
+            Context: 'Emergency response',
+            Category: 'Disaster',
+            'Data use': '2024',
+            Provider: 'NOAA; NASA',
+            Platform: 'GOES; VIIRS',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Hyperspectral',
+            Viz: 'NRG',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'Public dashboard'
+          },
+          {
+            Date: '2023-08-12',
+            Title: 'Historical City Growth',
+            Link: 'http://example.com/city-growth',
+            Outlet: 'Washington Post',
+            Country: 'United Kingdom',
+            Context: 'Urban history',
+            Category: 'History',
+            'Data use': '1950; 2000; 2020',
+            Provider: 'Ordnance Survey',
+            Platform: 'Historical Maps',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Radar',
+            Viz: 'NDVI',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'Archival research'
+          },
+          {
+            Date: '2024-05-20',
+            Title: 'Ocean Plastic Accumulation',
+            Link: 'http://example.com/ocean-plastic',
+            Outlet: 'Sky News',
+            Country: 'Japan',
+            Context: 'Marine pollution',
+            Category: 'Environment',
+            'Data use': '2024',
+            Provider: 'Sentinel Hub; ESA',
+            Platform: 'Sentinel-3',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Optical; Hyperspectral',
+            Viz: 'RGB; NRG',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'Ongoing research'
+          },
+          {
+            Date: '2023-06-01',
+            Title: 'Volcanic Activity Monitoring',
+            Link: 'http://example.com/volcano',
+            Outlet: 'Reuters',
+            Country: 'Italy',
+            Context: 'Geological hazards',
+            Category: 'Geology',
+            'Data use': '2023',
+            Provider: 'USGS',
+            Platform: 'GPS; Seismometers',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Radar',
+            Viz: 'NDVI',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'Scientific publication'
+          },
+          {
+            Date: '2024-01-25',
+            Title: 'Water Scarcity in Middle East',
+            Link: 'http://example.com/water-scarcity',
+            Outlet: 'The Guardian',
+            Country: 'Iraq',
+            Context: 'Resource management',
+            Category: 'Environment',
+            'Data use': '2020; 2021; 2022; 2023; 2024',
+            Provider: 'NASA',
+            Platform: 'GRACE',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Optical; Radar',
+            Viz: 'RGB; NDVI',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'UN Report'
+          },
+          {
+            Date: '2023-04-18',
+            Title: 'Arctic Shipping Routes',
+            Link: 'http://example.com/arctic-routes',
+            Outlet: 'BBC',
+            Country: 'Russia',
+            Context: 'Geopolitics; Climate Change',
+            Category: 'Geopolitics',
+            'Data use': '2023',
+            Provider: 'ESA; Private Firms',
+            Platform: 'Sentinel-1; Ice charts',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Hyperspectral',
+            Viz: 'NRG',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'Navigational guides'
+          },
+          {
+            Date: '2024-02-29',
+            Title: 'Disease Spread Mapping',
+            Link: 'http://example.com/disease-spread',
+            Outlet: 'The New York Times',
+            Country: 'United States',
+            Context: 'Public Health',
+            Category: 'Health',
+            'Data use': '2024',
+            Provider: 'CDC; WHO',
+            Platform: 'Health data',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Radar; Optical',
+            Viz: 'NDVI; RGB',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+          },
+          {
+            Date: '2023-05-05',
+            Title: 'Illegal Mining in Amazon',
+            Link: 'http://example.com/illegal-mining',
+            Outlet: 'The Guardian',
+            Country: 'Brazil',
+            Context: 'Environmental crime',
+            Category: 'Environment',
+            'Data use': '2023',
+            Provider: 'Planet Labs',
+            Platform: 'PlanetScope',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Optical',
+            Viz: 'NRG',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'NGO report'
+          },
+          {
+            Date: '2024-04-10',
+            Title: 'Infrastructure Development',
+            Link: 'http://example.com/infrastructure',
+            Outlet: 'Washington Post',
+            Country: 'China',
+            Context: 'Economic development',
+            Category: 'Development',
+            'Data use': '2020; 2024',
+            Provider: 'Maxar; Airbus',
+            Platform: 'WorldView; Pleiades',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Hyperspectral; Radar',
+            Viz: 'RGB; NDVI',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'Analyst brief'
+          },
+          {
+            Date: '2023-03-03',
+            Title: 'Refugee Camp Expansion',
+            Link: 'http://example.com/refugee-camp',
+            Outlet: 'Reuters',
+            Country: 'Syria',
+            Context: 'Humanitarian crisis',
+            Category: 'Humanitarian',
+            'Data use': '2023',
+            Provider: 'UNITAR/UNOSAT; Maxar',
+            Platform: 'Satellite Imagery',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Optical',
+            Viz: 'NDVI',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'UN Report'
+          },
+          {
+            Date: '2024-03-22',
+            Title: 'Election Monitoring',
+            Link: 'http://example.com/election-monitoring',
+            Outlet: 'BBC',
+            Country: 'Ukraine',
+            Context: 'Political observation',
+            Category: 'Politics',
+            'Data use': '2024',
+            Provider: 'OSCE; DigitalGlobe',
+            Platform: 'Satellite Imagery; Ground reports',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Hyperspectral',
+            Viz: 'RGB',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+          },
+          {
+            Date: '2023-11-01',
+            Title: 'Military Base Construction',
+            Link: 'http://example.com/military-base',
+            Outlet: 'CNN',
+            Country: 'North Korea',
+            Context: 'National Security',
+            Category: 'Security',
+            'Data use': '2023',
+            Provider: 'NGA; Private Satellite',
+            Platform: 'Satellite Imagery',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Radar',
+            Viz: 'NRG',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'Intelligence analysis'
+          }
+        ];
+        allData = sampleData.map(row => {
+            const date = row.Date || '';
+            const publicationYear = date ? new Date(date).getFullYear() : null;
+
+            const providers = row.Provider ? row.Provider.split(/[,;]/).map(p => p.trim()).filter(p => p) : [''];
+            const resolutions = row.Resolution ? row.Resolution.split(/[,;]/).map(r => r.trim()).filter(r => r) : [''];
+            const platforms = row.Platform ? row.Platform.split(/[,;]/).map(p => p.trim()).filter(p => p) : [''];
+            const representations = row.Representation ? row.Representation.split(/[,;]/).map(r => r.trim()).filter(r => r) : [''];
+            const vizs = row.Viz ? row.Viz.split(/[,;]/).map(v => v.trim()).filter(v => v) : [''];
+
+            const dataUseYears = extractYears(row['Data use'] || '');
+            if (dataUseYears.length === 0) dataUseYears.push('');
+
+            let combinedDataPoints = [];
+
+            const hasProviderData = providers.some(p => p !== '') || resolutions.some(r => r !== '') || platforms.some(p => p !== '') ||
+                                    representations.some(r => r !== '') || vizs.some(v => v !== '');
+
+            if (!hasProviderData && dataUseYears.length > 0) {
+                dataUseYears.forEach(year => {
+                    combinedDataPoints.push({
+                        dataUseYear: year,
+                        provider: '',
+                        platform: '',
+                        resolution: '',
+                        resolutionCategory: '',
+                        representation: '',
+                        viz: ''
+                    });
+                });
+            } else if (hasProviderData) {
+                dataUseYears.forEach(year => {
+                    const currentMaxLength = Math.max(providers.length, resolutions.length, platforms.length, representations.length, vizs.length);
+                    for (let i = 0; i < currentMaxLength; i++) {
+                        combinedDataPoints.push({
+                            dataUseYear: year,
+                            provider: providers[i] || providers[0] || '',
+                            platform: platforms[i] || platforms[0] || '',
+                            resolution: resolutions[i] || resolutions[0] || '',
+                            resolutionCategory: getMeterCategory(resolutions[i] || resolutions[0] || ''),
+                            representation: representations[i] || representations[0] || '',
+                            viz: vizs[i] || vizs[0] || ''
+                        });
+                    }
+                });
+            } else {
+                combinedDataPoints.push({
+                    dataUseYear: '',
+                    provider: '',
+                    platform: '',
+                    resolution: '',
+                    resolutionCategory: '',
+                    viz: ''
+                });
+            }
+
+            return {
+                date: date,
+                publicationYear: publicationYear,
+                title: row.Title || '',
+                link: row.Link || '',
+                outlet: row.Outlet || '',
+                country: row.Country || '',
+                region: countryRegions[row.Country] || '',
+                context: row.Context || '',
+                category: row.Category || '',
+                combinedDataPoints: combinedDataPoints,
+            };
+        });
+        initializeFilters();
+        filterTable();
+        loadingStatus.style.display = 'none';
+        statsDisplay.style.display = 'block';
+    }
+
+
+    function initializeFilters() {
+        const uniqueOutlets = [...new Set(allData.map(item => item.outlet).filter(o => o))];
+        populatePills('outlet-filter-pills', uniqueOutlets, 'outlet');
+
+        const uniqueProviders = [...new Set(allData.flatMap(item => item.combinedDataPoints.map(cdp => cdp.provider).filter(p => p)))];
+        populatePills('provider-filter-pills', uniqueProviders, 'provider');
+
+        const uniqueVizs = [...new Set(allData.flatMap(item => item.combinedDataPoints.map(cdp => cdp.viz).filter(v => v)))];
+        populatePills('viz-filter-pills', uniqueVizs, 'viz');
+
+        const uniqueRepresentations = [...new Set(allData.flatMap(item => item.combinedDataPoints.map(cdp => cdp.representation).filter(r => r)))];
+        populatePills('representation-filter-pills', uniqueRepresentations, 'representation');
+
+        // Removed interaction filter initialization
+        // const uniqueInteractions = [...new Set(allData.flatMap(item => item.combinedDataPoints.map(cdp => cdp.interaction).filter(i => i)))];
+        // populatePills('interaction-filter-pills', uniqueInteractions, 'interaction');
+
+        // Populate Data Use Years
+        const uniqueYears = [...new Set(allData.flatMap(item => item.combinedDataPoints.map(cdp => cdp.dataUseYear).filter(y => y)))].sort().reverse();
+        populatePills('years-filter-pills', uniqueYears, 'years');
+
+        // Populate Focus Countries dynamically with all initially
+        const allUniqueCountries = [...new Set(allData.map(item => item.country).filter(c => c))].sort();
+        populatePills('focus-filter-pills', allUniqueCountries, 'focus');
+    }
+
+    function populatePills(containerId, values, type) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = ''; // Clear existing pills
+
+        // Create and append the "All" pill first
+        const allButton = document.createElement('button');
+        allButton.classList.add('pill', 'active');
+        allButton.setAttribute('data-type', type);
+        allButton.setAttribute('data-value', 'all');
+        allButton.textContent = 'All';
+        allButton.addEventListener('click', handlePillClick);
+        container.appendChild(allButton);
+
+        // Append other values
+        values.forEach(value => {
+            if (value && value !== 'all') { // Ensure 'all' isn't added again
+                const button = document.createElement('button');
+                button.classList.add('pill');
+                button.setAttribute('data-type', type);
+                button.setAttribute('data-value', value);
+                button.textContent = value;
+                button.addEventListener('click', handlePillClick);
+                container.appendChild(button);
+            }
+        });
+    }
+
+    function handlePillClick(event) {
+        const clickedPill = event.target;
+        const type = clickedPill.getAttribute('data-type');
+        const value = clickedPill.getAttribute('data-value');
+        const parentContainer = clickedPill.closest('.filter-pills');
+
+        if (type === 'region') {
+            selectedRegion = value;
+            document.querySelectorAll('.pill[data-type="region"]').forEach(pill => pill.classList.remove('active'));
+            clickedPill.classList.add('active');
+
+            const focusFilterSection = document.getElementById('focus-filter-section');
+            
+            if (selectedRegion === 'all') {
+                focusFilterSection.style.display = 'none';
+                const allUniqueCountries = [...new Set(allData.map(item => item.country).filter(c => c))].sort();
+                populatePills('focus-filter-pills', allUniqueCountries, 'focus');
+                selectedFocuses = ['all'];
+            } else {
+                focusFilterSection.style.display = 'block';
+                const countriesInSelectedRegion = [...new Set(allData
+                    .filter(item => item.region === selectedRegion)
+                    .map(item => item.country)
+                    .filter(c => c)
+                )].sort();
+                populatePills('focus-filter-pills', countriesInSelectedRegion, 'focus');
+                selectedFocuses = ['all']; // Reset to 'all' for the newly filtered countries
+            }
+        } else if (type === 'focus') {
+            if (value === 'all') {
+                document.querySelectorAll('.pill[data-type="focus"]').forEach(pill => pill.classList.remove('active'));
+                clickedPill.classList.add('active');
+                selectedFocuses = ['all'];
+            } else {
+                const allPill = document.querySelector('.pill[data-type="focus"][data-value="all"]');
+                if (allPill.classList.contains('active')) {
+                    allPill.classList.remove('active');
+                    selectedFocuses = [value];
+                } else {
+                    if (clickedPill.classList.contains('active')) {
+                        selectedFocuses = selectedFocuses.filter(f => f !== value);
+                    } else {
+                        selectedFocuses.push(value);
+                    }
+                }
+                clickedPill.classList.toggle('active');
+                if (selectedFocuses.length === 0) {
+                    allPill.classList.add('active');
+                    selectedFocuses = ['all'];
+                }
+            }
+        } else if (type === 'years') {
+            if (value === 'all') {
+                document.querySelectorAll('.pill[data-type="years"]').forEach(pill => pill.classList.remove('active'));
+                clickedPill.classList.add('active');
+                selectedYears = ['all'];
+            } else {
+                const allPill = document.querySelector('.pill[data-type="years"][data-value="all"]');
+                if (allPill.classList.contains('active')) {
+                    allPill.classList.remove('active');
+                    selectedYears = [value];
+                } else {
+                    if (clickedPill.classList.contains('active')) {
+                        selectedYears = selectedYears.filter(y => y !== value);
+                    } else {
+                        selectedYears.push(value);
+                    }
+                }
+                clickedPill.classList.toggle('active');
+                if (selectedYears.length === 0) {
+                    allPill.classList.add('active');
+                    selectedYears = ['all'];
+                }
+            }
+        } else {
+            if (value === 'all') {
+                parentContainer.querySelectorAll('.pill').forEach(pill => pill.classList.remove('active'));
+                clickedPill.classList.add('active');
+            } else {
+                const allPill = parentContainer.querySelector('.pill[data-value="all"]');
+                if (allPill && allPill.classList.contains('active')) {
+                    allPill.classList.remove('active');
+                }
+                clickedPill.classList.toggle('active');
+
+                if (!parentContainer.querySelector('.pill.active')) {
+                    allPill.classList.add('active');
+                }
+            }
+        }
+        filterTable();
+    }
+
+    function toggleAllFilters(forceClose = false) {
+        const filterGroups = document.querySelectorAll('.filter-group');
+        filterGroups.forEach(group => {
+            if (!filtersActive || forceClose) {
+                group.classList.remove('active');
+            } else {
+                group.classList.remove('active');
+            }
+        });
+        adjustContentViewHeight();
+    }
+
+    function updateView() {
+        const tableViewContainer = document.getElementById('tableViewContainer');
+        const titleOnlyViewContainer = document.getElementById('titleOnlyViewContainer');
+        const feedToggle = document.getElementById('feedToggle');
+
+        currentView = feedToggle.checked ? 'title' : 'table';
+
+        if (currentView === 'table') {
+            tableViewContainer.classList.remove('hidden');
+            if (titleOnlyViewContainer) { // Check if element exists before modifying
+                titleOnlyViewContainer.classList.add('hidden');
+            }
+        } else {
+            tableViewContainer.classList.add('hidden');
+            if (!titleOnlyViewContainer) { // Create titleOnlyViewContainer if it doesn't exist
+                const newTitleContainer = document.createElement('div');
+                newTitleContainer.id = 'titleOnlyViewContainer';
+                newTitleContainer.classList.add('title-only-view-container');
+                document.body.appendChild(newTitleContainer); // Append to body or a more appropriate parent
+            }
+            document.getElementById('titleOnlyViewContainer').classList.remove('hidden');
+        }
+        filterTable();
+        adjustContentViewHeight();
+    }
+
+
+    function renderTable() {
+        const tbody = document.querySelector('table tbody');
+        tbody.innerHTML = '';
+
+        const fromYear = parseInt(document.getElementById('fromYearInput').value);
+        const toYear = parseInt(document.getElementById('toYearInput').value);
+
+        const selectedOutlets = Array.from(document.querySelectorAll('.pill[data-type="outlet"].active'))
+            .map(pill => pill.getAttribute('data-value'))
+            .filter(value => value !== 'all');
+        const allOutletsActive = selectedOutlets.length === 0 || selectedOutlets.includes('all');
+
+        const filteredResults = [];
+
+        allData.forEach(item => {
+            const visibleCombinedDataPoints = item.combinedDataPoints.filter(cdp => {
+                return applyAllFiltersToItemAndCombinedDataPoint(item, cdp, fromYear, toYear, allOutletsActive, selectedOutlets);
+            });
+
+            if (visibleCombinedDataPoints.length > 0) {
+                filteredResults.push({ item: item, visibleCombinedDataPoints: visibleCombinedDataPoints });
+            }
+        });
+
+        filteredResults.forEach((result, articleIndex) => {
+            const item = result.item;
+            const visibleCombinedDataPoints = result.visibleCombinedDataPoints;
+            const rowspan = visibleCombinedDataPoints.length;
+
+            visibleCombinedDataPoints.forEach((cdp, cdpIndex) => {
+                const row = document.createElement('tr');
+                row.setAttribute('data-original-index', allData.indexOf(item));
+                row.setAttribute('data-combined-data-point-index', cdpIndex);
+
+                if (cdpIndex === 0) {
+                    row.classList.add('article-start');
+                }
+
+                if (cdpIndex === visibleCombinedDataPoints.length - 1) {
+                    row.classList.add('last-cdp-of-article');
+                }
+
+                if (cdpIndex === 0) {
+                    row.innerHTML = `
+                        <td rowspan="${rowspan}">${item.date}</td>
+                        <td rowspan="${rowspan}">${item.title}</td>
+                        <td rowspan="${rowspan}"><a href="${item.link}" target="_blank">Link</a></td>
+                        <td rowspan="${rowspan}">${item.outlet}</td>
+                        <td rowspan="${rowspan}">${item.country}</td>
+                        <td rowspan="${rowspan}">${item.context}</td>
+                        <td rowspan="${rowspan}">${item.category}</td>
+                        <td class="data-detail-cell">${cdp.dataUseYear}</td>
+                        <td class="data-detail-cell">${cdp.provider}</td>
+                        <td class="data-detail-cell">${cdp.platform}</td>
+                        <td class="data-detail-cell">${cdp.representation}</td>
+                        <td class="data-detail-cell">${cdp.resolution}</td>
+                        <td class="data-detail-cell">${cdp.viz}</td>
+                    `;
+                } else {
+                    row.innerHTML = `
+                        <td class="data-detail-cell">${cdp.dataUseYear}</td>
+                        <td class="data-detail-cell">${cdp.provider}</td>
+                        <td class="data-detail-cell">${cdp.platform}</td>
+                        <td class="data-detail-cell">${cdp.representation}</td>
+                        <td class="data-detail-cell">${cdp.resolution}</td>
+                        <td class="data-detail-cell">${cdp.viz}</td>
+                    `;
+                }
+                tbody.appendChild(row);
+            });
+        });
+        updateFilterCount(filteredResults.length);
+    }
+
+    function renderTitleOnlyView() {
+        let titleContainer = document.getElementById('titleOnlyViewContainer');
+        if (!titleContainer) { // Create if it doesn't exist (e.g., first time switching to this view)
+            titleContainer = document.createElement('div');
+            titleContainer.id = 'titleOnlyViewContainer';
+            titleContainer.classList.add('title-only-view-container');
+            document.body.appendChild(titleContainer);
+        }
+        titleContainer.innerHTML = '';
+
+        const fromYear = parseInt(document.getElementById('fromYearInput').value);
+        const toYear = parseInt(document.getElementById('toYearInput').value);
+
+        const selectedOutlets = Array.from(document.querySelectorAll('.pill[data-type="outlet"].active'))
+            .map(pill => pill.getAttribute('data-value'))
+            .filter(value => value !== 'all');
+        const allOutletsActive = selectedOutlets.length === 0 || selectedOutlets.includes('all');
+
+        const filteredTitles = [];
+        const uniqueTitles = new Set();
+
+        allData.forEach(item => {
+            const hasMatchingCdp = item.combinedDataPoints.some(cdp => {
+                return applyAllFiltersToItemAndCombinedDataPoint(item, cdp, fromYear, toYear, allOutletsActive, selectedOutlets);
+            });
+
+            if (hasMatchingCdp && item.title && !uniqueTitles.has(item.title)) {
+                filteredTitles.push({ title: item.title, link: item.link });
+                uniqueTitles.add(item.title);
+            }
+        });
+
+        filteredTitles.forEach(item => {
+            const titleElement = document.createElement('div');
+            titleElement.classList.add('article-title-item');
+            titleElement.innerHTML = `<a href="${item.link}" target="_blank">${item.title}</a>`;
+            titleContainer.appendChild(titleElement);
+        });
+
+        updateFilterCount(filteredTitles.length);
+    }
+
+
+    function applyAllFiltersToItemAndCombinedDataPoint(item, cdp, fromYear, toYear, allOutletsActive, selectedOutlets) {
+        if (!filtersActive) return true;
+
+        const outletMatch = allOutletsActive || selectedOutlets.includes(item.outlet);
+        const regionMatch = (selectedRegion === 'all' || item.region === selectedRegion);
+        const countryMatch = (selectedFocuses.includes('all') || selectedFocuses.includes(item.country));
+
+        let publicationYearMatch = true;
+        if (item.publicationYear !== null) {
+            if (fromYear && item.publicationYear < fromYear) {
+                publicationYearMatch = false;
+            }
+            if (toYear && item.publicationYear > toYear) {
+                publicationYearMatch = false;
+            }
+        } else {
+            if (fromYear || toYear) {
+                publicationYearMatch = false;
+            }
+        }
+
+        const providerPills = document.querySelectorAll('.pill[data-type="provider"].active');
+        const allProvidersActive = Array.from(providerPills).some(pill => pill.getAttribute('data-value') === 'all');
+        const selectedProviders = Array.from(providerPills)
+            .map(pill => pill.getAttribute('data-value'))
+            .filter(value => value !== 'all');
+
+        const resolutionCategoryPills = document.querySelectorAll('.pill[data-type="resolutionCategory"].active');
+        const allResolutionCategoriesActive = Array.from(resolutionCategoryPills).some(pill => pill.getAttribute('data-value') === 'all');
+        const selectedResolutionCategories = Array.from(resolutionCategoryPills)
+            .map(pill => pill.getAttribute('data-value'))
+            .filter(value => value !== 'all');
+
+        const yearsPills = document.querySelectorAll('.pill[data-type="years"].active');
+        const allYearsActive = Array.from(yearsPills).some(pill => pill.getAttribute('data-value') === 'all');
+        const currentSelectedYears = Array.from(yearsPills)
+                                    .map(pill => pill.getAttribute('data-value'))
+                                    .filter(value => value !== 'all');
+        selectedYears = currentSelectedYears.length === 0 && !allYearsActive ? ['all'] : currentSelectedYears;
+
+
+        const vizPills = document.querySelectorAll('.pill[data-type="viz"].active');
+        const allVizActive = Array.from(vizPills).some(pill => pill.getAttribute('data-value') === 'all');
+        const selectedViz = Array.from(vizPills)
+            .map(pill => pill.getAttribute('data-value'))
+            .filter(value => value !== 'all');
+
+        const representationPills = document.querySelectorAll('.pill[data-type="representation"].active');
+        const allRepresentationsActive = Array.from(representationPills).some(pill => pill.getAttribute('data-value') === 'all');
+        const selectedRepresentations = Array.from(representationPills)
+            .map(pill => pill.getAttribute('data-value'))
+            .filter(value => value !== 'all');
+
+        // Removed interaction filter logic
+        // const interactionPills = document.querySelectorAll('.pill[data-type="interaction"].active');
+        // const allInteractionsActive = Array.from(interactionPills).some(pill => pill.getAttribute('data-value') === 'all');
+        // const selectedInteractions = Array.from(interactionPills)
+        //     .map(pill => pill.getAttribute('data-value'))
+        //     .filter(value => value !== 'all');
+
+        const dataUseYearMatch = allYearsActive || selectedYears.includes(cdp.dataUseYear);
+        const providerMatch = allProvidersActive || selectedProviders.includes(cdp.provider);
+        const resolutionCategoryMatch = allResolutionCategoriesActive || selectedResolutionCategories.includes(cdp.resolutionCategory);
+        const vizMatch = allVizActive || selectedViz.includes(cdp.viz);
+        const representationMatch = allRepresentationsActive || selectedRepresentations.includes(cdp.representation);
+        // const interactionMatch = allInteractionsActive || selectedInteractions.includes(cdp.interaction); // Removed
+
+        return outletMatch && providerMatch && resolutionCategoryMatch && regionMatch && countryMatch && dataUseYearMatch && publicationYearMatch && vizMatch && representationMatch; // Removed interactionMatch
+    }
+
+    function filterTable() {
+        if (currentView === 'table') {
+            renderTable();
+        } else {
+            renderTitleOnlyView();
+        }
+    }
+
+    function updateFilterCount(filteredCount) {
+      const totalCount = allData.length;
+      const statsDisplay = document.getElementById('statsDisplay');
+      if (statsDisplay) {
+        if (filteredCount === totalCount) {
+          statsDisplay.innerHTML = `Articles: ${totalCount}`;
+        } else {
+          statsDisplay.innerHTML = `Articles: ${filteredCount}/${totalCount}`;
+        }
+      }
+    }
+  </script>
+</body>
+</html>
