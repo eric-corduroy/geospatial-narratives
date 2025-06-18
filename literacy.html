@@ -13,6 +13,12 @@
       box-sizing: border-box;
     }
 
+    /* Text selection styling */
+    ::selection {
+      background: red; /* Red background when selecting text */
+      color: white; /* White text on selection */
+    }
+
     body {
       font-family: 'Geist', sans-serif;
       background: #f2f2f2;
@@ -345,25 +351,23 @@
     }
 
     .quote-only-view-container .literature-quote-item {
-      font-size: 120px; /* Triple the size of 40px */
+      font-size: 80px; /* Increased font size */
       font-weight: bold;
       margin-bottom: 20px;
       line-height: 1.2;
       color: #000;
       border-bottom: 1px solid #eee; /* Light separator */
       padding-bottom: 15px;
-      cursor: pointer;
-      display: block; /* Ensures the whole area is clickable */
+      cursor: default; /* Changed to default as quotes are no longer clickable */
+      display: flex; /* Changed to flex to align author to bottom */
+      flex-direction: column; /* Stack quote and author vertically */
+      justify-content: flex-start; /* Align content to the start (top) */
       text-decoration: none; /* Remove underline from link */
       text-transform: uppercase; /* All caps */
-      white-space: nowrap; /* Prevent line breaks */
-      overflow: hidden; /* Hide overflow content */
-      text-overflow: ellipsis; /* Add ellipsis for cut-off text */
+      white-space: normal; /* Allow text to wrap */
+      overflow: visible; /* Allow content to be visible */
+      text-overflow: clip; /* Remove ellipsis */
       font-family: 'Geist', sans-serif; /* Use Geist font */
-    }
-
-    .quote-only-view-container .literature-quote-item:hover {
-        background-color: #f8f8f8; /* Subtle hover effect */
     }
 
     .quote-only-view-container .literature-quote-item:last-child {
@@ -373,6 +377,18 @@
     .quote-only-view-container .literature-quote-item a {
         color: inherit; /* Inherit color from parent div */
         text-decoration: none; /* No underline */
+    }
+
+    .quote-author {
+      font-size: 14px; /* Author font size */
+      font-weight: normal; /* Author not bold */
+      color: #555; /* A bit lighter color for author */
+      margin-top: 5px; /* Reduced space above author, closer to quote */
+      text-align: left; /* Aligned to the left */
+      text-transform: none; /* Author should not be all caps */
+      /* Add some padding to differentiate from the quote if needed */
+      padding-left: 10px; /* Example: add a small indent */
+      font-family: 'Geist Mono', monospace; /* Use Geist Mono for author/source/year */
     }
 
     /* Terms View Specific Styles */
@@ -486,9 +502,14 @@
         padding: 15px 20px;
       }
       .quote-only-view-container .literature-quote-item {
-        font-size: 60px; /* Adjusted for responsive */
+        font-size: 40px; /* Half of 80px -> 40px */
         margin-bottom: 15px;
         padding-bottom: 10px;
+      }
+      .quote-author {
+        font-size: 12px; /* Smaller author font size */
+        margin-top: 8px;
+        padding-left: 8px;
       }
       .terms-view-container {
           padding: 15px 20px;
@@ -558,9 +579,14 @@
         padding: 10px 15px;
       }
       .quote-only-view-container .literature-quote-item {
-        font-size: 40px; /* Adjusted for responsive */
+        font-size: 25px; /* Adjusted for responsive */
         margin-bottom: 10px;
         padding-bottom: 8px;
+      }
+      .quote-author {
+        font-size: 10px; /* Even smaller author font size */
+        margin-top: 5px;
+        padding-left: 5px;
       }
       .terms-view-container {
           padding: 10px 15px;
@@ -584,7 +610,7 @@
     <div class="nav">
       <a href="index.html">Index</a>
       <a href="literacy.html" class="active">Literacy</a>
-      <a href="mood.html">Mood</a> <a href="about.html">About</a>
+      <a href="about.html">About</a>
     </div>
     <div class="stats">
       <span id="loadingStatus">Loading data...</span>
@@ -630,14 +656,9 @@
                   <button class="pill active" data-type="category" data-value="all">All</button>
               </div>
 
-              <div class="filter-title">Filter by Author:</div>
-              <div class="filter-pills" id="author-filter-pills">
-                  <button class="pill active" data-type="author" data-value="all">All</button>
-              </div>
-
-              <div class="filter-title">Filter by Platform/Publisher:</div>
-              <div class="filter-pills" id="platform-publisher-filter-pills">
-                  <button class="pill active" data-type="platform-publisher" data-value="all">All</button>
+              <div class="filter-title">Filter by Type:</div>
+              <div class="filter-pills" id="type-filter-pills">
+                  <button class="pill active" data-type="type" data-value="all">All</button>
               </div>
           </div>
       </div>
@@ -720,6 +741,32 @@
         }
       }
     }
+
+    // Function to format definition text for even line breaks
+    function formatDefinitionText(text, maxCharsPerLine) {
+        if (!text) return '';
+        const words = text.split(' ');
+        let lines = [];
+        let currentLine = [];
+        let currentLineLength = 0;
+
+        words.forEach(word => {
+            // Check if adding the next word (plus a space) exceeds maxCharsPerLine
+            // If it's the first word in a line, allow it to be longer if necessary (for very long words)
+            if (currentLineLength + (currentLine.length > 0 ? 1 : 0) + word.length > maxCharsPerLine && currentLine.length > 0) {
+                lines.push(currentLine.join(' '));
+                currentLine = [word];
+                currentLineLength = word.length;
+            } else {
+                currentLine.push(word);
+                currentLineLength += (currentLine.length > 1 ? 1 : 0) + word.length;
+            }
+        });
+        lines.push(currentLine.join(' ')); // Add the last line
+
+        return lines.join('<br>');
+    }
+
     // --- END GLOBAL FUNCTIONS ---
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -1070,30 +1117,35 @@
 
 
     function initializeFilters() {
-        const uniqueCategories = ['all', ...new Set(allData.map(item => item.category).filter(c => c))].sort();
+        const uniqueCategories = [...new Set(allData.map(item => item.category).filter(c => c))].sort();
         populatePills('category-filter-pills', uniqueCategories, 'category');
 
-        const uniqueAuthors = ['all', ...new Set(allData.map(item => item.author).filter(a => a))].sort();
-        populatePills('author-filter-pills', uniqueAuthors, 'author');
-
-        const uniquePlatformPublishers = ['all', ...new Set(allData.map(item => item.platformPublisher).filter(p => p))].sort();
-        populatePills('platform-publisher-filter-pills', uniquePlatformPublishers, 'platform-publisher');
+        const uniqueTypes = [...new Set(allData.map(item => item.type).filter(t => t))].sort();
+        populatePills('type-filter-pills', uniqueTypes, 'type');
 
         // Initialize Meaning Type filter pills
-        const meaningTypes = ['all', 'technical/scientific', 'media theoretical/philosophical'];
+        const meaningTypes = ['technical/scientific', 'media theoretical/philosophical']; // 'all' handled separately
         populatePills('meaning-type-filter-pills', meaningTypes, 'meaning-type');
     }
 
     function populatePills(containerId, values, type) {
         const container = document.getElementById(containerId);
         container.innerHTML = ''; // Clear existing pills
+
+        // Always add "All" pill first
+        const allButton = document.createElement('button');
+        allButton.classList.add('pill', 'active');
+        allButton.setAttribute('data-type', type);
+        allButton.setAttribute('data-value', 'all');
+        allButton.textContent = 'All';
+        allButton.addEventListener('click', handlePillClick);
+        container.appendChild(allButton);
+
+        // Add other pills
         values.forEach(value => {
-            if (value) { // Ensure value is not empty or null
+            if (value && value !== 'all') { // Ensure value is not empty or null, and not 'all'
                 const button = document.createElement('button');
                 button.classList.add('pill');
-                if (value === 'all') {
-                    button.classList.add('active');
-                }
                 button.setAttribute('data-type', type);
                 button.setAttribute('data-value', value);
                 button.textContent = value;
@@ -1122,7 +1174,7 @@
             }
             clickedPill.classList.toggle('active');
 
-            // If no pills are active, activate "All"
+            // If no pills are active (after toggling), activate "All"
             if (!parentContainer.querySelector('.pill.active')) {
                 if (allPill) allPill.classList.add('active'); // Ensure allPill exists
             }
@@ -1193,23 +1245,51 @@
     }
 
     function renderQuoteOnlyView() {
-        const quoteContainer = document.getElementById('quoteOnlyViewContainer');
-        quoteContainer.innerHTML = ''; // Clear existing quotes
+        const quotesContainer = document.getElementById('quoteOnlyViewContainer');
+        quotesContainer.innerHTML = ''; // Clear existing quotes
 
         const fromYear = parseInt(document.getElementById('fromYearInput').value);
         const toYear = parseInt(document.getElementById('toYearInput').value);
 
+        // Filter literature data to get relevant quotes
         const filteredQuotes = allData.filter(item => {
-            return applyAllFiltersToLiteratureItem(item, fromYear, toYear) && item.quote;
+            // Only include items that have a quote and pass the literature filters
+            return item.quote && applyAllFiltersToLiteratureItem(item, fromYear, toYear);
         });
 
-        filteredQuotes.forEach(item => {
-            const quoteElement = document.createElement('div');
-            quoteElement.classList.add('literature-quote-item');
-            quoteElement.innerHTML = `<a href="${item.link}" target="_blank">${item.quote}</a>`;
-            quoteContainer.appendChild(quoteElement);
-        });
+        if (filteredQuotes.length === 0) {
+            quotesContainer.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">No quotes found matching the selected filters.</p>';
+        } else {
+            filteredQuotes.forEach(item => {
+                const quoteWrapper = document.createElement('div'); // Create a wrapper for quote and author
+                quoteWrapper.classList.add('literature-quote-item'); // Apply main styling to the wrapper
 
+                const quoteText = document.createElement('div');
+                quoteText.classList.add('quote-text'); // Add a class for the quote text if needed
+                quoteText.innerHTML = item.quote; // Use innerHTML as quote might contain HTML entities
+
+                const quoteAuthor = document.createElement('div');
+                quoteAuthor.classList.add('quote-author');
+
+                // Construct the author/source/year string
+                let authorInfo = item.author;
+                let sourceInfo = item.title || item.platformPublisher; // Use title if available, otherwise platform/publisher
+                let yearInfo = item.year;
+
+                let citationParts = [];
+                if (authorInfo) citationParts.push(authorInfo);
+                if (sourceInfo) citationParts.push(sourceInfo);
+                if (yearInfo) citationParts.push(yearInfo);
+
+                quoteAuthor.textContent = citationParts.join(', '); // Join with comma and space, removed the dash
+
+                quoteWrapper.appendChild(quoteText);
+                quoteWrapper.appendChild(quoteAuthor);
+
+                // Append the quoteWrapper directly to the quotesContainer, making it non-clickable
+                quotesContainer.appendChild(quoteWrapper);
+            });
+        }
         updateFilterCount(filteredQuotes.length);
     }
 
@@ -1283,22 +1363,10 @@
 
                     // Open the new definition if definitionText exists
                     if (definitionText) {
-                        // Apply line breaks to the definition text
-                        const maxCharsPerLine = 56;
-                        let formattedDefinition = '';
-                        let currentLine = '';
-                        const words = definitionText.split(' ');
-
-                        for (let i = 0; i < words.length; i++) {
-                            const word = words[i];
-                            if ((currentLine + word).length <= maxCharsPerLine) {
-                                currentLine += (currentLine === '' ? '' : ' ') + word;
-                            } else {
-                                formattedDefinition += currentLine + '<br>';
-                                currentLine = word;
-                            }
-                        }
-                        formattedDefinition += currentLine; // Add the last line
+                        // Use the new formatDefinitionText function
+                        // Adjusted maxCharsPerLine for better visual fitting in columns
+                        const maxCharsPerLine = 33; 
+                        const formattedDefinition = formatDefinitionText(definitionText, maxCharsPerLine);
 
                         const definitionElement = document.createElement('div');
                         definitionElement.classList.add('term-definition');
@@ -1354,21 +1422,14 @@
             .filter(value => value !== 'all');
         const categoryMatch = allCategoriesActive || selectedCategories.includes(item.category);
 
-        const authorPills = document.querySelectorAll('.pill[data-type="author"].active');
-        const allAuthorsActive = Array.from(authorPills).some(pill => pill.getAttribute('data-value') === 'all');
-        const selectedAuthors = Array.from(authorPills)
+        const typePills = document.querySelectorAll('.pill[data-type="type"].active');
+        const allTypesActive = Array.from(typePills).some(pill => pill.getAttribute('data-value') === 'all');
+        const selectedTypes = Array.from(typePills)
             .map(pill => pill.getAttribute('data-value'))
             .filter(value => value !== 'all');
-        const authorMatch = allAuthorsActive || selectedAuthors.includes(item.author);
+        const typeMatch = allTypesActive || selectedTypes.includes(item.type);
 
-        const platformPublisherPills = document.querySelectorAll('.pill[data-type="platform-publisher"].active');
-        const allPlatformPublishersActive = Array.from(platformPublisherPills).some(pill => pill.getAttribute('data-value') === 'all');
-        const selectedPlatformPublishers = Array.from(platformPublisherPills)
-            .map(pill => pill.getAttribute('data-value'))
-            .filter(value => value !== 'all');
-        const platformPublisherMatch = allPlatformPublishersActive || selectedPlatformPublishers.includes(item.platformPublisher);
-
-        return yearMatch && categoryMatch && authorMatch && platformPublisherMatch;
+        return yearMatch && categoryMatch && typeMatch;
     }
 
     function filterTable() {
@@ -1387,8 +1448,7 @@
         if (currentView === 'table') {
           const totalCount = allData.length;
           const hasActiveLiteratureFilters = document.querySelectorAll('.filter-pills .pill.active[data-type="category"]:not([data-value="all"])').length > 0 ||
-                                         document.querySelectorAll('.filter-pills .pill.active[data-type="author"]:not([data-value="all"])').length > 0 ||
-                                         document.querySelectorAll('.filter-pills .pill.active[data-type="platform-publisher"]:not([data-value="all"])').length > 0 ||
+                                         document.querySelectorAll('.filter-pills .pill.active[data-type="type"]:not([data-value="all"])').length > 0 ||
                                          document.getElementById('fromYearInput').value !== '' ||
                                          document.getElementById('toYearInput').value !== '';
           if (hasActiveLiteratureFilters && filtersActive) {
@@ -1399,8 +1459,7 @@
         } else if (currentView === 'quote') {
           const totalQuotes = allData.filter(item => item.quote).length;
           const hasActiveLiteratureFilters = document.querySelectorAll('.filter-pills .pill.active[data-type="category"]:not([data-value="all"])').length > 0 ||
-                                         document.querySelectorAll('.filter-pills .pill.active[data-type="author"]:not([data-value="all"])').length > 0 ||
-                                         document.querySelectorAll('.filter-pills .pill.active[data-type="platform-publisher"]:not([data-value="all"])').length > 0 ||
+                                         document.querySelectorAll('.filter-pills .pill.active[data-type="type"]:not([data-value="all"])').length > 0 ||
                                          document.getElementById('fromYearInput').value !== '' ||
                                          document.getElementById('toYearInput').value !== '';
           if (hasActiveLiteratureFilters && filtersActive) {
