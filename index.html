@@ -503,7 +503,7 @@
 
     /* --- Responsive Design --- */
 
-    /* New media query for screens smaller than or equal to 1200px (e.g., 13.3-inch screen effective resolution) */
+    /* New media query for screens smaller than or equal to 1600px */
     @media (max-width: 1600px) {
       th, td, .data-detail-cell {
         font-size: 11.5px; /* 11pt equivalent for smaller screens */
@@ -511,7 +511,7 @@
     }
 
     /* For screens smaller than 768px (tablets and smaller) */
-    @media (max-width: 768px) {
+    @media (max-width: 1268px) {
       .nav {
         padding: 15px 20px 15px 15px;
         font-size: 18px;
@@ -550,16 +550,49 @@
         font-size: 12px;
         width: 60px;
       }
+
+      /* HIDE ALL COLUMNS FROM THE 4TH ONWARDS FOR SMALL VIEWPORT */
+      th:nth-child(n+5),
+      td:nth-child(n+5) {
+        display: none;
+      }
+
+      /* Adjust widths for the first three visible columns to fill the viewport */
+      th:nth-child(1),
+      td:nth-child(1) {
+        width: 20%; /* Date */
+        min-width: 20%;
+        max-width: 20%;
+      }
+      th:nth-child(2),
+      td:nth-child(2) {
+        width: 40%; /* Title */
+        min-width: 40%;
+        max-width: 40%;
+      }
+      th:nth-child(3),
+      td:nth-child(3) {
+        width: 15%; /* Link */
+        min-width: 15%;
+        max-width: 15%;
+      }
+       th:nth-child(4),
+      td:nth-child(4) {
+        width: 25%; /* Link */
+        min-width: 25%;
+        max-width: 25%;
+      }
+
       th, td {
-        font-size: 11px; /* Maintain 11px or adjust further if needed */
+        font-size: 12px; /* Adjusted to 10px for even smaller screens */
         padding: 6px 8px;
       }
       .overlay {
         font-size: 7em;
       }
       .data-detail-cell {
-        font-size: 11px; /* Maintain 11px or adjust further if needed */
-        padding: 3px 6px;
+        font-size: 0px; /* Adjusted for consistency */
+        padding: 0px 0px;
       }
       .title-only-view-container {
         padding: 15px 20px;
@@ -606,15 +639,15 @@
         width: 50px;
       }
       th, td {
-        font-size: 10px; /* Further reduced for very small screens */
+        font-size: 11px; /* Further reduced for very small screens */
         padding: 4px 6px;
       }
       .overlay {
         font-size: 4em;
       }
       .data-detail-cell {
-        font-size: 10px; /* Further reduced for very small screens */
-        padding: 2px 4px;
+        font-size: 0px; /* Further reduced for very small screens */
+        padding: 0px 0px;
       }
       .toggles-container {
         padding: 0 10px 10px 10px;
@@ -1053,7 +1086,7 @@
             Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
             Representation: 'Optical; Hyperspectral',
             Viz: 'RGB; NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * interactionsList.length)], // Removed
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
             'How To': 'Tutorial available'
           },
           {
@@ -1070,7 +1103,7 @@
             Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
             Representation: 'Optical',
             Viz: 'NDVI',
-            // Interaction: interactionsList[Math.floor(Math.random() * interactionsList.length)], // Removed
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
             'How To': 'N/A'
           },
           {
@@ -1087,7 +1120,7 @@
             Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
             Representation: 'Hyperspectral',
             Viz: 'RGB',
-            // Interaction: interactionsList[Math.floor(Math.random() * interactionsList.length)], // Removed
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
             'How To': 'Data publicly available'
           },
           {
