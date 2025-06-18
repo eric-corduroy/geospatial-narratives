@@ -604,62 +604,91 @@
       }
     }
 
-    /* For screens smaller than 480px (mobile phones) */
+   /* For screens smaller than 480px (mobile phones) */
     @media (max-width: 480px) {
       .nav {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 10px;
-        font-size: 16px;
+        padding: 15px 20px 15px 15px;
+        font-size: 18px;
+        gap: 5px;
       }
       .nav a {
-        font-size: 16px;
-        padding: 2px 5px;
-        border-bottom: 2px solid transparent;
+        font-size: 18px;
+        padding: 3px 8px;
       }
       .stats {
-        font-size: 40px;
-        padding: 10px;
-      }
-      .filter-group-header {
-        font-size: 14px;
-        padding: 4px 10px; /* Adjusted padding */
-      }
-      .filter-group-content {
-        padding: 0 10px;
-      }
-      .filter-title {
-        font-size: 11px;
-      }
-      .pill {
-        font-size: 11px;
-        padding: 4px 8px;
-      }
-      .year-range-filter input[type="number"] {
-        width: 50px;
-      }
-      th, td {
-        font-size: 11px; /* Further reduced for very small screens */
-        padding: 4px 6px;
-      }
-      .overlay {
-        font-size: 4em;
-      }
-      .data-detail-cell {
-        font-size: 0px; /* Further reduced for very small screens */
-        padding: 0px 0px;
+        font-size: 60px;
+        padding: 15px 20px 5px 20px;
       }
       .toggles-container {
-        padding: 0 10px 10px 10px;
-        flex-wrap: wrap;
+        padding: 0 20px 10px 15px;
+        gap: 15px;
+      }
+      .filter-toggle-label, .feed-toggle-label {
+        font-size: 16px;
+      }
+      .filter-group-header {
+        font-size: 16px;
+        padding: 6px 15px; /* Adjusted padding */
+      }
+      .filter-group-content {
+        padding: 0 15px;
+      }
+      .filter-title {
+        font-size: 12px;
+      }
+      .pill {
+        font-size: 12px;
+        padding: 5px 10px;
+      }
+      .year-range-filter input[type="number"] {
+        font-size: 12px;
+        width: 60px;
+      }
+
+      /* HIDE ALL COLUMNS FROM THE 4TH ONWARDS FOR SMALL VIEWPORT */
+      th:nth-child(n+4),
+      td:nth-child(n+4) {
+        display: none;
+      }
+
+      /* Adjust widths for the first three visible columns to fill the viewport */
+      th:nth-child(1),
+      td:nth-child(1) {
+        width: 20%; /* Date */
+        min-width: 20%;
+        max-width: 20%;
+      }
+      th:nth-child(2),
+      td:nth-child(2) {
+        width: 65%; /* Title */
+        min-width: 65%;
+        max-width: 65%;
+      }
+      th:nth-child(3),
+      td:nth-child(3) {
+        width: 15%; /* Link */
+        min-width: 15%;
+        max-width: 15%;
+      }
+
+      th, td {
+        font-size: 12px; /* Adjusted to 10px for even smaller screens */
+        padding: 6px 8px;
+      }
+      .overlay {
+        font-size: 7em;
+      }
+      .data-detail-cell {
+        font-size: 0px; /* Adjusted for consistency */
+        padding: 0px 0px;
       }
       .title-only-view-container {
-        padding: 10px 15px;
+        padding: 15px 20px;
       }
       .title-only-view-container .article-title-item {
-        font-size: 40px;
-        margin-bottom: 10px;
-        padding-bottom: 8px;
+        font-size: 60px;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
       }
     }
   </style>
