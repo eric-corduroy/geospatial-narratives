@@ -530,15 +530,13 @@
     /* For screens smaller than 480px (mobile phones) */
     @media (max-width: 480px) {
       .nav {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 10px;
-        font-size: 16px;
+        padding: 15px 20px 15px 15px;
+        font-size: 18px;
+        gap: 5px;
       }
       .nav a {
-        font-size: 16px;
-        padding: 2px 5px;
-        border-bottom: 2px solid transparent;
+        font-size: 17px;
+        padding: 3px 8px;
       }
       .stats {
         font-size: 40px;
@@ -561,12 +559,36 @@
       .year-range-filter input[type="number"] {
         width: 50px;
       }
+      /* HIDE ALL COLUMNS FROM THE 4TH ONWARDS FOR SMALL VIEWPORT */
+      th:nth-child(n+4),
+      td:nth-child(n+4) {
+        display: none;
+      }
+      /* Adjust widths for the first three visible columns to fill the viewport */
+      th:nth-child(1),
+      td:nth-child(1) {
+        width: 15%; /* Year */
+        min-width: 15%;
+        max-width: 15%;
+      }
+      th:nth-child(2),
+      td:nth-child(2) {
+        width: 60%; /* Title */
+        min-width: 60%;
+        max-width: 60%;
+      }
+      th:nth-child(3),
+      td:nth-child(3) {
+        width: 15%; /* Link */
+        min-width: 15%;
+        max-width: 15%;
+      }
       th, td {
         font-size: 11px;
         padding: 4px 6px;
       }
       table {
-        min-width: 500px;
+        min-width: 300px;
       }
       .overlay {
         font-size: 4em;
@@ -574,6 +596,25 @@
       .toggles-container {
         padding: 0 10px 10px 10px;
         flex-wrap: wrap; /* Allow toggles to wrap */
+      }
+      .filter-toggle-label, .view-toggle-label {
+        font-size: 14px; /* Slightly smaller labels on mobile */
+      }
+      /* Smaller toggle switch on mobile */
+      .switch {
+        width: 34px; /* Slightly smaller width */
+        height: 20px; /* Slightly smaller height */
+      }
+      .slider:before {
+        height: 14px; /* Slightly smaller circle */
+        width: 14px; /* Slightly smaller circle */
+        left: 3px;
+        bottom: 3px; /* Keep consistent with remaining space */
+      }
+      input:checked + .slider:before {
+        -webkit-transform: translateX(14px); /* (34 - 3 - 14) = 17. Adjust based on new width and circle size */
+        -ms-transform: translateX(14px);
+        transform: translateX(14px);
       }
       .quote-only-view-container {
         padding: 10px 15px;
@@ -1085,7 +1126,7 @@
             { Term: 'Nadir', 'Meaning Type': 'Technical/Scientific', Definition: 'The point on the celestial sphere directly below a given location; in remote sensing, it refers to the point directly beneath an aircraft or satellite.' },
             { Term: 'Nonhuman Photography', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'A concept that examines images produced not by human intention or vision, but by autonomous machines or processes (e.g., algorithmic image generation, satellite feeds), challenging traditional notions of authorship.' },
             { Term: 'Oblique', 'Meaning Type': 'Technical/Scientific', Definition: 'Refers to aerial imagery or perspectives taken at an angle, rather than directly from above (nadir), providing a more natural and recognizable view of the landscape.' },
-            { Term: 'Operational images', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'Images produced not for human viewing or aesthetic purposes, but for technical functions or operational control (e.g., surveillance footage, drone telemetry), often bypassing human interpretation.' },
+            { Term: 'Operational images', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'Images produced not for human viewing or aesthetic purposes, but for technical functions or operational control (e.g., algorithmic image generation, satellite feeds), often bypassing human interpretation.' },
             { Term: 'Orbital Geopolitics', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'The study of how the control and use of orbital space, particularly for satellites, influences international relations, power dynamics, and global surveillance capabilities.' },
             { Term: 'Orbital Truth', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'A concept exploring the authoritative status often granted to satellite imagery and data due to its \'objective\' and \'elevated\' perspective, despite potential biases or manipulations.' },
             { Term: 'Remote Sensing', 'Meaning Type': 'Technical/Scientific', Definition: 'The acquisition of information about an object or phenomenon without making physical contact with the object, typically through the use of sensors on satellites or aircraft.' },
@@ -1365,7 +1406,7 @@
                     if (definitionText) {
                         // Use the new formatDefinitionText function
                         // Adjusted maxCharsPerLine for better visual fitting in columns
-                        const maxCharsPerLine = 33; 
+                        const maxCharsPerLine = 33;
                         const formattedDefinition = formatDefinitionText(definitionText, maxCharsPerLine);
 
                         const definitionElement = document.createElement('div');
