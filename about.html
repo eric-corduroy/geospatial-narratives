@@ -14,7 +14,7 @@
     }
 
     body {
-      font-family: 'Geist', sans-serif;
+      font-family: 'Geist Mono', monospace;
       background: #f2f2f2; /* All same grey */
       margin: 0;
       padding: 0;
@@ -27,26 +27,25 @@
       display: flex;
       justify-content: flex-start;
       align-items: center;
-      padding: 20px 40px 20px 20px; /* Increased top padding to move lower */
+      padding: 5px 40px 5px 20px; /* Increased top padding to move lower */
       font-size: 21px;
       font-weight: bold;
       color: #000;
       gap: 10px;
-      background: #f2f2f2;
+      background: #ff3636;
     }
     .nav a {
       font-size: 21px;
       text-decoration: none;
       color: #000;
-      border-bottom: 4px solid transparent;
+      border-bottom: none;
       padding: 5px 10px;
     }
     .nav a:hover {
-      border-bottom: 4px solid #000;
+      color: color: rgba(0, 0, 0, 0.5);
     }
     .nav a.active {
-      border-bottom: 4px solid #000;
-      color: #000;
+      color: color: rgba(0, 0, 0, 0.5);
     }
 
     /* Fixed Header Area */
@@ -205,7 +204,7 @@
     /* For screens smaller than 480px (mobile phones) */
     @media (max-width: 480px) {
       .nav {
-        padding: 15px 20px 15px 15px;
+        padding: 5px 20px 5px 5px;
         font-size: 18px;
         gap: 5px;
       }
@@ -218,7 +217,7 @@
       }
       .stats {
         font-size: 44px;
-        padding-top: 10px;
+        padding-top: 30px;
         line-height: 50px;
       }
       .toggles-container { /* This block is effectively removed now */
