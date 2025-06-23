@@ -27,15 +27,15 @@
       display: flex;
       justify-content: flex-start;
       align-items: center;
-      padding: 5px 40px 5px 20px; /* Increased top padding to move lower */
-      font-size: 21px;
+      padding: 4px 40px 4px 20px; /* Increased top padding to move lower */
+      font-size: 18px;
       font-weight: bold;
       color: #000;
       gap: 10px;
-      background: #ff3636;
+      background: rgb(255, 54, 54);
     }
     .nav a {
-      font-size: 21px;
+      font-size: 18px;
       text-decoration: none;
       color: #9b1414;
       border-bottom: none;
@@ -427,7 +427,7 @@
     .data-detail-cell {
       font-size: 13px; /* Base font size */
       padding: 4px 8px;
-      background-color: rgb(156, 255, 154);
+      background-color: rgb(255, 117, 96);
       padding-left: 12px;
     }
 
@@ -729,9 +729,9 @@
           <div class="filter-group-header">NARRATIVE</div>
           <div class="filter-group-content">
               <div class="filter-title">Filter by Publication Year Range:</div>
-              <div class="year-range-filter">
-                  <input type="number" id="fromYearInput" placeholder="From Year">
-                  <input type="number" id="toYearInput" placeholder="To Year">
+              <div class="filter-pills" id="publication-year-filter-pills"> <button class="pill active" data-type="publicationYear" data-value="all">All</button>
+                  <input type="number" id="fromYearInput" placeholder="Year">
+                  <input type="number" id="toYearInput" placeholder="Year">
               </div>
 
               <div class="filter-title">Filter by Region:</div>
@@ -840,6 +840,7 @@
     let selectedRegion = 'all';
     let selectedFocuses = ['all'];
     let selectedYears = ['all'];
+    let selectedPublicationYears = 'all'; // New variable for publication year filter
     let filtersActive = false;
     let currentView = 'table'; // 'table' or 'title'
 
@@ -933,8 +934,19 @@
         pill.addEventListener('click', handlePillClick);
       });
 
-      document.getElementById('fromYearInput').addEventListener('input', filterTable);
-      document.getElementById('toYearInput').addEventListener('input', filterTable);
+      document.getElementById('fromYearInput').addEventListener('input', function() {
+          const allPill = document.querySelector('.pill[data-type="publicationYear"][data-value="all"]');
+          if (allPill) allPill.classList.remove('active');
+          selectedPublicationYears = 'range';
+          filterTable();
+      });
+      document.getElementById('toYearInput').addEventListener('input', function() {
+          const allPill = document.querySelector('.pill[data-type="publicationYear"][data-value="all"]');
+          if (allPill) allPill.classList.remove('active');
+          selectedPublicationYears = 'range';
+          filterTable();
+      });
+
 
       document.querySelectorAll('.filter-group-header').forEach(header => {
         header.addEventListener('click', function() {
@@ -1531,10 +1543,6 @@
         const uniqueRepresentations = [...new Set(allData.flatMap(item => item.combinedDataPoints.map(cdp => cdp.representation).filter(r => r)))];
         populatePills('representation-filter-pills', uniqueRepresentations, 'representation');
 
-        // Removed interaction filter initialization
-        // const uniqueInteractions = [...new Set(allData.flatMap(item => item.combinedDataPoints.map(cdp => cdp.interaction).filter(i => i)))];
-        // populatePills('interaction-filter-pills', uniqueInteractions, 'interaction');
-
         // Populate Data Use Years
         const uniqueYears = [...new Set(allData.flatMap(item => item.combinedDataPoints.map(cdp => cdp.dataUseYear).filter(y => y)))].sort().reverse();
         populatePills('years-filter-pills', uniqueYears, 'years');
@@ -1542,10 +1550,33 @@
         // Populate Focus Countries dynamically with all initially
         const allUniqueCountries = [...new Set(allData.map(item => item.country).filter(c => c))].sort();
         populatePills('focus-filter-pills', allUniqueCountries, 'focus');
+
+        // Ensure publicationYear 'All' button is active by default
+        const publicationYearAllPill = document.querySelector('.pill[data-type="publicationYear"][data-value="all"]');
+        if (publicationYearAllPill) {
+            publicationYearAllPill.classList.add('active');
+            selectedPublicationYears = 'all';
+        }
     }
 
     function populatePills(containerId, values, type) {
         const container = document.getElementById(containerId);
+        // Special handling for publication year range, as it has input fields
+        if (type === 'publicationYear') {
+            // No need to clear and re-add inputs, just manage the 'All' button
+            const allButton = container.querySelector('.pill[data-type="publicationYear"][data-value="all"]');
+            if (!allButton) {
+                const newAllButton = document.createElement('button');
+                newAllButton.classList.add('pill', 'active');
+                newAllButton.setAttribute('data-type', type);
+                newAllButton.setAttribute('data-value', 'all');
+                newAllButton.textContent = 'All';
+                newAllButton.addEventListener('click', handlePillClick);
+                container.prepend(newAllButton); // Add at the beginning
+            }
+            return;
+        }
+
         container.innerHTML = ''; // Clear existing pills
 
         // Create and append the "All" pill first
@@ -1645,7 +1676,27 @@
                     selectedYears = ['all'];
                 }
             }
-        } else {
+        } else if (type === 'publicationYear') {
+            if (value === 'all') {
+                document.querySelectorAll('.pill[data-type="publicationYear"]').forEach(pill => pill.classList.remove('active'));
+                clickedPill.classList.add('active');
+                document.getElementById('fromYearInput').value = '';
+                document.getElementById('toYearInput').value = '';
+                selectedPublicationYears = 'all';
+            } else {
+                // If a year input is clicked as a pill (though none exist for this type, for completeness)
+                // or if we decide to add individual year pills later.
+                // For now, this branch is primarily for "All" button.
+                clickedPill.classList.toggle('active');
+                if (!parentContainer.querySelector('.pill.active')) {
+                    document.querySelector('.pill[data-type="publicationYear"][data-value="all"]').classList.add('active');
+                    selectedPublicationYears = 'all';
+                } else {
+                    selectedPublicationYears = 'range'; // Indicate that a range or specific year is selected
+                }
+            }
+        }
+        else { // Generic pill handling for other filters
             if (value === 'all') {
                 parentContainer.querySelectorAll('.pill').forEach(pill => pill.classList.remove('active'));
                 clickedPill.classList.add('active');
@@ -1828,18 +1879,19 @@
         const countryMatch = (selectedFocuses.includes('all') || selectedFocuses.includes(item.country));
 
         let publicationYearMatch = true;
-        if (item.publicationYear !== null) {
-            if (fromYear && item.publicationYear < fromYear) {
-                publicationYearMatch = false;
-            }
-            if (toYear && item.publicationYear > toYear) {
-                publicationYearMatch = false;
-            }
-        } else {
-            if (fromYear || toYear) {
-                publicationYearMatch = false;
+        if (selectedPublicationYears !== 'all') { // Only apply if "All" button is not active
+            if (item.publicationYear !== null) {
+                if (fromYear && item.publicationYear < fromYear) {
+                    publicationYearMatch = false;
+                }
+                if (toYear && item.publicationYear > toYear) {
+                    publicationYearMatch = false;
+                }
+            } else {
+                publicationYearMatch = false; // If no publication year, it won't match a range
             }
         }
+
 
         const providerPills = document.querySelectorAll('.pill[data-type="provider"].active');
         const allProvidersActive = Array.from(providerPills).some(pill => pill.getAttribute('data-value') === 'all');
