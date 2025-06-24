@@ -33,15 +33,15 @@
       display: flex;
       justify-content: flex-start;
       align-items: center;
-      padding: 5px 40px 5px 20px; /* Increased top padding to move lower */
-      font-size: 21px;
+      padding: 4px 40px 4px 20px; /* Increased top padding to move lower */
+      font-size: 18px;
       font-weight: bold;
       color: #000;
       gap: 10px;
       background: #ff3636;
     }
     .nav a {
-      font-size: 21px;
+      font-size: 18px;
       text-decoration: none;
       color: #9b1414;
       border-bottom: none;
@@ -155,15 +155,16 @@
       display: flex;
       gap: 10px;
       margin-top: 8px;
+      align-items: center; /* Vertically align items */
     }
     .year-range-filter input[type="number"] {
       padding: 6px 10px;
       border: 1px solid #999;
-      border-radius: 4px;
+      background: transparent;
+      border-radius: 10px;
       font-size: 13px;
       width: 80px;
       color: #000;
-      background-color: #f9f9f9;
     }
     .table-view-container, .quote-only-view-container, .terms-view-container {
       margin: 0;
@@ -224,7 +225,7 @@
       border-bottom: 1px solid #000;
     }
     a {
-      color: #1a73e8;
+      color: #ff3636;
       text-decoration: none;
       border-bottom: none;
     }
@@ -251,7 +252,7 @@
 
     .filter-toggle-label, .view-toggle-label {
       font-size: 18px;
-      font-weight: bold;
+      font-weight: 700;
       color: #000;
     }
 
@@ -541,7 +542,8 @@
       }
       .stats {
         font-size: 44px;
-        padding: 10px;
+        padding-top: 30px;
+        padding-left: 10px;
       }
       .filter-group-header {
         font-size: 16px;
@@ -551,14 +553,15 @@
         padding: 0 10px;
       }
       .filter-title {
-        font-size: 11px;
+        font-size: 12px;
       }
       .pill {
-        font-size: 11px;
-        padding: 4px 8px;
+        font-size: 12px;
+        padding: 5px 10px;
       }
       .year-range-filter input[type="number"] {
-        width: 50px;
+        width: 60px;
+        padding: 5px 16px;
       }
       /* HIDE ALL COLUMNS FROM THE 4TH ONWARDS FOR SMALL VIEWPORT */
       th:nth-child(n+4),
@@ -687,18 +690,19 @@
       <div class="filter-group" id="literature-group">
           <div class="filter-group-header">LITERATURE</div>
           <div class="filter-group-content">
-              <div class="filter-title">Filter by Publication Year Range:</div>
+              <div class="filter-title">Publication Year Range:</div>
               <div class="year-range-filter">
-                  <input type="number" id="fromYearInput" placeholder="From Year">
-                  <input type="number" id="toYearInput" placeholder="To Year">
+                  <button class="pill active" data-type="publicationYear" data-value="all">All</button>
+                  <input type="number" id="fromYearInput" placeholder="Year">
+                  <input type="number" id="toYearInput" placeholder="Year">
               </div>
 
-              <div class="filter-title">Filter by Category:</div>
+              <div class="filter-title">Category:</div>
               <div class="filter-pills" id="category-filter-pills">
                   <button class="pill active" data-type="category" data-value="all">All</button>
               </div>
 
-              <div class="filter-title">Filter by Type:</div>
+              <div class="filter-title">Media Type:</div>
               <div class="filter-pills" id="type-filter-pills">
                   <button class="pill active" data-type="type" data-value="all">All</button>
               </div>
@@ -708,7 +712,7 @@
       <div class="filter-group" id="terms-filter-group">
           <div class="filter-group-header">TERMS</div>
           <div class="filter-group-content">
-              <div class="filter-title">Filter by Meaning Type:</div>
+              <div class="filter-title">Meaning Type:</div>
               <div class="filter-pills" id="meaning-type-filter-pills">
                   <button class="pill active" data-type="meaning-type" data-value="all">All</button>
                   <button class="pill" data-type="meaning-type" data-value="technical/scientific">Technical/Scientific</button>
@@ -812,6 +816,29 @@
     // --- END GLOBAL FUNCTIONS ---
 
     document.addEventListener('DOMContentLoaded', function() {
+  // Year Range "All" button behavior
+  const yearAllButton = document.querySelector('.pill[data-type="publicationYear"][data-value="all"]');
+  const fromYearInput = document.getElementById('fromYearInput');
+  const toYearInput = document.getElementById('toYearInput');
+
+  // Set correct active state on "All" click
+  yearAllButton.addEventListener('click', function () {
+    fromYearInput.value = '';
+    toYearInput.value = '';
+    yearAllButton.classList.add('active');
+    filterTable();
+  });
+
+  // Clear active state of "All" when typing into year inputs
+  [fromYearInput, toYearInput].forEach(input => {
+    input.addEventListener('input', () => {
+      if (fromYearInput.value || toYearInput.value) {
+        yearAllButton.classList.remove('active');
+      }
+      filterTable();
+    });
+  });
+
       // Load both CSVs concurrently
       Promise.all([
         loadLiteratureData(),
