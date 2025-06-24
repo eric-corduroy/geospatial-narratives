@@ -4,10 +4,27 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Geospatial Narratives</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Geist&family=Geist+Mono&display=swap" rel="stylesheet">
   <style>
+    /* Geist Regular */
+    @font-face {
+      font-family: 'Geist';
+      src: url('Geist-Regular.woff2') format('woff2'),
+           url('Geist-Regular.woff') format('woff');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap; /* Improves font loading experience */
+    }
+
+    /* Geist Mono Regular */
+    @font-face {
+      font-family: 'Geist Mono';
+      src: url('GeistMono-Regular.woff2') format('woff2'),
+           url('GeistMono-Regular.woff') format('woff');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+
     /* Add box-sizing to all elements for consistent box model behavior */
     *, *::before, *::after {
       box-sizing: border-box;
@@ -1674,7 +1691,7 @@ document.getElementById('toYearInput').addEventListener('input', function () {
                 clickedPill.classList.add('active');
                 selectedYears = ['all'];
             } else {
-                const allPill = document.querySelector('.pill[data-type="years"][data-value="all"]');
+                const allPill = document.querySelector('.pill[data-type="years"][data-value="all']');
                 if (allPill.classList.contains('active')) {
                     allPill.classList.remove('active');
                     selectedYears = [value];
