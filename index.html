@@ -516,6 +516,14 @@
       font-family: 'Geist Mono', monospace; /* Use Geist Mono for details */
     }
 
+    /* Spacing for article count numbers */
+    .article-count-number {
+      margin-left: 30px; /* Default for desktop */
+    }
+
+    sup .article-count-number {
+      margin-left: 1px; /* Default for desktop superscript */
+    }
 
     /* --- Responsive Design --- */
 
@@ -721,6 +729,15 @@
         font-size: 11px; /* Even smaller details font size */
         margin-top: 5px;
         padding-left: 1px;
+      }
+
+      /* Mobile-specific spacing for article count numbers */
+      .article-count-number {
+        margin-left: 20px;
+      }
+
+      sup .article-count-number {
+        margin-left: 0px;
       }
     }
   </style>
@@ -1980,11 +1997,16 @@ document.getElementById('toYearInput').addEventListener('input', function () {
                                  document.getElementById('fromYearInput').value !== '' ||
                                  document.getElementById('toYearInput').value !== '';
 
+        // Add a class for the span that will contain the numbers
+        const numberSpanClass = 'article-count-number';
+
         if (currentView === 'table' || currentView === 'feed') { // Apply to both table and feed views
             if (hasActiveFilters && filtersActive) {
-                statsDisplay.innerHTML = `Articles: ${filteredCount}/${totalCount}`;
+                // Now using the CSS class for spacing instead of inline style
+                statsDisplay.innerHTML = `Articles:<span class="${numberSpanClass}">${filteredCount}</span><sup style="font-size: 0.5em; vertical-align: super; color: lightgrey;">/<span class="${numberSpanClass}">${totalCount}</span></sup>`;
             } else {
-                statsDisplay.innerHTML = `Articles: ${totalCount}`;
+                // Now using the CSS class for spacing instead of inline style
+                statsDisplay.innerHTML = `Articles:<span class="${numberSpanClass}">${totalCount}</span>`;
             }
         }
       }
