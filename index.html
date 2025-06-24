@@ -163,7 +163,7 @@
       color: #000;
       
     }
-    .table-view-container, .title-only-view-container {
+    .table-view-container, .feed-view-container {
       margin: 0;
       flex-grow: 1;
       overflow-y: auto;
@@ -460,47 +460,56 @@
 
     /* Show/Hide View Containers */
     .table-view-container.hidden,
-    .title-only-view-container.hidden {
+    .feed-view-container.hidden {
       display: none;
     }
 
-    /* Title-Only View Specific Styles */
-    .title-only-view-container {
+    /* Feed View Specific Styles (similar to quote-only view) */
+    .feed-view-container {
       padding: 20px 40px;
       background: #fff;
       overflow-y: auto;
       border-top: 1px solid #000;
     }
 
-    .title-only-view-container .article-title-item {
-      font-size: 120px;
+    .feed-view-container .article-item {
+      font-size: 80px; /* Increased font size, similar to quotes */
       font-weight: bold;
       margin-bottom: 20px;
       line-height: 1.2;
       color: #000;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid #eee; /* Light separator */
       padding-bottom: 15px;
-      cursor: pointer;
-      display: block;
-      text-decoration: none;
-      text-transform: uppercase;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      font-family: 'Geist', sans-serif;
+      cursor: pointer; /* Clickable */
+      display: flex; /* Changed to flex to align details to bottom */
+      flex-direction: column; /* Stack title and details vertically */
+      justify-content: flex-start; /* Align content to the start (top) */
+      text-decoration: none; /* Remove underline from link */
+      text-transform: uppercase; /* All caps */
+      white-space: normal; /* Allow text to wrap */
+      overflow: visible; /* Allow content to be visible */
+      text-overflow: clip; /* Remove ellipsis */
+      font-family: 'Geist', sans-serif; /* Use Geist font */
     }
 
-    .title-only-view-container .article-title-item:hover {
-        background-color: #f8f8f8;
-    }
-
-    .title-only-view-container .article-title-item:last-child {
-      border-bottom: none;
+    .feed-view-container .article-item:last-child {
+      border-bottom: none; /* No border for the last item */
       margin-bottom: 0;
     }
-    .title-only-view-container .article-title-item a {
-        color: inherit;
-        text-decoration: none;
+    .feed-view-container .article-item a {
+        color: inherit; /* Inherit color from parent div */
+        text-decoration: none; /* No underline */
+    }
+
+    .article-details {
+      font-size: 14px; /* Details font size */
+      font-weight: normal; /* Not bold */
+      color: #969696; /* A bit lighter color for details */
+      margin-top: 5px; /* Reduced space above details */
+      text-align: left; /* Aligned to the left */
+      text-transform: none; /* Details should not be all caps */
+      padding-left: 10px; /* Small indent */
+      font-family: 'Geist Mono', monospace; /* Use Geist Mono for details */
     }
 
 
@@ -597,13 +606,18 @@
         font-size: 0px; /* Adjusted for consistency */
         padding: 0px 0px;
       }
-      .title-only-view-container {
+      .feed-view-container {
         padding: 15px 20px;
       }
-      .title-only-view-container .article-title-item {
-        font-size: 60px;
+      .feed-view-container .article-item {
+        font-size: 40px; /* Half of 80px -> 40px */
         margin-bottom: 15px;
         padding-bottom: 10px;
+      }
+      .article-details {
+        font-size: 12px; /* Smaller details font size */
+        margin-top: 8px;
+        padding-left: 8px;
       }
     }
 
@@ -687,13 +701,18 @@
         font-size: 0px; /* Adjusted for consistency */
         padding: 0px 0px;
       }
-      .title-only-view-container {
-        padding: 15px 20px;
+      .feed-view-container {
+        padding: 10px 15px;
       }
-      .title-only-view-container .article-title-item {
-        font-size: 60px;
-        margin-bottom: 15px;
-        padding-bottom: 10px;
+      .feed-view-container .article-item {
+        font-size: 25px; /* Adjusted for responsive */
+        margin-bottom: 10px;
+        padding-bottom: 8px;
+      }
+      .article-details {
+        font-size: 10px; /* Even smaller details font size */
+        margin-top: 5px;
+        padding-left: 5px;
       }
     }
   </style>
@@ -836,7 +855,8 @@
     </table>
   </div>
 
- 
+  <div id="feedViewContainer" class="feed-view-container hidden">
+    </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
   <script>
@@ -845,7 +865,7 @@
     let selectedFocuses = ['all'];
     let selectedYears = ['all'];
     let filtersActive = false;
-    let currentView = 'table'; // 'table' or 'title'
+    let currentView = 'table'; // 'table' or 'feed'
 
     const countryRegions = {
       'Gaza Strip': 'Middle East',
@@ -913,9 +933,9 @@
       const fixedHeader = document.getElementById('fixed-header-area');
       const togglesContainer = document.querySelector('.toggles-container');
       const tableViewContainer = document.getElementById('tableViewContainer');
-      const titleOnlyViewContainer = document.getElementById('titleOnlyViewContainer');
+      const feedViewContainer = document.getElementById('feedViewContainer'); // Changed from titleOnlyViewContainer
 
-      if (fixedHeader && togglesContainer && (tableViewContainer || titleOnlyViewContainer)) {
+      if (fixedHeader && togglesContainer && (tableViewContainer || feedViewContainer)) {
         const headerHeight = fixedHeader.offsetHeight;
         const togglesHeight = togglesContainer.offsetHeight;
         const remainingHeight = `calc(100vh - ${headerHeight}px - ${togglesHeight}px)`;
@@ -923,8 +943,8 @@
         if (tableViewContainer) {
             tableViewContainer.style.height = remainingHeight;
         }
-        if (titleOnlyViewContainer) {
-            titleOnlyViewContainer.style.height = remainingHeight;
+        if (feedViewContainer) { // Updated to feedViewContainer
+            feedViewContainer.style.height = remainingHeight;
         }
       }
     }
@@ -984,10 +1004,10 @@ document.getElementById('toYearInput').addEventListener('input', function () {
         filterTable();
       });
 
-      // Feed Toggle Switch
+      // Feed Toggle Switch (renamed from feedToggle/titleToggle)
       const feedToggle = document.getElementById('feedToggle');
       feedToggle.addEventListener('change', function() {
-          currentView = this.checked ? 'title' : 'table';
+          currentView = this.checked ? 'feed' : 'table'; // 'feed' instead of 'title'
           updateView();
       });
 
@@ -1709,25 +1729,17 @@ document.getElementById('toYearInput').addEventListener('input', function () {
 
     function updateView() {
         const tableViewContainer = document.getElementById('tableViewContainer');
-        const titleOnlyViewContainer = document.getElementById('titleOnlyViewContainer');
-        const feedToggle = document.getElementById('feedToggle');
+        const feedViewContainer = document.getElementById('feedViewContainer'); // Changed from titleOnlyViewContainer
 
-        currentView = feedToggle.checked ? 'title' : 'table';
+        // Hide all view containers first
+        tableViewContainer.classList.add('hidden');
+        feedViewContainer.classList.add('hidden');
 
+        // Show the active view container
         if (currentView === 'table') {
             tableViewContainer.classList.remove('hidden');
-            if (titleOnlyViewContainer) { // Check if element exists before modifying
-                titleOnlyViewContainer.classList.add('hidden');
-            }
-        } else {
-            tableViewContainer.classList.add('hidden');
-            if (!titleOnlyViewContainer) { // Create titleOnlyViewContainer if it doesn't exist
-                const newTitleContainer = document.createElement('div');
-                newTitleContainer.id = 'titleOnlyViewContainer';
-                newTitleContainer.classList.add('title-only-view-container');
-                document.body.appendChild(newTitleContainer); // Append to body or a more appropriate parent
-            }
-            document.getElementById('titleOnlyViewContainer').classList.remove('hidden');
+        } else if (currentView === 'feed') { // Changed from 'title'
+            feedViewContainer.classList.remove('hidden');
         }
         filterTable();
         adjustContentViewHeight();
@@ -1808,15 +1820,15 @@ document.getElementById('toYearInput').addEventListener('input', function () {
         updateFilterCount(filteredResults.length);
     }
 
-    function renderTitleOnlyView() {
-        let titleContainer = document.getElementById('titleOnlyViewContainer');
-        if (!titleContainer) { // Create if it doesn't exist (e.g., first time switching to this view)
-            titleContainer = document.createElement('div');
-            titleContainer.id = 'titleOnlyViewContainer';
-            titleContainer.classList.add('title-only-view-container');
-            document.body.appendChild(titleContainer);
+    function renderFeedOnlyView() { // Renamed from renderTitleOnlyView
+        let feedContainer = document.getElementById('feedViewContainer'); // Renamed ID
+        if (!feedContainer) { // Create if it doesn't exist
+            feedContainer = document.createElement('div');
+            feedContainer.id = 'feedViewContainer';
+            feedContainer.classList.add('feed-view-container'); // Renamed class
+            document.body.appendChild(feedContainer);
         }
-        titleContainer.innerHTML = '';
+        feedContainer.innerHTML = '';
 
         const fromYear = parseInt(document.getElementById('fromYearInput').value);
         const toYear = parseInt(document.getElementById('toYearInput').value);
@@ -1826,28 +1838,47 @@ document.getElementById('toYearInput').addEventListener('input', function () {
             .filter(value => value !== 'all');
         const allOutletsActive = selectedOutlets.length === 0 || selectedOutlets.includes('all');
 
-        const filteredTitles = [];
-        const uniqueTitles = new Set();
+        const filteredArticles = []; // Renamed from filteredTitles
+        const uniqueArticleTitles = new Set(); // To ensure unique articles
 
         allData.forEach(item => {
             const hasMatchingCdp = item.combinedDataPoints.some(cdp => {
                 return applyAllFiltersToItemAndCombinedDataPoint(item, cdp, fromYear, toYear, allOutletsActive, selectedOutlets);
             });
 
-            if (hasMatchingCdp && item.title && !uniqueTitles.has(item.title)) {
-                filteredTitles.push({ title: item.title, link: item.link });
-                uniqueTitles.add(item.title);
+            if (hasMatchingCdp && item.title && !uniqueArticleTitles.has(item.title)) {
+                filteredArticles.push(item); // Push the entire item
+                uniqueArticleTitles.add(item.title);
             }
         });
 
-        filteredTitles.forEach(item => {
-            const titleElement = document.createElement('div');
-            titleElement.classList.add('article-title-item');
-            titleElement.innerHTML = `<a href="${item.link}" target="_blank">${item.title}</a>`;
-            titleContainer.appendChild(titleElement);
-        });
+        if (filteredArticles.length === 0) {
+            feedContainer.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">No articles found matching the selected filters.</p>';
+        } else {
+            filteredArticles.forEach(item => {
+                const articleWrapper = document.createElement('div');
+                articleWrapper.classList.add('article-item'); // Apply main styling
 
-        updateFilterCount(filteredTitles.length);
+                const articleTitle = document.createElement('div');
+                articleTitle.classList.add('article-title'); // Add a class for the title text if needed
+                articleTitle.innerHTML = `<a href="${item.link}" target="_blank">${item.title}</a>`;
+
+                const articleDetails = document.createElement('div');
+                articleDetails.classList.add('article-details');
+
+                let detailsParts = [];
+                if (item.outlet) detailsParts.push(item.outlet);
+                if (item.date) detailsParts.push(item.date);
+
+                articleDetails.textContent = detailsParts.join(', ');
+
+                articleWrapper.appendChild(articleTitle);
+                articleWrapper.appendChild(articleDetails);
+
+                feedContainer.appendChild(articleWrapper);
+            });
+        }
+        updateFilterCount(filteredArticles.length);
     }
 
 
@@ -1927,8 +1958,8 @@ document.getElementById('toYearInput').addEventListener('input', function () {
     function filterTable() {
         if (currentView === 'table') {
             renderTable();
-        } else {
-            renderTitleOnlyView();
+        } else if (currentView === 'feed') { // Changed from 'title'
+            renderFeedOnlyView(); // Call the new feed rendering function
         }
     }
 
@@ -1936,10 +1967,17 @@ document.getElementById('toYearInput').addEventListener('input', function () {
       const totalCount = allData.length;
       const statsDisplay = document.getElementById('statsDisplay');
       if (statsDisplay) {
-        if (filteredCount === totalCount) {
-          statsDisplay.innerHTML = `Articles: ${totalCount}`;
-        } else {
-          statsDisplay.innerHTML = `Articles: ${filteredCount}/${totalCount}`;
+        // Determine if any filters are actively narrowing down the literature data
+        const hasActiveFilters = document.querySelectorAll('.filter-pills .pill.active:not([data-value="all"])').length > 0 ||
+                                 document.getElementById('fromYearInput').value !== '' ||
+                                 document.getElementById('toYearInput').value !== '';
+
+        if (currentView === 'table' || currentView === 'feed') { // Apply to both table and feed views
+            if (hasActiveFilters && filtersActive) {
+                statsDisplay.innerHTML = `Articles: ${filteredCount}/${totalCount}`;
+            } else {
+                statsDisplay.innerHTML = `Articles: ${totalCount}`;
+            }
         }
       }
     }
