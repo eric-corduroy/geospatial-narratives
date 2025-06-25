@@ -446,22 +446,20 @@
     .term-definition.active {
         display: block; /* Show when active */
     }
+    .total-count-superscript {
+        font-size: 50%; /* Adjust as needed, e.g., 60% for slightly larger */
+        vertical-align: super;
+        color: #666; /* Lighter color for the total count */
+        margin-left: 5px; /* Space from the filtered count */
+    }
 
-    /* Styles for the counter number */
+    /* Custom spacing for counted values */
     .article-count-number {
-        font-size: 96px; /* Primary font size for the count */
-        line-height: 1; /* Adjust line-height to prevent extra spacing */
-        color: #000;
-        display: inline-block; /* Allows superscript to be positioned relative to it */
+        margin-left: 30px;
     }
 
     sup .article-count-number {
-        font-size: 24px; /* Smaller font size for the total count (superscript) */
-        position: relative;
-        top: -0.5em; /* Adjust vertical position */
-        margin-left: 5px; /* Space between current and total */
-        line-height: 1; /* Keep line height consistent */
-        vertical-align: baseline; /* Align with the baseline of the parent text */
+        margin-left: 0px;
     }
 
 
@@ -544,17 +542,6 @@
       .term-definition {
           font-size: 16px;
       }
-
-      /* Responsive styles for the counter number */
-      .article-count-number {
-          font-size: 60px; /* Adjusted for tablets */
-      }
-
-      sup .article-count-number {
-          font-size: 18px; /* Adjusted for tablets */
-          top: -0.4em; /* Readjust vertical position */
-          margin-left: 4px;
-      }
     }
 
     /* For screens smaller than 480px (mobile phones) */
@@ -569,7 +556,7 @@
         padding: 3px 8px;
       }
       .stats {
-        font-size: 44px;
+        font-size: 40px;
         padding-top: 30px;
         padding-left: 10px;
       }
@@ -676,15 +663,13 @@
           font-size: 14px;
       }
 
-      /* Responsive styles for the counter number */
+      /* Mobile-specific spacing for article count numbers */
       .article-count-number {
-          font-size: 44px; /* Adjusted for mobile */
+        margin-left: 20px;
       }
 
       sup .article-count-number {
-          font-size: 14px; /* Adjusted for mobile */
-          top: -0.3em; /* Readjust vertical position */
-          margin-left: 3px;
+        margin-left: 0px;
       }
     }
   </style>
@@ -1005,7 +990,7 @@
                         console.error('PapaParse error for literacy_data.csv:', err);
                         throw err;
                     }
-                );
+                });
             });
         } catch (error) {
             console.error('Failed to fetch or parse literacy_data.csv:', error);
@@ -1202,7 +1187,7 @@
             { Term: 'Vertical Perspective', 'Meaning Type': 'Technical/Scientific', Definition: 'A view directly from above, providing a map-like representation without foreshortening, commonly used in cartography and aerial photography.' },
             { Term: 'Verticality', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'The philosophical and cultural implications of perceiving space from a vertical perspective, often associated with power, control, and surveillance, distinct from horizontal, lived experiences.' },
             { Term: 'View from above', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'A perspective (literal or metaphorical) that implies a detached, omniscient, or authoritative gaze, often associated with military, governmental, or technological surveillance.' },
-            { Term: 'View from nowhere', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'A philosophical concept suggesting an objective or unbiased perspective, often critiqued in media studies for masking inherent biases in data collection and representation, particularly from aerial or satellite viewpoints.' }
+            { Term: 'View from nowhere', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'A philosophical concept implying an objective or unbiased perspective, often critiqued in media studies for masking inherent biases in data collection and representation, particularly from aerial or satellite viewpoints.' }
         ];
         termsData = {};
         sampleTerms.forEach(row => {
@@ -1552,6 +1537,9 @@
 
     function updateFilterCount(filteredCount) {
       const statsDisplay = document.getElementById('statsDisplay');
+      // Define a base class for numbers to apply general spacing
+      const numberSpanClass = "article-count-number"; 
+      
       if (statsDisplay) {
         if (currentView === 'table') {
           const totalCount = allData.length;
@@ -1560,9 +1548,10 @@
                                          document.getElementById('fromYearInput').value !== '' ||
                                          document.getElementById('toYearInput').value !== '';
           if (hasActiveLiteratureFilters && filtersActive) {
-            statsDisplay.innerHTML = `Publications: <span class="article-count-number">${filteredCount}</span><sup><span class="article-count-number">/${totalCount}</span></sup>`;
+            statsDisplay.innerHTML = `Articles:<span class="${numberSpanClass}">${filteredCount}</span><sup style="font-size: 0.5em; vertical-align: super; color: lightgrey;">/<span class="${numberSpanClass}">${totalCount}</span></sup>`;
           } else {
-            statsDisplay.innerHTML = `Publications: <span class="article-count-number">${totalCount}</span>`;
+            // Removed the extra space before the span here
+            statsDisplay.innerHTML = `Articles:<span class="${numberSpanClass}">${totalCount}</span>`;
           }
         } else if (currentView === 'quote') {
           const totalQuotes = allData.filter(item => item.quote).length;
@@ -1571,9 +1560,10 @@
                                          document.getElementById('fromYearInput').value !== '' ||
                                          document.getElementById('toYearInput').value !== '';
           if (hasActiveLiteratureFilters && filtersActive) {
-             statsDisplay.innerHTML = `Quotes: <span class="article-count-number">${filteredCount}</span><sup><span class="article-count-number">/${totalQuotes}</span></sup>`;
+             statsDisplay.innerHTML = `Quotes:<span class="${numberSpanClass}">${filteredCount}</span><sup style="font-size: 0.5em; vertical-align: super; color: lightgrey;">/<span class="${numberSpanClass}">${totalQuotes}</span></sup>`;
           } else {
-             statsDisplay.innerHTML = `Quotes: <span class="article-count-number">${totalQuotes}</span>`;
+             // Removed the extra space before the span here
+             statsDisplay.innerHTML = `Quotes:<span class="${numberSpanClass}">${totalQuotes}</span>`;
           }
         } else if (currentView === 'terms') {
             let totalTermsCount = 0;
@@ -1583,9 +1573,10 @@
             const hasActiveTermsFilters = document.querySelectorAll('.pill.active[data-type="meaning-type"]:not([data-value="all"])').length > 0;
 
             if (hasActiveTermsFilters && filtersActive) {
-                statsDisplay.innerHTML = `Terms: <span class="article-count-number">${filteredCount}</span><sup><span class="article-count-number">/${totalTermsCount}</span></sup>`;
+                statsDisplay.innerHTML = `Terms:<span class="${numberSpanClass}">${filteredCount}</span><sup style="font-size: 0.5em; vertical-align: super; color: lightgrey;">/<span class="${numberSpanClass}">${totalTermsCount}</span></sup>`;
             } else {
-                statsDisplay.innerHTML = `Terms: <span class="article-count-number">${totalTermsCount}</span>`;
+                // Removed the extra space before the span here
+                statsDisplay.innerHTML = `Terms:<span class="${numberSpanClass}">${totalTermsCount}</span>`;
             }
         }
       }
