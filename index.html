@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist&family=Geist+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=filter_list" />
   <style>
     /* Add box-sizing to all elements for consistent box model behavior */
     *, *::before, *::after {
@@ -740,6 +741,13 @@
         margin-left: 0px;
       }
     }
+    .material-symbols-outlined {
+      font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 24
+    }
   </style>
 </head>
 <body>
@@ -756,7 +764,7 @@
 
     <div class="toggles-container">
         <div class="filter-toggle-group">
-            <span class="filter-toggle-label">FILTERS</span>
+            <span class="filter-toggle-label"><span class="material-symbols-outlined">filter_list</span></span>
             <label class="switch">
                 <input type="checkbox" id="filterToggle">
                 <span class="slider"></span>
@@ -1977,14 +1985,21 @@ document.getElementById('toYearInput').addEventListener('input', function () {
         const representationMatch = allRepresentationsActive || selectedRepresentations.includes(cdp.representation);
         // const interactionMatch = allInteractionsActive || selectedInteractions.includes(cdp.interaction); // Removed
 
-        return outletMatch && providerMatch && resolutionCategoryMatch && regionMatch && countryMatch && dataUseYearMatch && publicationYearMatch && vizMatch && representationMatch; // Removed interactionMatch
+
+        return outletMatch && regionMatch && countryMatch && publicationYearMatch &&
+               dataUseYearMatch && providerMatch && resolutionCategoryMatch &&
+               vizMatch && representationMatch; // Removed interactionMatch
     }
 
     function filterTable() {
         if (currentView === 'table') {
             renderTable();
-        } else if (currentView === 'feed') { // Changed from 'title'
-            renderFeedOnlyView(); // Call the new feed rendering function
+        } else if (currentView === 'feed') {
+            renderFeedOnlyView();
+        }
+    }
+
+    function Call the new feed rendering function
         }
     }
 
