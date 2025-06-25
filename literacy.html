@@ -1548,10 +1548,10 @@
                                          document.getElementById('fromYearInput').value !== '' ||
                                          document.getElementById('toYearInput').value !== '';
           if (hasActiveLiteratureFilters && filtersActive) {
-            statsDisplay.innerHTML = `Articles:<span class="${numberSpanClass}">${filteredCount}</span><sup style="font-size: 0.5em; vertical-align: super; color: lightgrey;">/<span class="${numberSpanClass}">${totalCount}</span></sup>`;
+            statsDisplay.innerHTML = `Texts:<span class="${numberSpanClass}">${filteredCount}</span><sup style="font-size: 0.5em; vertical-align: super; color: lightgrey;">/<span class="${numberSpanClass}">${totalCount}</span></sup>`;
           } else {
             // Removed the extra space before the span here
-            statsDisplay.innerHTML = `Articles:<span class="${numberSpanClass}">${totalCount}</span>`;
+            statsDisplay.innerHTML = `Texts:<span class="${numberSpanClass}">${totalCount}</span>`;
           }
         } else if (currentView === 'quote') {
           const totalQuotes = allData.filter(item => item.quote).length;
