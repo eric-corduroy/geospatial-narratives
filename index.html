@@ -526,6 +526,15 @@
       margin-left: 1px; /* Default for desktop superscript */
     }
 
+    /* New CSS for Material Symbols */
+    .material-symbols-outlined {
+      font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 24
+    }
+
     /* --- Responsive Design --- */
 
     /* New media query for screens smaller than or equal to 1600px */
@@ -740,13 +749,6 @@
       sup .article-count-number {
         margin-left: 0px;
       }
-    }
-    .material-symbols-outlined {
-      font-variation-settings:
-      'FILL' 0,
-      'wght' 400,
-      'GRAD' 0,
-      'opsz' 24
     }
   </style>
 </head>
@@ -1985,21 +1987,17 @@ document.getElementById('toYearInput').addEventListener('input', function () {
         const representationMatch = allRepresentationsActive || selectedRepresentations.includes(cdp.representation);
         // const interactionMatch = allInteractionsActive || selectedInteractions.includes(cdp.interaction); // Removed
 
-
         return outletMatch && regionMatch && countryMatch && publicationYearMatch &&
                dataUseYearMatch && providerMatch && resolutionCategoryMatch &&
-               vizMatch && representationMatch; // Removed interactionMatch
+               vizMatch && representationMatch;
     }
+
 
     function filterTable() {
         if (currentView === 'table') {
             renderTable();
-        } else if (currentView === 'feed') {
-            renderFeedOnlyView();
-        }
-    }
-
-    function Call the new feed rendering function
+        } else {
+            renderFeedOnlyView(); // Call the new feed rendering function
         }
     }
 
