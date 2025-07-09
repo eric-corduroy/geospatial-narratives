@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Geospatial Narratives</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400&family=Geist+Mono&display=swap" rel="stylesheet">
+  <style>
+    /* Add box-sizing to all elements for consistent box model behavior */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Geist Mono', monospace;
+      background: #f2f2f2; /* All same grey */
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh; /* Make body take full viewport height */
+      overflow: hidden; /* Prevent body from scrolling */
+    }
+    .nav {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 3px 40px 3px 20px; /* Increased top padding to move lower */
+      font-size: 187.5x;
+      font-weight: bold;
+      color: #000;
+      gap: 10px;
+      background: rgb(221, 255, 109);
+    }
+    .nav a {
+      font-size: 17.5px;
+      text-decoration: none;
+      color: rgb(155, 180, 72);
+      border-bottom: none;
+      padding: 5px 10px;
+    }
+    .nav a:hover {
+      color: #000;
+    }
+    .nav a.active {
+      color: #000;
+    }
+
+    /* Fixed Header Area */
+    .fixed-header-content {
+        position: sticky; /* Make it sticky */
+        top: 0; /* Stick to the top */
+        width: 100%;
+        background: #f2f2f2; /* Ensure background is consistent when sticky */
+        z-index: 100; /* Ensure it stays on top of other content */
+        /* Removed box-shadow */
+    }
+
+    .main-content-wrapper-header { /* Wrapper for content that *was* in main-content-wrapper but now fixed */
+        padding: 0 20px; /* Consistent left/right padding for fixed content */
+    }
+
+    .stats {
+      font-size: 96px; /* Same as the counter text */
+      padding-top: 20px;
+      padding-bottom: 10px;
+      color: #000;
+    }
+
+    /* New styles for tab buttons */
+    .about-tabs {
+        display: flex;
+        gap: 20px;
+        padding-top: 20px;
+        padding-bottom: 0px;
+    }
+
+    .about-tab-button {
+        background: none;
+        border: none;
+        font-family: 'Geist Mono', monospace;
+        font-size: 20px;
+        font-weight: 300;
+        color: rgb(207, 207, 207); /* Inactive color */
+        cursor: pointer;
+        padding: 0;
+        position: relative;
+        text-decoration: none;
+    }
+
+    .about-tab-button.active-tab {
+        color: #000000; /* Active color */
+        font-weight: 300;
+        text-decoration: none;
+    }
+
+    /* Scrollable Content Area */
+    .scrollable-content-area {
+        flex-grow: 1; /* Takes remaining vertical space */
+        overflow-y: auto; /* Enables vertical scrolling */
+        padding: 0 20px; /* Consistent left/right padding for scrollable content */
+        background: #f2f2f2; /* Match body background */
+    }
+
+
+    /* Column Container for About Page */
+    .info-columns-container {
+      display: flex;
+      flex-direction: row; /* Always row layout */
+      gap: 2vw; /* 2% of overall page width for gap */
+      padding-bottom: 20px; /* Padding at the bottom of the container */
+      padding-top: 0px; /* Add some top padding to separate from fixed header */
+    }
+
+    /* Default (short version) - only first column visible, specific width - MODIFIED */
+    .info-columns-container #shortColumn {
+        flex: 0 0 30vw; /* 30% of the overall page width */
+        max-width: 30vw;
+    }
+    .info-columns-container #longColumn {
+        flex: 0 0 30vw; /* 30% of the overall page width (same as first column) */
+        max-width: 30vw;
+        display: block; /* Make sure it's visible */
+    }
+
+
+    .info-column {
+        font-family: 'Geist Mono', monospace;
+        font-size: 19px;
+        line-height: 36px;
+        font-weight: 400; /* Changed to regular font weight */
+        color: #de2020;
+    }
+
+    /* Font styles for all text elements within info-column to ensure consistency */
+    .info-column h1,
+    .info-column h2,
+    .info-column p,
+    .info-column ul,
+    .info-column li {
+      font-size: 19px; /* Explicitly set all to 30px */
+      line-height: 26px; /* Explicitly set all to 36px */
+      font-weight: 300; /* Changed to regular font weight */
+      color: #1e1e1e;
+    }
+
+    .info-column h1 {
+      margin-top: 0;
+      margin-bottom: 20px; /* A bit more space for heading */
+    }
+
+    .info-column h2 {
+      margin-top: 30px; /* Space above subheadings */
+      margin-bottom: 10px;
+    }
+
+    .info-column p {
+        margin-bottom: 20px;
+    }
+
+    .info-column ul {
+        list-style-type: disc;
+        margin-left: 40px; /* Indent lists */
+        margin-bottom: 20px;
+    }
+    .info-column li {
+        margin-bottom: 10px;
+    }
+
+    /* CSS for Superscript to prevent line height increase */
+    sup {
+        vertical-align: baseline;
+        position: relative;
+        color: #ff3636;
+        top: -0.4em;
+        font-size: 0.75em;
+        line-height: 0;
+    }
+
+    /* Hide content sections by default */
+    .about-content-section {
+        display: none;
+    }
+    /* Show active content section */
+    .about-content-section.active {
+        display: flex; /* Use flex to maintain the column layout */
+    }
+
+
+    /* --- Responsive Design --- */
+
+    /* For screens smaller than 768px (tablets and smaller) */
+    @media (max-width: 768px) {
+      .nav {
+        padding: 15px 20px 15px 15px;
+        font-size: 18px;
+        gap: 5px;
+      }
+      .nav a {
+        font-size: 18px;
+        padding: 3px 8px;
+      }
+      .main-content-wrapper-header {
+        padding: 0 15px;
+      }
+      .stats {
+        font-size: 60px;
+        padding-top: 15px;
+        padding-bottom: 5px;
+      }
+      .about-tabs {
+          gap: 15px;
+          padding-top: 8px;
+          padding-bottom: 15px;
+      }
+      .about-tab-button {
+          font-size: 18px;
+      }
+      .scrollable-content-area {
+        padding: 0 15px;
+      }
+      .info-columns-container {
+        padding-bottom: 15px;
+        flex-direction: column; /* Always stack on smaller screens */
+        gap: 15px;
+      }
+      /* Ensure columns are auto-sized and visible when stacked */
+      .info-columns-container #shortColumn,
+      .info-columns-container #longColumn {
+          flex-basis: auto; /* Revert to auto sizing for stacked columns */
+          max-width: none;
+          min-width: auto;
+          display: block; /* Make sure both are visible in stacked mode on smaller screens */
+      }
+      .info-column,
+      .info-column h1, .info-column h2, .info-column p, .info-column ul, .info-column li {
+        font-size: 20px; /* Smaller font size on tablets */
+        line-height: 28px;
+        font-weight: 400; /* Regular font weight */
+      }
+      .info-column h1 { margin-bottom: 15px; }
+      .info-column h2 { margin-top: 20px; margin-bottom: 8px; }
+      .info-column p { margin-bottom: 15px; }
+      .info-column ul { margin-left: 25px; margin-bottom: 15px; }
+      .info-column li { margin-bottom: 8px; }
+    }
+
+    /* For screens smaller than 480px (mobile phones) */
+    @media (max-width: 480px) {
+      .nav {
+        padding: 5px 20px 5px 5px;
+        font-size: 18px;
+        gap: 5px;
+      }
+      .nav a {
+        font-size: 17px;
+        padding: 3px 8px;
+      }
+      .main-content-wrapper-header {
+        padding: 0 10px;
+      }
+      .stats {
+        font-size: 44px;
+        padding-top: 30px;
+        line-height: 50px;
+      }
+      .about-tabs {
+        padding-bottom: 10px;
+        flex-wrap: wrap; /* Allow toggles to wrap */
+        gap: 10px;
+      }
+      .about-tab-button {
+          font-size: 16px;
+      }
+      .scrollable-content-area {
+        padding: 0 10px;
+      }
+      .info-columns-container {
+        padding-bottom: 10px;
+        gap: 10px;
+      }
+      .info-column,
+      .info-column h1, .info-column h2, .info-column p, .info-column ul, .info-column li {
+        font-size: 15px; /* Even smaller font size on mobile */
+        line-height: 20px;
+        font-weight: 400; /* Regular font weight */
+      }
+      .info-column h1 { margin-bottom: 10px; }
+      .info-column h2 { margin-top: 15px; margin-bottom: 5px; }
+      .info-column p { margin-bottom: 10px; }
+      .info-column ul { margin-left: 20px; margin-bottom: 10px; }
+      .info-column li { margin-bottom: 5px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="fixed-header-content">
+    <div class="nav">
+      <a href="index.html">Index</a>
+      <a href="literacy.html">Literacy</a>
+      <a href="about.html" class="active">About</a>
+    </div>
+    <div class="main-content-wrapper-header">
+      <div class="stats">
+        Geospatial Narratives
+      </div>
+      <div class="about-tabs">
+          <button class="about-tab-button active-tab" data-target="aboutContent">Concept</button>
+          <button class="about-tab-button" data-target="methodologyContent">Methodology</button>
+          <button class="about-tab-button" data-target="creditsContent">Disclaimer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="scrollable-content-area">
+    <div id="aboutContent" class="info-columns-container about-content-section active">
+      <div id="shortColumn" class="info-column">
+          <p>The widespread use of satellite imagery as a narrative medium particularly in journalism has grown significantly in recent years. This is due in part to its role in documenting the effects of climate change, and in part to its use in reporting on conflicts such as those in Ukraine, Gaza, and Sudan.<sup>1</sup></p>
+          <p>What was once a rare tool of reportage accessible only through external, often governmental or intelligence sources has become a ubiquitous visual element. In the early days, satellite images appeared so unfamiliar that even newsrooms didn’t fully understand what they were seeing (as in the case of Chernobyl). Today, they are more accessible than ever sometimes to the point of being used decoratively, without meaningful journalistic value (as seen in coverage of the Baltimore bridge collapse or the Ever Given incident).
+<sup>2</sup></p>
+          <p>Satellite images have entered the media mainstream. While the vertical perspective popularized by platforms like Google Maps and Google Earth may feel intuitive today, the imagery and the data behind it is anything but self-evident. Nor is it, as often assumed, inherently objective, neutral, or self-contained. This belief, common throughout the history of journalism, oversimplifies a complex medium.</p>
+          <p>In some contexts, satellite images appear like photographs seemingly no different from what we might take with our phones. In others, they serve as cartographic backdrops. False-color imagery is often misunderstood or not understood at all. And the technological nature of satellites themselve silent, invisible at the moment of capture remains abstract or distorted by pop-cultural imaginaries that obscure the geopolitical and terrestrial realities of this infrastructure.</p>
+      </div>
+      <div id="longColumn" class="info-column">
+          <p>As early as 2013, Laura Kurgan pointed out that satellite images are “stripped of their data and presented to us as already interpreted images by experts.” In the same work, she argues that “for every image, we should be able to ask about its technology, its location data, its ownership, its readability, and its source.” Media theorist and philosopher Lisa Parks similarly emphasized “the need for greater public knowledge of satellite technologies and increased literacy around the images they generate.”</p>
+          <p>These calls for critical engagement resonate strongly with my own trajectory. My engagement with satellite imagery began in 2016, initially driven by visual and aesthetic curiosity. Accessing data at the time primarily through open NASA sources and the early stages of the Copernicus programme was technically complex and often discouraging. What started as a fascination with satellite images as design material gradually turned into a deeper interest in the underlying infrastructures and their geopolitical implications. This led me to engage with the work of theorists such as Lisa Parks and Laura Kurgan, whose perspectives continue to shape my thinking.</p>
+          <p>Over the years, I moved from visual experimentation to more research-oriented and applied uses of satellite data, developing a technical understanding of sensors, resolutions, and processing workflows. Eventually, I worked within the industry itself, where I prepared satellite imagery for use in global news reporting on a near-daily basis covering major events, conflicts, and environmental crises. This intersection between technology and journalism provided firsthand insight into how satellite data enters public discourse, how editorial choices are made, and where critical literacy is often lacking. This platform now brings together those threads creative practice, technical insight, and critical reflection into a shared resource.</p>
+      </div>
+    </div>
+
+    <div id="methodologyContent" class="info-columns-container about-content-section">
+      <div id="shortColumn" class="info-column">
+          <p>The information presented on this platform combines explicit details from published articles with interpretations based on experience with satellite imagery as both a visual and technical medium.</p>
+          <p>Some facts are straightforward: publication date, source, headline, and the geographical region referenced are taken directly from the articles. However, the accompanying satellite images often lack crucial context. Who captured the image? Which sensor was used? What exactly is visible in the image?</p>
+          <p>To address these gaps, I rely on publicly available knowledge about the technical capabilities of satellites, visual clues within the imagery, and an interpretive sensibility developed through daily work with geospatial data. If the satellite or sensor is named, it is usually possible to infer the image type - optical, radar, or hyperspectral. The visualization style (e.g. true color, false color, or composite) is determined through a combination of aesthetic familiarity, sensor specifications, and the thematic framing of the article such as floods, wildfires, or deforestation.</p>
+          <p>Resolution, however, is difficult to pin down. It is often not specified and can be visually misleading due to cropping, rescaling, or digital post-processing of the image making it ultimately impossible to determine with precision. In such cases, I refer to the known native resolution of the most likely satellite bands used and assign the image to one of three general resolution categories: <1m, 1–10m, or >10m.</p>
+          <p>Some degree of approximation and deviation is therefore unavoidable with this approach. But this interpretive margin is not a flaw it is part of the critical inquiry: How much do we really know when we are shown a satellite image? And what remains unseen?</p>
+      </div>
+      <div id="longColumn" class="info-column">
+      </div>
+    </div>
+
+    <div id="creditsContent" class="info-columns-container about-content-section">
+      <div id="shortColumn" class="info-column">
+          <p>The content presented on this platform is part of an ongoing project dedicated to the archiving, contextualization, and critical engagement with the use of satellite data in journalistic and narrative contexts. The goal is to make these applications visible, searchable, filterable, and comparable.</p>
+          <p>Curation follows an editorial practice: iterative, subjective, and open to new perspectives.</p>
+          <p>This applies not only to the satellite imagery itself but also to the accompanying theoretical materials particularly the article list and the glossary. Both sections are conceived as curated companions and conceptual tools that aim to foster a reflective engagement with the narrative and analytical use of satellite data. They make no claim to completeness or academic authority, but instead invite an open, interdisciplinary dialogue.</p>
+          <p><mark>The archive</mark> explicitly does not claim to be a comprehensive documentation of all uses of satellite imagery. Given the growing number of cases, its focus on primarily English-language and Western media, and a conscious selection based on narrative and analytical criteria, the platform does not aim for completeness.
+All listed entries and information (see Methodology) have been included without prior permission from the respective authors or publications. Should any individual or institution feel misrepresented by their inclusion, content can be removed upon request at any time.</p>
+    
+
+      </div>
+      <div id="longColumn" class="info-column">
+          <p><mark>The article list</mark> brings together a deliberately diverse range of perspectives: from (popular) scientific publications and media-theoretical or philosophical texts to journalistic reports and NGO-based analyses. It includes books, online articles, essays, interviews, and videos that exemplify how satellite imagery is used within cultural, political, and media discourse.
+The selection is guided by criteria such as narrative and analytical relevance, linguistic accessibility, and interdisciplinary significance.</p>
+          <p><mark>The glossary</mark> expands this collection with a hybrid vocabulary—a mix of technical terms, scientific concepts, and critical or poetic figures of thought drawn from fields such as remote sensing, media theory, design research, and philosophy.
+Some entries offer foundational knowledge about how satellite technologies function. Others act as prompts: metaphors, theoretical frameworks, or conceptual tools for questioning how we perceive, interpret, and use such technologies.
+Where terms stem from established disciplines (e.g., spatial resolution, multispectral imaging), definitions follow common standards—but are deliberately contextualized and made accessible. Where terms are more speculative or media-theoretical (e.g., remote gaze, machine vision, visual regime), they draw on a broader, often non-unified body of references—not shaped by consensus, but by critical depth and openness to interpretation.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set active nav link on page load
+      document.querySelectorAll('.nav a').forEach(link => {
+        link.classList.remove('active'); // Remove active from all links first
+      });
+      document.querySelector('.nav a[href="about.html"]').classList.add('active');
+
+      const tabButtons = document.querySelectorAll('.about-tab-button');
+      const contentSections = document.querySelectorAll('.about-content-section');
+
+      tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          // Remove 'active-tab' class from all buttons
+          tabButtons.forEach(btn => btn.classList.remove('active-tab'));
+          // Add 'active-tab' class to the clicked button
+          button.classList.add('active-tab');
+
+          // Hide all content sections
+          contentSections.forEach(section => section.classList.remove('active'));
+
+          // Show the target content section
+          const targetId = button.dataset.target;
+          document.getElementById(targetId).classList.add('active');
+        });
+      });
+    });
+  </script>
+</body>
+</html>
