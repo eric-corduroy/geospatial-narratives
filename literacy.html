@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Geospatial Literacy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=filter_list" />
+  <style>
+    /* Add box-sizing to all elements for consistent box model behavior */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    /* Text selection styling */
+    ::selection {
+      background: rgb(221, 255, 109); /* Red background when selecting text */
+      color: rgb(0, 0, 0); /* White text on selection */
+    }
+
+    body {
+      font-family: 'Geist Mono', monospace;
+      background: #f2f2f2;
+      margin: 0;
+      padding: 0;
+      overflow: hidden; /* Prevents body from scrolling horizontally */
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    .nav {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 3px 40px 3px 20px; /* Increased top padding to move lower */
+      font-size: 17.5px;
+      font-weight: 450;
+      color: #000;
+      gap: 10px;
+      background: rgb(221, 255, 109);
+    }
+    .nav a {
+      font-size: 17.5px;
+      font-weight: 450;
+      color: rgb(155, 180, 72);
+      border-bottom: none;
+      padding: 5px 10px;
+    }
+    .nav a:hover {
+      color: #000;
+    }
+    .nav a.active {
+      color: #000;
+    }
+    .csv-upload {
+      display: none;
+    }
+     /* New style for the update date */
+    .update-date {
+        font-family: 'Geist Mono', monospace;
+        font-size: 15px; /* Smaller font size for date */
+        font-weight: 300;
+        color: #9f9e9e; /* Softer color for date */
+        padding: 10px 0 0 29px; /* Padding to position it */
+    }
+    .stats {
+      font-size: 96px; /* Same as the counter text */
+      padding-top: 20px;
+      padding-bottom: 10px;
+      padding-left: 20px;
+      color: #000;
+    }
+    .filter-container {
+      padding: 0;
+      background: #f2f2f2;
+    }
+    .filter-group {
+      background: #fff;
+      border: none;
+      border-radius: 0;
+      margin-bottom: 0;
+      overflow: hidden;
+    }
+    .filter-group:not(:first-child) {
+      border-top: 1px solid #000;
+    }
+    .filter-group-header {
+      padding: 6px 30px;
+      font-size: 18px;
+      font-weight: 500;
+      background: #e6e6e6;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: none;
+      color: #999; /* Faint grey when inactive */
+    }
+
+    /* New rule for filter group headers when filters are generally active */
+    body.filters-active .filter-group-header {
+        color: #000; /* Black when main filter toggle is on */
+    }
+
+
+    .filter-group-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+      padding: 0 20px;
+      background-color: #e6e6e6;
+    }
+    .filter-group.active .filter-group-content {
+      max-height: 600px;
+      padding-bottom: 15px;
+    }
+    .filter-title {
+      font-size: 14px; /* Made smaller */
+      font-weight: 500;
+      margin-top: 15px;
+      margin-bottom: 8px;
+      color: #666; /* Closer to background gray */
+    }
+    .filter-group-content .filter-title:first-of-type {
+        margin-top: 0;
+    }
+    .filter-pills {
+      display: flex;
+      flex-wrap: nowrap; /* Ensures horizontal scrolling */
+      gap: 8px;
+      overflow-x: auto; /* Enables horizontal scrolling */
+      padding-bottom: 8px;
+      -webkit-overflow-scrolling: touch; /* Smoother scrolling on iOS */
+    }
+    .filter-pills::-webkit-scrollbar {
+        display: none; /* Hide scrollbar for Webkit browsers */
+    }
+    .filter-pills {
+        -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
+        scrollbar-width: none; /* Hide scrollbar for Firefox */
+    }
+    .pill {
+      flex-shrink: 0;
+      padding: 6px 12px;
+      border-radius: 16px;
+      border: 1px solid #999;
+      background: transparent;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s ease;
+      color: #000;
+    }
+    .pill:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+    .pill.active {
+      background: #000;
+      color: white;
+      border-color: #000;
+    }
+    .year-range-filter {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+      align-items: center; /* Vertically align items */
+    }
+    .year-range-filter input[type="number"] {
+      padding: 6px 10px;
+      border: 1px solid #999;
+      background: transparent;
+      border-radius: 10px;
+      font-size: 13px;
+      width: 80px;
+      color: #000;
+    }
+    .table-view-container, .quote-only-view-container, .terms-view-container {
+      margin: 0;
+      flex-grow: 1;
+      overflow-y: auto;
+      overflow-x: auto; /* Allows horizontal scrolling for the table */
+      position: relative;
+      background: #f2f2f2;
+    }
+    table {
+      width: 100%;
+      min-width: 900px; /* Ensures table doesn't shrink too much on smaller screens */
+      border-collapse: collapse;
+      background: #fff;
+      table-layout: fixed; /* Added this line */
+    }
+      th {
+      text-align: left;
+      padding: 4px 12px;
+      border-bottom: 1px solid #D3D3D3;
+      border-top: 1px solid #D3D3D3;
+      font-family: 'Geist Mono', monospace;
+      vertical-align: top;
+      font-size: 13px; /* Base font size */
+      font-weight: 500;
+      word-wrap: break-word; /* Allows text to break to the next line */
+    }
+    td {
+      text-align: left;
+      padding: 4px 12px;
+      border-bottom: 1px solid #D3D3D3;
+      border-top: 1px solid #D3D3D3;
+      font-family: 'Geist Mono', monospace;
+      vertical-align: top;
+      font-size: 13px; /* Base font size */
+      font-weight: 400;
+      word-wrap: break-word; /* Allows text to break to the next line */
+    }
+
+    /* Specific styles for all columns (since all are now primary data) */
+    th, td {
+      border-bottom: 1px solid #000; /* All main rows have black bottom border */
+    }
+    th {
+      border-top: none; /* No top border for header cells */
+    }
+    td {
+      border-top: 1px solid #000; /* All data cells have black top border */
+    }
+
+    /* Fixed width for specific columns */
+    th:nth-child(1), td:nth-child(1) { width: 8%; min-width: 8%; max-width: 8%; } /* Year */
+    th:nth-child(2), td:nth-child(2) { width: 20%; min-width: 20%; max-width: 20%; } /* Title */
+    th:nth-child(3), td:nth-child(3) { width: 5%; min-width: 5%; max-width: 5%; } /* Link */
+    th:nth-child(4), td:nth-child(4) { width: 12%; min-width: 12%; max-width: 12%; } /* Author */
+    th:nth-child(5), td:nth-child(5) { width: 12%; min-width: 12%; max-width: 12%; } /* Platform/Publisher */
+    th:nth-child(6), td:nth-child(6) { width: 10%; min-width: 10%; max-width: 10%; } /* Category */
+    th:nth-child(7), td:nth-child(7) { width: 8%; min-width: 8%; max-width: 8%; } /* Type */
+    th:nth-child(8), td:nth-child(8) { width: 25%; min-width: 25%; max-width: 25%; } /* Quote(s) */
+
+    thead {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    th {
+      background: #000;
+      color: white;
+      border-top: none;
+      border-bottom: 1px solid #000;
+    }
+    a {
+      color: #997b21;
+      text-decoration: none;
+      border-bottom: none;
+    }
+    .month {
+      color: gray;
+    }
+
+    /* Toggle Switches Container */
+    .toggles-container {
+      background: #f2f2f2;
+      padding: 0 40px 10px 30px;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 20px; /* Space between the two toggle groups */
+      margin-top: 10px; /* Space between filter toggle and view toggle */
+    }
+
+    .filter-toggle-group, .view-toggle-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .filter-toggle-label, .view-toggle-label {
+      font-size: 18px;
+      font-weight: 500;
+      color: #000;
+    }
+
+     /* The switch - the box around the slider */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 24px;
+    }
+
+    /* Hide default HTML checkbox */
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    /* The slider */
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      -webkit-transition: .4s;
+      transition: .4s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      -webkit-transition: .4s;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #000;
+    }
+
+    input:focus + .slider {
+      box-shadow: 0 0 1px #000;
+    }
+
+    input:checked + .slider:before {
+      -webkit-transform: translateX(16px);
+      -ms-transform: translateX(16px);
+      transform: translateX(16px);
+    }
+
+    /* Overlay styles */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: transparent;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      font-size: 10em;
+      font-weight: bold;
+      color: #333;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+      pointer-events: none;
+      opacity: 1;
+      transition: opacity 0.5s ease-out;
+    }
+    .overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    /* Show/Hide View Containers */
+    .table-view-container.hidden,
+    .quote-only-view-container.hidden,
+    .terms-view-container.hidden {
+      display: none;
+    }
+
+    /* Quote-Only View Specific Styles */
+    .quote-only-view-container {
+      padding: 20px 40px;
+      background: #fff;
+      overflow-y: auto;
+      border-top: 1px solid #000;
+    }
+
+    .quote-only-view-container .literature-quote-item {
+      font-size: 80px; /* Increased font size */
+      font-weight: 500;
+      margin-bottom: 20px;
+      line-height: 1.2;
+      color: #000;
+      border-bottom: 1px solid #eee; /* Light separator */
+      padding-bottom: 15px;
+      cursor: default; /* Changed to default as quotes are no longer clickable */
+      display: flex; /* Changed to flex to align author to bottom */
+      flex-direction: column; /* Stack quote and author vertically */
+      justify-content: flex-start; /* Align content to the start (top) */
+      text-decoration: none; /* Remove underline from link */
+      text-transform: uppercase; /* All caps */
+      white-space: normal; /* Allow text to wrap */
+      overflow: visible; /* Allow content to be visible */
+      text-overflow: clip; /* Remove ellipsis */
+      font-family: 'Geist', sans-serif; /* Use Geist font */
+    }
+
+    .quote-only-view-container .literature-quote-item:last-child {
+      border-bottom: none; /* No border for the last item */
+      margin-bottom: 0;
+    }
+    .quote-only-view-container .literature-quote-item a {
+        color: inherit; /* Inherit color from parent div */
+        text-decoration: none; /* No underline */
+    }
+
+    .quote-author {
+      font-size: 14px; /* Author font size */
+      font-weight: 350; /* Author not bold */
+      color: #555; /* A bit lighter color for author */
+      margin-top: 5px; /* Reduced space above author, closer to quote */
+      text-align: left; /* Aligned to the left */
+      text-transform: none; /* Author should not be all caps */
+      /* Add some padding to differentiate from the quote if needed */
+      padding-left: 10px; /* Example: add a small indent */
+      font-family: 'Geist Mono', monospace; /* Use Geist Mono for author/source/year */
+    }
+
+    /* Terms View Specific Styles */
+    .terms-view-container {
+        padding: 20px 40px;
+        background: #fff;
+        overflow-y: auto;
+        border-top: 1px solid #000;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr); /* 4 columns */
+        gap: 20px; /* Gap between columns and rows */
+    }
+
+    .terms-view-container .term-column {
+        display: flex;
+        flex-direction: column;
+        gap: 5px; /* Space between terms within a column */
+    }
+
+    .terms-view-container .term-letter {
+        font-size: 18px; /* Small letter for each section */
+        font-weight: bold;
+        color: #000;
+        margin-bottom: 0; /* Remove extra margin */
+        margin-top: 20px;
+        text-transform: uppercase;
+        border-bottom: none; /* Removed the underline */
+        padding-bottom: 0; /* Removed padding */
+    }
+
+    .terms-view-container .term-item {
+        font-size: 48px; /* Large font size for individual terms */
+        line-height: 0.9; /* Adjusted line height to be smaller */
+        color: #000;
+        margin-top: 10px; /* Add margin for spacing between terms and letter */
+        cursor: pointer; /* Indicate clickability */
+    }
+
+    .term-definition {
+        font-family: 'Geist Mono', monospace;
+        font-size: 14px;
+        line-height: 1.2; /* Adjust for readability */
+        color: #333; /* Darker grey than term, but not black */
+        margin-top: 5px; /* Small space below term */
+        margin-bottom: 15px; /* Space before next term or letter */
+        padding: 2px; /* Some padding around the definition */
+        background-color: #ffffff; /* Light background for definition box */
+        border-radius: 4px; /* Slightly rounded corners */
+        display: none; /* Initially hidden */
+        word-break: break-word; /* Ensure long words break */
+    }
+
+    .term-definition.active {
+        display: block; /* Show when active */
+    }
+    .total-count-superscript {
+        font-size: 50%; /* Adjust as needed, e.g., 60% for slightly larger */
+        vertical-align: super;
+        color: #666; /* Lighter color for the total count */
+        margin-left: 5px; /* Space from the filtered count */
+    }
+
+    /* Custom spacing for counted values */
+    .article-count-number {
+        margin-left: 30px;
+    }
+
+    sup .article-count-number {
+        margin-left: 0px;
+    }
+
+    /* Material Icons specific styles */
+    .material-symbols-outlined {
+      font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 24
+    }
+
+
+    /* --- Responsive Design --- */
+
+    /* For screens smaller than 768px (tablets and smaller) */
+    @media (max-width: 768px) {
+      .nav {
+        padding: 15px 20px 15px 15px;
+        font-size: 18px;
+        gap: 5px;
+      }
+      .nav a {
+        font-size: 18px;
+        padding: 3px 8px;
+      }
+      .stats {
+        font-size: 60px;
+        padding: 15px 20px 5px 20px;
+      }
+      .toggles-container {
+        padding: 0 20px 10px 15px;
+        gap: 15px;
+      }
+      .filter-toggle-label, .view-toggle-label {
+        font-size: 16px;
+      }
+      .filter-group-header {
+        font-size: 16px;
+        padding: 8px 15px;
+      }
+      .filter-group-content {
+        padding: 0 15px;
+      }
+      .filter-title {
+        font-size: 12px;
+      }
+      .pill {
+        font-size: 12px;
+        padding: 5px 10px;
+      }
+      .year-range-filter input[type="number"] {
+        font-size: 12px;
+        width: 60px;
+      }
+      th, td {
+        font-size: 12px;
+        padding: 6px 8px;
+      }
+      table {
+        min-width: 700px;
+      }
+      .overlay {
+        font-size: 7em;
+      }
+      .quote-only-view-container {
+        padding: 15px 20px;
+      }
+      .quote-only-view-container .literature-quote-item {
+        font-size: 40px; /* Half of 80px -> 40px */
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+      }
+      .quote-author {
+        font-size: 12px; /* Smaller author font size */
+        margin-top: 8px;
+        padding-left: 8px;
+      }
+      .terms-view-container {
+          padding: 15px 20px;
+          grid-template-columns: repeat(2, 1fr); /* 2 columns on tablets */
+          gap: 15px;
+      }
+      .terms-view-container .term-letter {
+          font-size: 16px; /* Adjusted for responsive */
+      }
+      .terms-view-container .term-item {
+          font-size: 36px; /* Adjusted for responsive */
+      }
+      .term-definition {
+          font-size: 16px;
+      }
+    }
+
+    /* For screens smaller than 480px (mobile phones) */
+    @media (max-width: 480px) {
+      .nav {
+        padding: 5px 20px 5px 5px;
+        font-size: 18px;
+        gap: 5px;
+      }
+      .nav a {
+        font-size: 17px;
+        padding: 3px 8px;
+      }
+      .stats {
+        font-size: 40px;
+        padding-top: 30px;
+        padding-left: 10px;
+      }
+      .filter-group-header {
+        font-size: 16px;
+        padding: 6px 15px;
+      }
+      .filter-group-content {
+        padding: 0 10px;
+      }
+      .filter-title {
+        font-size: 12px;
+      }
+      .pill {
+        font-size: 12px;
+        padding: 5px 10px;
+      }
+      .year-range-filter input[type="number"] {
+        width: 60px;
+        padding: 5px 16px;
+      }
+      /* HIDE ALL COLUMNS FROM THE 4TH ONWARDS FOR SMALL VIEWPORT */
+      th:nth-child(n+4),
+      td:nth-child(n+4) {
+        display: none;
+      }
+      /* Adjust widths for the first three visible columns to fill the viewport */
+      th:nth-child(1),
+      td:nth-child(1) {
+        width: 15%; /* Year */
+        min-width: 15%;
+        max-width: 15%;
+      }
+      th:nth-child(2),
+      td:nth-child(2) {
+        width: 60%; /* Title */
+        min-width: 60%;
+        max-width: 60%;
+      }
+      th:nth-child(3),
+      td:nth-child(3) {
+        width: 15%; /* Link */
+        min-width: 15%;
+        max-width: 15%;
+      }
+      th, td {
+        font-size: 12.5px;
+        padding: 6px 8px;
+      }
+      table {
+        min-width: 300px;
+      }
+      .overlay {
+        font-size: 4em;
+      }
+      .toggles-container {
+        padding: 0 10px 10px 10px;
+        flex-wrap: wrap; /* Allow toggles to wrap */
+      }
+      .filter-toggle-label, .view-toggle-label {
+        font-size: 16px; /* Slightly smaller labels on mobile */
+      }
+  
+      input:checked + .slider:before {
+        -webkit-transform: translateX(14px); /* (34 - 3 - 14) = 17. Adjust based on new width and circle size */
+        -ms-transform: translateX(14px);
+        transform: translateX(14px);
+      }
+      .quote-only-view-container {
+        padding: 10px 15px;
+      }
+      .quote-only-view-container .literature-quote-item {
+        font-size: 25px; /* Adjusted for responsive */
+        margin-bottom: 10px;
+        padding-bottom: 8px;
+      }
+      .quote-author {
+        font-size: 10px; /* Even smaller author font size */
+        margin-top: 5px;
+        padding-left: 5px;
+      }
+      .terms-view-container {
+          padding: 10px 15px;
+          grid-template-columns: 1fr; /* 1 column on mobile */
+          gap: 10px;
+      }
+      .terms-view-container .term-letter {
+          font-size: 14px; /* Adjusted for responsive */
+      }
+      .terms-view-container .term-item {
+          font-size: 28px; /* Adjusted for responsive */
+      }
+      .term-definition {
+          font-size: 14px;
+      }
+
+      /* Mobile-specific spacing for article count numbers */
+      .article-count-number {
+        margin-left: 20px;
+      }
+
+      sup .article-count-number {
+        margin-left: 0px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="fixed-header-area">
+    <div class="nav">
+      <a href="index.html">Index</a>
+      <a href="literacy.html" class="active">Literacy</a>
+      <a href="about.html">About</a>
+    </div>
+     <div class="update-date">
+        updated: July 15, 2025
+    </div>
+    <div class="stats">
+      <span id="loadingStatus">Loading data...</span>
+      <div id="statsDisplay" style="display: none;"></div>
+    </div>
+
+    <div class="toggles-container">
+        <div class="filter-toggle-group">
+            <span class="filter-toggle-label"><span class="material-symbols-outlined">filter_list</span></span>
+            <label class="switch">
+                <input type="checkbox" id="filterToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="view-toggle-group">
+            <span class="view-toggle-label">QUOTES</span>
+            <label class="switch">
+                <input type="checkbox" id="quotesToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="view-toggle-group">
+            <span class="view-toggle-label">TERMS</span>
+            <label class="switch">
+                <input type="checkbox" id="termsToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <div class="filter-container">
+      <div class="filter-group" id="literature-group">
+          <div class="filter-group-header">LITERATURE</div>
+          <div class="filter-group-content">
+              <div class="filter-title">Publication Year Range:</div>
+              <div class="year-range-filter">
+                  <button class="pill active" data-type="publicationYear" data-value="all">All</button>
+                  <input type="number" id="fromYearInput" placeholder="Year">
+                  <input type="number" id="toYearInput" placeholder="Year">
+              </div>
+
+              <div class="filter-title">Category:</div>
+              <div class="filter-pills" id="category-filter-pills">
+                  <button class="pill active" data-type="category" data-value="all">All</button>
+              </div>
+
+              <div class="filter-title">Media Type:</div>
+              <div class="filter-pills" id="type-filter-pills">
+                  <button class="pill active" data-type="type" data-value="all">All</button>
+              </div>
+          </div>
+      </div>
+
+      <div class="filter-group" id="terms-filter-group">
+          <div class="filter-group-header">TERMS</div>
+          <div class="filter-group-content">
+              <div class="filter-title">Meaning Type:</div>
+              <div class="filter-pills" id="meaning-type-filter-pills">
+                  <button class="pill active" data-type="meaning-type" data-value="all">All</button>
+                  <button class="pill" data-type="meaning-type" data-value="technical/scientific">Technical/Scientific</button>
+                  <button class="pill" data-type="meaning-type" data-value="media theoretical/philosophical">Media Theoretical/Philosophical</button>
+              </div>
+          </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="tableViewContainer" class="table-view-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Year</th>
+          <th>Title</th>
+          <th>Link</th>
+          <th>Author</th>
+          <th>Publisher</th>
+          <th>Category</th>
+          <th>Type</th>
+          <th>Quote(s)</th>
+        </tr>
+      </thead>
+      <tbody>
+        </tbody>
+    </table>
+  </div>
+
+  <div id="quoteOnlyViewContainer" class="quote-only-view-container hidden">
+    </div>
+
+  <div id="termsViewContainer" class="terms-view-container hidden">
+    </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+  <script>
+    let allData = [];
+    let termsData = {}; // To store terms loaded from CSV
+    let filtersActive = false;
+    let currentView = 'table'; // 'table', 'quote', or 'terms'
+    let currentOpenDefinitionElement = null; // Global variable to track the currently open definition
+
+    // --- GLOBAL FUNCTIONS ---
+    function extractYears(yearString) {
+        if (!yearString) return [];
+        const yearMatches = String(yearString).match(/\b\d{4}\b/g); // Ensure it's treated as string
+        return yearMatches ? Array.from(new Set(yearMatches)).sort() : [];
+    }
+
+    function adjustContentViewHeight() {
+      const fixedHeader = document.getElementById('fixed-header-area');
+      const togglesContainer = document.querySelector('.toggles-container');
+      const tableViewContainer = document.getElementById('tableViewContainer');
+      const quoteOnlyViewContainer = document.getElementById('quoteOnlyViewContainer');
+      const termsViewContainer = document.getElementById('termsViewContainer');
+
+      if (fixedHeader && togglesContainer) {
+        const headerHeight = fixedHeader.offsetHeight;
+        const togglesHeight = togglesContainer.offsetHeight;
+        const remainingHeight = `calc(100vh - ${headerHeight}px - ${togglesHeight}px)`;
+
+        if (tableViewContainer) {
+            tableViewContainer.style.height = remainingHeight;
+        }
+        if (quoteOnlyViewContainer) {
+            quoteOnlyViewContainer.style.height = remainingHeight;
+        }
+        if (termsViewContainer) {
+            termsViewContainer.style.height = remainingHeight;
+        }
+      }
+    }
+
+    // Function to format definition text for even line breaks
+    function formatDefinitionText(text, maxCharsPerLine) {
+        if (!text) return '';
+        const words = text.split(' ');
+        let lines = [];
+        let currentLine = [];
+        let currentLineLength = 0;
+
+        words.forEach(word => {
+            // Check if adding the next word (plus a space) exceeds maxCharsPerLine
+            // If it's the first word in a line, allow it to be longer if necessary (for very long words)
+            if (currentLineLength + (currentLine.length > 0 ? 1 : 0) + word.length > maxCharsPerLine && currentLine.length > 0) {
+                lines.push(currentLine.join(' '));
+                currentLine = [word];
+                currentLineLength = word.length;
+            } else {
+                currentLine.push(word);
+                currentLineLength += (currentLine.length > 1 ? 1 : 0) + word.length;
+            }
+        });
+        lines.push(currentLine.join(' ')); // Add the last line
+
+        return lines.join('<br>');
+    }
+
+    // --- END GLOBAL FUNCTIONS ---
+
+    document.addEventListener('DOMContentLoaded', function() {
+  // Year Range "All" button behavior
+  const yearAllButton = document.querySelector('.pill[data-type="publicationYear"][data-value="all"]');
+  const fromYearInput = document.getElementById('fromYearInput');
+  const toYearInput = document.getElementById('toYearInput');
+
+  // Set correct active state on "All" click
+  yearAllButton.addEventListener('click', function () {
+    fromYearInput.value = '';
+    toYearInput.value = '';
+    yearAllButton.classList.add('active');
+    filterTable();
+  });
+
+  // Clear active state of "All" when typing into year inputs
+  [fromYearInput, toYearInput].forEach(input => {
+    input.addEventListener('input', () => {
+      if (fromYearInput.value || toYearInput.value) {
+        yearAllButton.classList.remove('active');
+      }
+      filterTable();
+    });
+  });
+
+      // Load both CSVs concurrently
+      Promise.all([
+        loadLiteratureData(),
+        loadTermsData()
+      ]).then(() => {
+        initializeFilters();
+        filterTable(); // Initial render after all data is loaded
+        document.getElementById('loadingStatus').style.display = 'none';
+        document.getElementById('statsDisplay').style.display = 'block';
+      }).catch(error => {
+        console.error('Error loading data:', error);
+        document.getElementById('loadingStatus').textContent = 'Error loading data. Showing sample data.'; // Display error
+        // Fallback to sample data for both if loading fails
+        loadSampleLiteratureData();
+        loadSampleTermsData();
+        initializeFilters();
+        filterTable();
+        document.getElementById('statsDisplay').style.display = 'block';
+      });
+
+
+      document.querySelectorAll('.filter-pills .pill').forEach(pill => {
+        pill.addEventListener('click', handlePillClick);
+      });
+
+      document.getElementById('fromYearInput').addEventListener('input', filterTable);
+      document.getElementById('toYearInput').addEventListener('input', filterTable);
+
+      document.querySelectorAll('.filter-group-header').forEach(header => {
+        header.addEventListener('click', function() {
+          const group = this.closest('.filter-group');
+          if (filtersActive) {
+            group.classList.toggle('active');
+            adjustContentViewHeight();
+          }
+        });
+      });
+
+      const filterToggle = document.getElementById('filterToggle');
+      filterToggle.addEventListener('change', function() {
+        filtersActive = this.checked;
+        if (filtersActive) {
+            document.body.classList.add('filters-active');
+        } else {
+            document.body.classList.remove('filters-active');
+        }
+        toggleAllFilters(true); // Always activate filters and reset them when toggled
+        filterTable();
+      });
+
+      // View Toggle Switches
+      const quotesToggle = document.getElementById('quotesToggle');
+      const termsToggle = document.getElementById('termsToggle');
+
+      quotesToggle.addEventListener('change', function() {
+          if (this.checked) {
+              currentView = 'quote';
+              termsToggle.checked = false; // Uncheck other toggles
+          } else if (!termsToggle.checked) {
+              currentView = 'table'; // Default to table if no other view is selected
+          }
+          updateView();
+      });
+
+      termsToggle.addEventListener('change', function() {
+          if (this.checked) {
+              currentView = 'terms';
+              quotesToggle.checked = false; // Uncheck other toggles
+          } else if (!quotesToggle.checked) {
+              currentView = 'table'; // Default to table if no other view is selected
+          }
+          updateView();
+      });
+
+      // Set initial state based on currentView (which defaults to 'table')
+      updateView();
+
+
+      // Set active nav link
+      // This will set the 'active' class based on the current page's href
+      const currentPath = window.location.pathname.split('/').pop();
+      document.querySelectorAll('.nav a').forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+          link.classList.add('active');
+        } else {
+          link.classList.remove('active');
+        }
+      });
+
+
+      adjustContentViewHeight();
+      window.addEventListener('resize', adjustContentViewHeight);
+
+    });
+
+    async function loadLiteratureData() {
+        try {
+            const response = await fetch('./literacy_data.csv');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const csvText = await response.text();
+            return new Promise(resolve => {
+                Papa.parse(csvText, {
+                    header: true,
+                    skipEmptyLines: true,
+                    dynamicTyping: false,
+                    complete: function(results) {
+                        allData = results.data.map(row => {
+                            return {
+                                year: row.Year ? parseInt(row.Year) : null,
+                                title: row.Title || '',
+                                link: row.Link || '',
+                                author: row.Author || '',
+                                platformPublisher: row['Platform/Publisher'] || '',
+                                category: row.Category || '',
+                                type: row.Type || '', // Added Type column
+                                quote: row.Quote || '',
+                            };
+                        }).filter(item => item.year !== null);
+                        console.log('Literature data loaded successfully:', allData.length, 'items');
+                        resolve();
+                    },
+                    error: function(err) {
+                        console.error('PapaParse error for literacy_data.csv:', err);
+                        throw err;
+                    }
+                });
+            });
+        } catch (error) {
+            console.error('Failed to fetch or parse literacy_data.csv:', error);
+            throw error; // Re-throw to be caught by Promise.all
+        }
+    }
+
+    async function loadTermsData() {
+        try {
+            const response = await fetch('./terms.csv'); // New CSV file for terms
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const csvText = await response.text();
+            return new Promise(resolve => {
+                Papa.parse(csvText, {
+                    header: true,
+                    skipEmptyLines: true,
+                    dynamicTyping: false,
+                    complete: function(results) {
+                        termsData = {};
+                        results.data.forEach(row => {
+                            const term = row.Term || '';
+                            const meaningType = row['Meaning Type'] || ''; // New column for terms
+                            const definition = row.Definition || ''; // NEW: Read Definition column
+                            if (term) {
+                                const firstLetter = term.charAt(0).toUpperCase();
+                                if (!termsData[firstLetter]) {
+                                    termsData[firstLetter] = [];
+                                }
+                                termsData[firstLetter].push({ term: term, meaningType: meaningType, definition: definition }); // NEW: Store definition
+                            }
+                        });
+                        // Sort terms alphabetically within each letter group
+                        for (const letter in termsData) {
+                            termsData[letter].sort((a, b) => a.term.localeCompare(b.term));
+                        }
+                        console.log('Terms data loaded successfully:', Object.keys(termsData).length, 'letters, total terms:', Object.values(termsData).flat().length);
+                        resolve();
+                    },
+                    error: function(err) {
+                        console.error('PapaParse error for terms.csv:', err);
+                        throw err;
+                    }
+                });
+            });
+        } catch (error) {
+            console.error('Failed to fetch or parse terms.csv:', error);
+            throw error; // Re-throw to be caught by Promise.all
+        }
+    }
+
+    function loadSampleLiteratureData() {
+        const sampleData = [
+          {
+            Year: '2020',
+            Title: 'Mapping the Unseen: Geospatial Data in Journalism',
+            Link: 'http://example.com/mapping-unseen',
+            Author: 'Dr. Jane Doe',
+            'Platform/Publisher': 'Journal of Digital Humanities',
+            Category: 'Journalism',
+            Type: 'Book', // Added Type
+            Quote: 'Geospatial narratives empower readers to visualize complex data.'
+          },
+          {
+            Year: '2023',
+            Title: 'The Cartographer\'s Dilemma: Ethics in Mapmaking',
+            Link: 'http://example.com/cartographer-dilemma',
+            Author: 'Prof. John Smith',
+            'Platform/Publisher': 'University Press',
+            Category: 'Ethics',
+            Type: 'Journal Article', // Added Type
+            Quote: 'Every map is a political statement, whether intended or not.'
+          },
+          {
+            Year: '2019',
+            Title: 'Satellite Imagery for Social Good',
+            Link: 'http://example.com/satellite-social-good',
+            Author: 'Dr. Alice Brown',
+            'Platform/Publisher': 'OpenGIS Blog',
+            Category: 'Social Impact',
+            Type: 'Blog Post', // Added Type
+            Quote: 'High-resolution imagery provides unprecedented insights into global challenges.'
+          },
+          {
+            Year: '2021',
+            Title: 'Data Visualization Best Practices',
+            Link: 'http://example.com/data-viz-best',
+            Author: 'Emma White',
+            'Platform/Publisher': 'O\'Reilly Media',
+            Category: 'Data Science',
+            Type: 'Book', // Added Type
+            Quote: 'Clarity and accuracy are paramount in effective data communication.'
+          },
+          {
+            Year: '2022',
+            Title: 'The Power of Location: Geographic Information Systems',
+            Link: 'http://example.com/power-location',
+            Author: 'David Green',
+            'Platform/Publisher': 'ESRI Press',
+            Category: 'GIS',
+            Type: 'Report', // Added Type
+            Quote: 'GIS transforms raw data into actionable intelligence for decision-makers.'
+          },
+          {
+            Year: '2018',
+            Title: 'Storytelling with Maps: A Practitioner\'s Guide',
+            Link: 'http://example.com/storytelling-maps',
+            Author: 'Sarah Black',
+            'Platform/Publisher': 'Medium',
+            Category: 'Journalism',
+            Type: 'Online Article', // Added Type
+            Quote: 'Interactive maps engage audiences on a deeper, more personal level.'
+          },
+          {
+            Year: '2024',
+            Title: 'AI and Geospatial Analysis: New Frontiers',
+            Link: 'http://example.com/ai-geospatial',
+            Author: 'Dr. Emily Chen',
+            'Platform/Publisher': 'Springer',
+            Category: 'Technology',
+            Type: 'Book Chapter', // Added Type
+            Quote: 'Machine learning algorithms are revolutionizing the interpretation of satellite data.'
+          },
+          {
+            Year: '2017',
+            Title: 'Remote Sensing for Environmental Monitoring',
+            Link: 'http://example.com/remote-sensing-env',
+            Author: 'Prof. Mark Davis',
+            'Platform/Publisher': 'Elsevier',
+            Category: 'Environment',
+            Type: 'Journal Article', // Added Type
+            Quote: 'Monitoring environmental change from space offers a global perspective.'
+          },
+          {
+            Year: '2020',
+            Title: 'The Ethics of Surveillance: Drones and Society',
+            Link: 'http://example.com/ethics-surveillance',
+            Author: 'Laura Perez',
+            'Platform/Publisher': 'The Drone Journal',
+            Category: 'Ethics',
+            Type: 'Conference Paper', // Added Type
+            Quote: 'As technology advances, so too must our ethical considerations of its use.'
+          },
+          {
+            Year: '2023',
+            Title: 'Visualizing Inequality: Spatial Justice in Action',
+            Link: 'http://example.com/visualizing-inequality',
+            Author: 'Carlos Rivera',
+            'Platform/Publisher': 'Urban Studies Review',
+            Category: 'Social Justice',
+            Type: 'Journal Article', // Added Type
+            Quote: 'Maps can expose disparities and advocate for equitable resource distribution.'
+          }
+        ];
+
+        allData = sampleData.map(row => {
+            return {
+                year: row.Year ? parseInt(row.Year) : null,
+                title: row.Title || '',
+                link: row.Link || '',
+                author: row.Author || '',
+                platformPublisher: row['Platform/Publisher'] || '',
+                category: row.Category || '',
+                type: row.Type || '', // Added Type column to sample data
+                quote: row.Quote || '',
+            };
+        }).filter(item => item.year !== null);
+        console.log('Sample literature data loaded.');
+    }
+
+    function loadSampleTermsData() {
+        const sampleTerms = [
+            { Term: 'Before/After', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'A conceptual framework in media theory often used to describe the impact of a specific event or technology on perception and representation, particularly in visual media.' },
+            { Term: 'Co-operative aerial images', 'Meaning Type': 'Technical/Scientific', Definition: 'Aerial images produced through the collaborative efforts of multiple participants, often leveraging crowdsourcing or community science approaches for data collection and analysis.' },
+            { Term: 'Deepfake Geography', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'The manipulation of geospatial data or imagery to create misleading or entirely fabricated representations of geographic spaces, raising questions about authenticity and trust in maps.' },
+            { Term: 'Earth Observation', 'Meaning Type': 'Technical/Scientific', Definition: 'The gathering of information about Earth\'s physical, chemical and biological systems by means of remote sensing technologies, typically from satellites or aircraft.' },
+            { Term: 'Eye(s) in the Sky', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'A metaphorical term referring to the pervasive presence of aerial or satellite surveillance, implying constant observation from above and raising concerns about privacy.' },
+            { Term: 'Geomedia', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'A hybrid field exploring the intersections of geographical information and media studies, focusing on how spatial data is produced, disseminated, and consumed through various media forms.' },
+            { Term: 'Ground Truth', 'Meaning Type': 'Technical/Scientific', Definition: 'Information collected on location (on the ground) to verify and calibrate data acquired remotely, such as satellite imagery or aerial photographs.' },
+            { Term: 'Keyhole', 'Meaning Type': 'Technical/Scientific', Definition: 'A term originating from early spy satellite programs (e.g., KEYHOLE satellites) used to describe high-resolution reconnaissance imagery, implying detailed visual access.' },
+            { Term: 'Kyl–Bingaman Amendment', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'A US legislative amendment (1996) that restricts the commercial distribution of high-resolution satellite imagery of Israel, highlighting the geopolitical implications of geospatial data access.' },
+            { Term: 'Machine gaze', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'The perspective or \'vision\' of automated systems and algorithms as they process and interpret visual and spatial data, often differing significantly from human perception.' },
+            { Term: 'Mosaic', 'Meaning Type': 'Technical/Scientific', Definition: 'A composite image created by stitching together multiple individual images to form a larger, continuous view of an area, commonly used in cartography and remote sensing.' },
+            { Term: 'Nadir', 'Meaning Type': 'Technical/Scientific', Definition: 'The point on the celestial sphere directly below a given location; in remote sensing, it refers to the point directly beneath an aircraft or satellite.' },
+            { Term: 'Nonhuman Photography', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'A concept that examines images produced not by human intention or vision, but by autonomous machines or processes (e.g., algorithmic image generation, satellite feeds), challenging traditional notions of authorship.' },
+            { Term: 'Oblique', 'Meaning Type': 'Technical/Scientific', Definition: 'Refers to aerial imagery or perspectives taken at an angle, rather than directly from above (nadir), providing a more natural and recognizable view of the landscape.' },
+            { Term: 'Operational images', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'Images produced not for human viewing or aesthetic purposes, but for technical functions or operational control (e.g., algorithmic image generation, satellite feeds), often bypassing human interpretation.' },
+            { Term: 'Orbital Geopolitics', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'The study of how the control and use of orbital space, particularly for satellites, influences international relations, power dynamics, and global surveillance capabilities.' },
+            { Term: 'Orbital Truth', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'A concept exploring the authoritative status often granted to satellite imagery and data due to its \'objective\' and \'elevated\' perspective, despite potential biases or manipulations.' },
+            { Term: 'Remote Sensing', 'Meaning Type': 'Technical/Scientific', Definition: 'The acquisition of information about an object or phenomenon without making physical contact with the object, typically through the use of sensors on satellites or aircraft.' },
+            { Term: 'Technosphere', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'A concept referring to the sphere of human technological activity and its impact on the Earth\'s systems, often used to describe the pervasive influence of technology on the environment and human experience.' },
+            { Term: 'Visual spatial imaginaries', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'The collective mental images, narratives, and cultural understandings that shape how people perceive and interact with space and place, often influenced by media representations.' },
+            { Term: 'Vertical Perspective', 'Meaning Type': 'Technical/Scientific', Definition: 'A view directly from above, providing a map-like representation without foreshortening, commonly used in cartography and aerial photography.' },
+            { Term: 'Verticality', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'The philosophical and cultural implications of perceiving space from a vertical perspective, often associated with power, control, and surveillance, distinct from horizontal, lived experiences.' },
+            { Term: 'View from above', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'A perspective (literal or metaphorical) that implies a detached, omniscient, or authoritative gaze, often associated with military, governmental, or technological surveillance.' },
+            { Term: 'View from nowhere', 'Meaning Type': 'Media Theoretical/Philosophical', Definition: 'A philosophical concept implying an objective or unbiased perspective, often critiqued in media studies for masking inherent biases in data collection and representation, particularly from aerial or satellite viewpoints.' }
+        ];
+        termsData = {};
+        sampleTerms.forEach(row => {
+            const term = row.Term || '';
+            const meaningType = row['Meaning Type'] || '';
+            const definition = row.Definition || ''; // NEW: Read Definition from sample data
+            if (term) {
+                const firstLetter = term.charAt(0).toUpperCase();
+                if (!termsData[firstLetter]) {
+                    termsData[firstLetter] = [];
+                }
+                termsData[firstLetter].push({ term: term, meaningType: meaningType, definition: definition }); // NEW: Store definition
+            }
+        });
+        for (const letter in termsData) {
+            termsData[letter].sort((a, b) => a.term.localeCompare(b.term));
+        }
+        console.log('Sample terms data loaded.');
+    }
+
+
+    function initializeFilters() {
+        const uniqueCategories = [...new Set(allData.map(item => item.category).filter(c => c))].sort();
+        populatePills('category-filter-pills', uniqueCategories, 'category');
+
+        const uniqueTypes = [...new Set(allData.map(item => item.type).filter(t => t))].sort();
+        populatePills('type-filter-pills', uniqueTypes, 'type');
+
+        // Initialize Meaning Type filter pills
+        const meaningTypes = ['technical/scientific', 'media theoretical/philosophical']; // 'all' handled separately
+        populatePills('meaning-type-filter-pills', meaningTypes, 'meaning-type');
+    }
+
+    function populatePills(containerId, values, type) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = ''; // Clear existing pills
+
+        // Always add "All" pill first
+        const allButton = document.createElement('button');
+        allButton.classList.add('pill', 'active');
+        allButton.setAttribute('data-type', type);
+        allButton.setAttribute('data-value', 'all');
+        allButton.textContent = 'All';
+        allButton.addEventListener('click', handlePillClick);
+        container.appendChild(allButton);
+
+        // Add other pills
+        values.forEach(value => {
+            if (value && value !== 'all') { // Ensure value is not empty or null, and not 'all'
+                const button = document.createElement('button');
+                button.classList.add('pill');
+                button.setAttribute('data-type', type);
+                button.setAttribute('data-value', value);
+                button.textContent = value;
+                button.addEventListener('click', handlePillClick);
+                container.appendChild(button);
+            }
+        });
+    }
+
+    function handlePillClick(event) {
+        const clickedPill = event.target;
+        const type = clickedPill.getAttribute('data-type');
+        const value = clickedPill.getAttribute('data-value');
+        const parentContainer = clickedPill.closest('.filter-pills');
+
+        // For all filter types on this page (category, author, platform-publisher, meaning-type)
+        if (value === 'all') {
+            // If "All" is clicked, activate "All" and deactivate others in the same group
+            parentContainer.querySelectorAll('.pill').forEach(pill => pill.classList.remove('active'));
+            clickedPill.classList.add('active');
+        } else {
+            // If another pill is clicked, deactivate "All" if it's active
+            const allPill = parentContainer.querySelector('.pill[data-value="all"]');
+            if (allPill && allPill.classList.contains('active')) {
+                allPill.classList.remove('active');
+            }
+            clickedPill.classList.toggle('active');
+
+            // If no pills are active (after toggling), activate "All"
+            if (!parentContainer.querySelector('.pill.active')) {
+                if (allPill) allPill.classList.add('active'); // Ensure allPill exists
+            }
+        }
+        filterTable();
+    }
+
+    function toggleAllFilters(forceClose = false) {
+        const filterGroups = document.querySelectorAll('.filter-group');
+        filterGroups.forEach(group => {
+            if (!filtersActive || forceClose) {
+                group.classList.remove('active');
+            } else {
+                group.classList.remove('active');
+            }
+        });
+        adjustContentViewHeight();
+    }
+
+    function updateView() {
+        const tableViewContainer = document.getElementById('tableViewContainer');
+        const quoteOnlyViewContainer = document.getElementById('quoteOnlyViewContainer');
+        const termsViewContainer = document.getElementById('termsViewContainer');
+
+        // Hide all view containers first
+        tableViewContainer.classList.add('hidden');
+        quoteOnlyViewContainer.classList.add('hidden');
+        termsViewContainer.classList.add('hidden');
+
+        // Show the active view container
+        if (currentView === 'table') {
+            tableViewContainer.classList.remove('hidden');
+        } else if (currentView === 'quote') {
+            quoteOnlyViewContainer.classList.remove('hidden');
+        } else if (currentView === 'terms') {
+            termsViewContainer.classList.remove('hidden');
+        }
+        filterTable(); // Re-render content for the active view (table, quotes, and terms still filter)
+        adjustContentViewHeight();
+    }
+
+
+    function renderTable() {
+        const tbody = document.querySelector('table tbody');
+        tbody.innerHTML = ''; // Clear existing rows
+
+        const fromYear = parseInt(document.getElementById('fromYearInput').value);
+        const toYear = parseInt(document.getElementById('toYearInput').value);
+
+        const filteredResults = allData.filter(item => {
+            return applyAllFiltersToLiteratureItem(item, fromYear, toYear);
+        });
+
+        filteredResults.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item.year}</td>
+                <td>${item.title}</td>
+                <td><a href="${item.link}" target="_blank">Link</a></td>
+                <td>${item.author}</td>
+                <td>${item.platformPublisher}</td>
+                <td>${item.category}</td>
+                <td>${item.type}</td> <td>${item.quote}</td>
+            `;
+            tbody.appendChild(row);
+        });
+        updateFilterCount(filteredResults.length);
+    }
+
+    function renderQuoteOnlyView() {
+        const quotesContainer = document.getElementById('quoteOnlyViewContainer');
+        quotesContainer.innerHTML = ''; // Clear existing quotes
+
+        const fromYear = parseInt(document.getElementById('fromYearInput').value);
+        const toYear = parseInt(document.getElementById('toYearInput').value);
+
+        // Filter literature data to get relevant quotes
+        const filteredQuotes = allData.filter(item => {
+            // Only include items that have a quote and pass the literature filters
+            return item.quote && applyAllFiltersToLiteratureItem(item, fromYear, toYear);
+        });
+
+        if (filteredQuotes.length === 0) {
+            quotesContainer.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">No quotes found matching the selected filters.</p>';
+        } else {
+            filteredQuotes.forEach(item => {
+                const quoteWrapper = document.createElement('div'); // Create a wrapper for quote and author
+                quoteWrapper.classList.add('literature-quote-item'); // Apply main styling to the wrapper
+
+                const quoteText = document.createElement('div');
+                quoteText.classList.add('quote-text'); // Add a class for the quote text if needed
+                quoteText.innerHTML = item.quote; // Use innerHTML as quote might contain HTML entities
+
+                const quoteAuthor = document.createElement('div');
+                quoteAuthor.classList.add('quote-author');
+
+                // Construct the author/source/year string
+                let authorInfo = item.author;
+                let sourceInfo = item.title || item.platformPublisher; // Use title if available, otherwise platform/publisher
+                let yearInfo = item.year;
+
+                let citationParts = [];
+                if (authorInfo) citationParts.push(authorInfo);
+                if (sourceInfo) citationParts.push(sourceInfo);
+                if (yearInfo) citationParts.push(yearInfo);
+
+                quoteAuthor.textContent = citationParts.join(', '); // Join with comma and space, removed the dash
+
+                quoteWrapper.appendChild(quoteText);
+                quoteWrapper.appendChild(quoteAuthor);
+
+                // Append the quoteWrapper directly to the quotesContainer, making it non-clickable
+                quotesContainer.appendChild(quoteWrapper);
+            });
+        }
+        updateFilterCount(filteredQuotes.length);
+    }
+
+    function renderTermsView() {
+        const termsContainer = document.getElementById('termsViewContainer');
+        termsContainer.innerHTML = ''; // Clear existing terms
+
+        // NEW: Clear any open definition when re-rendering terms view
+        if (currentOpenDefinitionElement) {
+            currentOpenDefinitionElement.remove();
+            currentOpenDefinitionElement = null;
+        }
+
+        const filteredTerms = {};
+        const selectedMeaningTypes = getActivePillValues('meaning-type');
+        const allMeaningTypesActive = selectedMeaningTypes.includes('all');
+
+        for (const letter in termsData) {
+            const termsForLetter = termsData[letter].filter(termItem => {
+                if (!filtersActive) return true; // If filters are not active, show all
+                if (allMeaningTypesActive) return true;
+                return selectedMeaningTypes.includes(termItem.meaningType.toLowerCase());
+            });
+
+            if (termsForLetter.length > 0) {
+                filteredTerms[letter] = termsForLetter;
+            }
+        }
+
+        // Sort letters alphabetically
+        const sortedLetters = Object.keys(filteredTerms).sort();
+
+        // Determine the number of columns (e.g., 4 columns)
+        const numColumns = 4;
+        const columns = Array.from({ length: numColumns }, () => document.createElement('div'));
+        columns.forEach(col => col.classList.add('term-column'));
+
+        let currentColumnIndex = 0;
+        let displayedTermCount = 0;
+
+        sortedLetters.forEach(letter => {
+            const letterHeader = document.createElement('div');
+            letterHeader.classList.add('term-letter');
+            letterHeader.textContent = letter;
+            columns[currentColumnIndex].appendChild(letterHeader);
+
+            filteredTerms[letter].forEach(termItem => {
+                const termElement = document.createElement('div');
+                termElement.classList.add('term-item');
+                termElement.textContent = termItem.term;
+                termElement.setAttribute('data-term', termItem.term); // Store term text
+                termElement.setAttribute('data-definition', termItem.definition); // NEW: Store definition on the element for easy access
+
+                // NEW: Add click listener for definition display
+                termElement.addEventListener('click', function() {
+                    let definitionText = this.getAttribute('data-definition');
+                    const clickedTermElement = this;
+
+                    // If the clicked term's definition is already open, close it
+                    if (currentOpenDefinitionElement && currentOpenDefinitionElement.previousElementSibling === clickedTermElement) {
+                        currentOpenDefinitionElement.remove();
+                        currentOpenDefinitionElement = null;
+                        return; // Exit as definition is now closed
+                    }
+
+                    // If another definition is open, close it first
+                    if (currentOpenDefinitionElement) {
+                        currentOpenDefinitionElement.remove();
+                        currentOpenDefinitionElement = null; // Clear reference
+                    }
+
+                    // Open the new definition if definitionText exists
+                    if (definitionText) {
+                        // Use the new formatDefinitionText function
+                        // Adjusted maxCharsPerLine for better visual fitting in columns
+                        const maxCharsPerLine = 33;
+                        const formattedDefinition = formatDefinitionText(definitionText, maxCharsPerLine);
+
+                        const definitionElement = document.createElement('div');
+                        definitionElement.classList.add('term-definition');
+                        definitionElement.classList.add('active'); // Make it visible
+                        definitionElement.innerHTML = formattedDefinition; // Use innerHTML for <br> tags
+
+                        // Insert the definition right after the clicked term element
+                        clickedTermElement.parentNode.insertBefore(definitionElement, clickedTermElement.nextSibling);
+
+                        currentOpenDefinitionElement = definitionElement; // Store reference to the newly opened definition
+                    }
+                });
+
+                columns[currentColumnIndex].appendChild(termElement);
+                displayedTermCount++;
+            });
+
+            currentColumnIndex = (currentColumnIndex + 1) % numColumns;
+        });
+
+        columns.forEach(col => termsContainer.appendChild(col));
+
+        updateFilterCount(displayedTermCount);
+    }
+
+    function getActivePillValues(type) {
+        const activePills = document.querySelectorAll(`.pill[data-type="${type}"].active`);
+        return Array.from(activePills).map(pill => pill.getAttribute('data-value').toLowerCase());
+    }
+
+    function applyAllFiltersToLiteratureItem(item, fromYear, toYear) {
+        if (!filtersActive) return true;
+
+        // Year Filter
+        let yearMatch = true;
+        if (item.year !== null) {
+            if (fromYear && item.year < fromYear) {
+                yearMatch = false;
+            }
+            if (toYear && item.year > toYear) {
+                yearMatch = false;
+            }
+        } else {
+            if (fromYear || toYear) {
+                yearMatch = false;
+            }
+        }
+
+        const categoryPills = document.querySelectorAll('.pill[data-type="category"].active');
+        const allCategoriesActive = Array.from(categoryPills).some(pill => pill.getAttribute('data-value') === 'all');
+        const selectedCategories = Array.from(categoryPills)
+            .map(pill => pill.getAttribute('data-value'))
+            .filter(value => value !== 'all');
+        const categoryMatch = allCategoriesActive || selectedCategories.includes(item.category);
+
+        const typePills = document.querySelectorAll('.pill[data-type="type"].active');
+        const allTypesActive = Array.from(typePills).some(pill => pill.getAttribute('data-value') === 'all');
+        const selectedTypes = Array.from(typePills)
+            .map(pill => pill.getAttribute('data-value'))
+            .filter(value => value !== 'all');
+        const typeMatch = allTypesActive || selectedTypes.includes(item.type);
+
+        return yearMatch && categoryMatch && typeMatch;
+    }
+
+    function filterTable() {
+        if (currentView === 'table') {
+            renderTable();
+        } else if (currentView === 'quote') {
+            renderQuoteOnlyView();
+        } else if (currentView === 'terms') {
+            renderTermsView();
+        }
+    }
+
+    function updateFilterCount(filteredCount) {
+      const statsDisplay = document.getElementById('statsDisplay');
+      // Define a base class for numbers to apply general spacing
+      const numberSpanClass = "article-count-number"; 
+      
+      if (statsDisplay) {
+        if (currentView === 'table') {
+          const totalCount = allData.length;
+          const hasActiveLiteratureFilters = document.querySelectorAll('.filter-pills .pill.active[data-type="category"]:not([data-value="all"])').length > 0 ||
+                                         document.querySelectorAll('.filter-pills .pill.active[data-type="type"]:not([data-value="all"])').length > 0 ||
+                                         document.getElementById('fromYearInput').value !== '' ||
+                                         document.getElementById('toYearInput').value !== '';
+          if (hasActiveLiteratureFilters && filtersActive) {
+            statsDisplay.innerHTML = `Texts:<span class="${numberSpanClass}">${filteredCount}</span><sup style="font-size: 0.5em; vertical-align: super; color: lightgrey;">/<span class="${numberSpanClass}">${totalCount}</span></sup>`;
+          } else {
+            // Removed the extra space before the span here
+            statsDisplay.innerHTML = `Texts:<span class="${numberSpanClass}">${totalCount}</span>`;
+          }
+        } else if (currentView === 'quote') {
+          const totalQuotes = allData.filter(item => item.quote).length;
+          const hasActiveLiteratureFilters = document.querySelectorAll('.filter-pills .pill.active[data-type="category"]:not([data-value="all"])').length > 0 ||
+                                         document.querySelectorAll('.filter-pills .pill.active[data-type="type"]:not([data-value="all"])').length > 0 ||
+                                         document.getElementById('fromYearInput').value !== '' ||
+                                         document.getElementById('toYearInput').value !== '';
+          if (hasActiveLiteratureFilters && filtersActive) {
+             statsDisplay.innerHTML = `Quotes:<span class="${numberSpanClass}">${filteredCount}</span><sup style="font-size: 0.5em; vertical-align: super; color: lightgrey;">/<span class="${numberSpanClass}">${totalQuotes}</span></sup>`;
+          } else {
+             // Removed the extra space before the span here
+             statsDisplay.innerHTML = `Quotes:<span class="${numberSpanClass}">${totalQuotes}</span>`;
+          }
+        } else if (currentView === 'terms') {
+            let totalTermsCount = 0;
+            for (const letter in termsData) {
+                totalTermsCount += termsData[letter].length;
+            }
+            const hasActiveTermsFilters = document.querySelectorAll('.pill.active[data-type="meaning-type"]:not([data-value="all"])').length > 0;
+
+            if (hasActiveTermsFilters && filtersActive) {
+                statsDisplay.innerHTML = `Terms:<span class="${numberSpanClass}">${filteredCount}</span><sup style="font-size: 0.5em; vertical-align: super; color: lightgrey;">/<span class="${numberSpanClass}">${totalTermsCount}</span></sup>`;
+            } else {
+                // Removed the extra space before the span here
+                statsDisplay.innerHTML = `Terms:<span class="${numberSpanClass}">${totalTermsCount}</span>`;
+            }
+        }
+      }
+    }
+  </script>
+</body>
+</html>
