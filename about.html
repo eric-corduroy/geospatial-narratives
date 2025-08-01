@@ -266,57 +266,60 @@
     }
 
     /* For screens smaller than 480px (mobile phones) */
+    /* For screens smaller than 480px (mobile phones) */
     @media (max-width: 480px) {
-      .nav {
-        padding: 5px 20px 5px 5px;
-        font-size: 18px;
-        gap: 5px;
-      }
-      .nav a {
-        font-size: 17px;
-        padding: 3px 6px;
-      }
-      .main-content-wrapper-header {
-        padding: 0 10px;
-      }
-      .update-date {
-        font-size: 12px;
-        padding: 10px 0 0 13px;
-      }
-      .stats {
-        font-size: 42px;
-        padding-top: 20px;
-        padding-left: 1.5px;
-        padding-bottom: 20px;
-        line-height: 50px;
-      }
-      .about-tabs {
-        padding-bottom: 10px;
-        padding-left: 3px;
-        flex-wrap: wrap; /* Allow toggles to wrap */
-        gap: 10px;
-      }
-      .about-tab-button {
-          font-size: 15px;
-      }
-      .scrollable-content-area {
-        padding: 0 3px;
-      }
-      .info-columns-container {
-        padding-bottom: 0px;
-        gap: 0px;
-      }
-      .info-column,
-      .info-column h1, .info-column h2, .info-column p, .info-column ul, .info-column li {
-        font-size: 15px; /* Even smaller font size on mobile */
-        line-height: 20px;
-        font-weight: 400; /* Regular font weight */
-      }
-      .info-column h1 { margin-bottom: 10px; }
-      .info-column h2 { margin-top: 15px; margin-bottom: 5px; }
-      .info-column p { margin-bottom: 10px; }
-      .info-column ul { margin-left: 20px; margin-bottom: 10px; }
-      .info-column li { margin-bottom: 5px; }
+  .nav {
+    padding: 5px 20px 5px 5px;
+    font-size: 18px;
+    gap: 5px;
+  }
+  .nav a {
+    font-size: 17px;
+    padding: 3px 6px;
+  }
+  .main-content-wrapper-header {
+    padding: 0 10px;
+  }
+  .update-date {
+    font-size: 12px;
+    padding: 10px 0 0 13px;
+  }
+  .stats {
+    font-size: 42px;
+    padding-top: 20px;
+    padding-left: 1.5px;
+    padding-bottom: 20px;
+    line-height: 50px;
+  }
+  .about-tabs {
+    padding-bottom: 10px;
+    padding-left: 3px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .about-tab-button {
+    font-size: 15px;
+  }
+  .scrollable-content-area {
+    padding: 0 3px;
+    padding-bottom: 40px; /* ✅ NEW LINE: extra bottom breathing room */
+  }
+  .info-columns-container {
+    padding-bottom: 0px;
+    gap: 0px;
+  }
+  .info-column,
+  .info-column h1, .info-column h2, .info-column p, .info-column ul, .info-column li {
+    font-size: 15px;
+    line-height: 20px;
+    font-weight: 400;
+  }
+  .info-column h1 { margin-bottom: 10px; }
+  .info-column h2 { margin-top: 15px; margin-bottom: 5px; }
+  .info-column p { margin-bottom: 10px; }
+  .info-column ul { margin-left: 20px; margin-bottom: 10px; }
+  .info-column li { margin-bottom: 5px; }
+
     }
   </style>
 </head>
