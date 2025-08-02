@@ -564,6 +564,11 @@
       'opsz' 24
     }
 
+    /* New style for PENDING status */
+    .pending-status {
+        color: blue;
+    }
+
     /* --- Responsive Design --- */
 
     /* New media query for screens smaller than or equal to 1600px */
@@ -1084,10 +1089,9 @@ document.getElementById('toYearInput').addEventListener('input', function () {
       // Feed Toggle Switch (renamed from feedToggle/titleToggle)
       const feedToggle = document.getElementById('feedToggle');
       feedToggle.addEventListener('change', function() {
-          currentView = this.checked ? 'feed' : 'table'; // 'feed' instead of 'title'
-          updateView();
+        currentView = this.checked ? 'feed' : 'table'; // 'feed' instead of 'title'
+        updateView();
       });
-
 
       const currentPath = window.location.pathname.split('/').pop();
       document.querySelectorAll('.nav a').forEach(link => {
@@ -1120,1904 +1124,61 @@ document.getElementById('toYearInput').addEventListener('input', function () {
     });
 
     async function loadDataFromBackend() {
-        const loadingStatus = document.getElementById('loadingStatus');
-        const statsDisplay = document.getElementById('statsDisplay');
-        try {
-            loadingStatus.textContent = 'Loading data from server...';
-            const response = await fetch('./data.csv');
-            if (!response.ok) {
-                // If the file is not found or other HTTP error, trigger fallback
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const csvText = await response.text();
-            Papa.parse(csvText, {
-                header: true,
-                skipEmptyLines: true,
-                dynamicTyping: false,
-                complete: function(results) {
-                    const parsedData = results.data;
-                    allData = parsedData.map(row => {
-                        // Ensure required fields exist, provide defaults if missing
-                        const date = row.Date || '';
-                        const publicationYear = date ? new Date(date).getFullYear() : null;
-
-                        const providers = row.Provider ? row.Provider.split(/[,;]/).map(p => p.trim()).filter(p => p) : [''];
-                        const resolutions = row.Resolution ? row.Resolution.split(/[,;]/).map(r => r.trim()).filter(r => r) : [''];
-                        const platforms = row.Platform ? row.Platform.split(/[,;]/).map(p => p.trim()).filter(p => p) : [''];
-                        const representations = row.Representation ? row.Representation.split(/[,;]/).map(r => r.trim()).filter(r => r) : [''];
-                        const vizs = row.Viz ? row.Viz.split(/[,;]/).map(v => v.trim()).filter(v => v) : [''];
-
-                        const dataUseYears = extractYears(row['Data use'] || '');
-                        if (dataUseYears.length === 0) dataUseYears.push('');
-
-                        let combinedDataPoints = [];
-
-                        const hasProviderData = providers.some(p => p !== '') || resolutions.some(r => r !== '') || platforms.some(p => p !== '') ||
-                                                representations.some(r => r !== '') || vizs.some(v => v !== '');
-
-                        if (!hasProviderData && dataUseYears.length > 0) {
-                            dataUseYears.forEach(year => {
-                                combinedDataPoints.push({
-                                    dataUseYear: year,
-                                    provider: '',
-                                    platform: '',
-                                    resolution: '',
-                                    resolutionCategory: '',
-                                    representation: '',
-                                    viz: ''
-                                });
-                            });
-                        } else if (hasProviderData) {
-                            dataUseYears.forEach(year => {
-                                const currentMaxLength = Math.max(providers.length, resolutions.length, platforms.length, representations.length, vizs.length);
-                                for (let i = 0; i < currentMaxLength; i++) {
-                                    combinedDataPoints.push({
-                                        dataUseYear: year,
-                                        provider: providers[i] || providers[0] || '',
-                                        platform: platforms[i] || platforms[0] || '',
-                                        resolution: resolutions[i] || resolutions[0] || '',
-                                        resolutionCategory: getMeterCategory(resolutions[i] || resolutions[0] || ''),
-                                        representation: representations[i] || representations[0] || '',
-                                        viz: vizs[i] || vizs[0] || ''
-                                    });
-                                }
-                            });
-                        } else {
-                            combinedDataPoints.push({
-                                dataUseYear: '',
-                                provider: '',
-                                platform: '',
-                                resolution: '',
-                                resolutionCategory: '',
-                                viz: ''
-                            });
-                        }
-
-                        return {
-                            date: date,
-                            publicationYear: publicationYear,
-                            title: row.Title || '',
-                            link: row.Link || '',
-                            outlet: row.Outlet || '',
-                            country: row.Country || '',
-                            region: countryRegions[row.Country] || '',
-                            context: row.Context || '',
-                            category: row.Category || '',
-                            combinedDataPoints: combinedDataPoints,
-                        };
-                    });
-                    initializeFilters();
-                    filterTable();
-                    loadingStatus.style.display = 'none';
-                    statsDisplay.style.display = 'block';
-                }
-            });
-        } catch (error) {
-            console.error('Error loading data from backend, falling back to sample data:', error);
-            loadSampleData();
+      const loadingStatus = document.getElementById('loadingStatus');
+      const statsDisplay = document.getElementById('statsDisplay');
+      try {
+        loadingStatus.textContent = 'Loading data from server...';
+        const response = await fetch('./data.csv');
+        if (!response.ok) {
+          // If the file is not found or other HTTP error, trigger fallback
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-    }
+        const csvText = await response.text();
+        Papa.parse(csvText, {
+          header: true,
+          skipEmptyLines: true,
+          dynamicTyping: false,
+          complete: function(results) {
+            const parsedData = results.data;
+            allData = parsedData.map(row => {
+              // Ensure required fields exist, provide defaults if missing
+              const date = row.Date || '';
+              const publicationYear = date ? new Date(date).getFullYear() : null;
+              const providers = row.Provider ? row.Provider.split(/[,;]/).map(p => p.trim()).filter(p => p) : [''];
+              const resolutions = row.Resolution ? row.Resolution.split(/[,;]/).map(r => r.trim()).filter(r => r) : [''];
+              const platforms = row.Platform ? row.Platform.split(/[,;]/).map(p => p.trim()).filter(p => p) : [''];
+              const representations = row.Representation ? row.Representation.split(/[,;]/).map(r => r.trim()).filter(r => r) : [''];
+              const vizs = row.Viz ? row.Viz.split(/[,;]/).map(v => v.trim()).filter(v => v) : [''];
+              const dataUseYears = extractYears(row['Data use'] || '');
+              if (dataUseYears.length === 0) dataUseYears.push('');
 
-    function loadSampleData() {
-        const loadingStatus = document.getElementById('loadingStatus');
-        const statsDisplay = document.getElementById('statsDisplay');
+              let combinedDataPoints = [];
+              const hasProviderData = providers.some(p => p !== '') || resolutions.some(r => r !== '') || platforms.some(p => p !== '') || representations.some(r => r !== '') || vizs.some(v => v !== '');
 
-        const resolutionsList = ['<1m', '1-10m', '>10m'];
-        // const interactionsList = ['On-Scroll', 'Slider', 'Zoom']; // Removed
-
-        const sampleData = [
-          {
-            Date: '2024-03-15',
-            Title: 'Überschwemmungsgebiete Experts waarschuwen: Rusland bouwt lanceerinstallaties voor hypermoderne kernraket',
-            Link: 'http://example.com/urban-expansion',
-            Outlet: 'The New York Times',
-            Country: 'United States',
-            Context: 'Urban development patterns',
-            Category: 'Environment',
-            'Data use': '2023; 2024',
-            Provider: 'Planet Labs; Maxar',
-            Platform: 'Sentinel-2; Landsat',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Optical; Hyperspectral',
-            Viz: 'RGB; NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Tutorial available'
-          },
-          {
-            Date: '2023-11-20',
-            Title: 'Deforestation in Amazon',
-            Link: 'http://example.com/deforestation',
-            Outlet: 'The Guardian',
-            Country: 'Brazil',
-            Context: 'Environmental monitoring',
-            Category: 'Environment',
-            'Data use': '2022',
-            Provider: 'ESA',
-            Platform: 'Sentinel-1',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Optical',
-            Viz: 'NDVI',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'N/A'
-          },
-          {
-            Date: '2024-01-05',
-            Title: 'Glacier Retreat in Alps',
-            Link: 'http://example.com/glacier-retreat',
-            Outlet: 'BBC',
-            Country: 'Germany',
-            Context: 'Climate change impact',
-            Category: 'Climate',
-            'Data use': '2020; 2024',
-            Provider: 'NASA',
-            Platform: 'MODIS',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Hyperspectral',
-            Viz: 'RGB',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Data publicly available'
-          },
-          {
-            Date: '2023-09-01',
-            Title: 'Crop Yield Analysis',
-            Link: 'http://example.com/crop-yield',
-            Outlet: 'Reuters',
-            Country: 'India',
-            Context: 'Agriculture and food security',
-            Category: 'Agriculture',
-            'Data use': '2023',
-            Provider: 'USGS',
-            Platform: 'Landsat',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Contact for data'
-          },
-          {
-            Date: '2024-02-10',
-            Title: 'Coastal Erosion Study',
-            Link: 'http://example.com/coastal-erosion',
-            Outlet: 'CNN',
-            Country: 'Japan',
-            Context: 'Disaster preparedness',
-            Category: 'Environment',
-            'Data use': '2024',
-            Provider: 'Airbus',
-            Platform: 'SPOT',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Optical',
-            Viz: 'NDVI',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Report access limited'
-          },
-          {
-            Date: '2023-07-25',
-            Title: 'Urban Population Density',
-            Link: 'http://example.com/urban-density',
-            Outlet: 'The New York Times',
-            Country: 'France',
-            Context: 'Demographic trends',
-            Category: 'Demographics',
-            'Data use': '2020; 2021; 2022',
-            Provider: 'OpenStreetMap',
-            Platform: 'Open Data',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Hyperspectral',
-            Viz: 'RGB',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Data available via API'
-          },
-          {
-            Date: '2024-04-01',
-            Title: 'Arctic Ice Melt',
-            Link: 'http://example.com/arctic-ice',
-            Outlet: 'The Guardian',
-            Country: 'Canada',
-            Context: 'Climate change research',
-            Category: 'Climate',
-            'Data use': '2023; 2024',
-            Provider: 'NASA; ESA',
-            Platform: 'CryoSat-2; ICESat-2',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar; Optical',
-            Viz: 'NRG; NDVI',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Scientific paper'
-          },
-          {
-            Date: '2023-10-10',
-            Title: 'Desertification in Africa',
-            Link: 'http://example.com/desertification',
-            Outlet: 'BBC',
-            Country: 'Sudan',
-            Context: 'Land degradation',
-            Category: 'Environment',
-            'Data use': '2021',
-            Provider: 'USGS',
-            Platform: 'Landsat',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Optical',
-            Viz: 'RGB',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'University study'
-          },
-          {
-            Date: '2024-03-01',
-            Title: 'Wildfire Tracking',
-            Link: 'http://example.com/wildfire',
-            Outlet: 'CNN',
-            Country: 'United States',
-            Context: 'Emergency response',
-            Category: 'Disaster',
-            'Data use': '2024',
-            Provider: 'NOAA; NASA',
-            Platform: 'GOES; VIIRS',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Hyperspectral',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Public dashboard'
-          },
-          {
-            Date: '2023-08-12',
-            Title: 'Historical City Growth',
-            Link: 'http://example.com/city-growth',
-            Outlet: 'Washington Post',
-            Country: 'United Kingdom',
-            Context: 'Urban history',
-            Category: 'History',
-            'Data use': '1950; 2000; 2020',
-            Provider: 'Ordnance Survey',
-            Platform: 'Historical Maps',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NDVI',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Archival research'
-          },
-          {
-            Date: '2024-05-20',
-            Title: 'Ocean Plastic Accumulation',
-            Link: 'http://example.com/ocean-plastic',
-            Outlet: 'Sky News',
-            Country: 'Japan',
-            Context: 'Marine pollution',
-            Category: 'Environment',
-            'Data use': '2024',
-            Provider: 'Sentinel Hub; ESA',
-            Platform: 'Sentinel-3',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Optical; Hyperspectral',
-            Viz: 'RGB; NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Ongoing research'
-          },
-          {
-            Date: '2023-06-01',
-            Title: 'Volcanic Activity Monitoring',
-            Link: 'http://example.com/volcano',
-            Outlet: 'Reuters',
-            Country: 'Italy',
-            Context: 'Geological hazards',
-            Category: 'Geology',
-            'Data use': '2023',
-            Provider: 'USGS',
-            Platform: 'GPS; Seismometers',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NDVI',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Scientific publication'
-          },
-          {
-            Date: '2024-01-25',
-            Title: 'Water Scarcity in Middle East',
-            Link: 'http://example.com/water-scarcity',
-            Outlet: 'The Guardian',
-            Country: 'Iraq',
-            Context: 'Resource management',
-            Category: 'Environment',
-            'Data use': '2020; 2021; 2022; 2023; 2024',
-            Provider: 'NASA',
-            Platform: 'GRACE',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Optical; Radar',
-            Viz: 'RGB; NDVI',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'UN Report'
-          },
-          {
-            Date: '2023-04-18',
-            Title: 'Arctic Shipping Routes',
-            Link: 'http://example.com/arctic-routes',
-            Outlet: 'BBC',
-            Country: 'Russia',
-            Context: 'Geopolitics; Climate Change',
-            Category: 'Geopolitics',
-            'Data use': '2023',
-            Provider: 'ESA; Private Firms',
-            Platform: 'Sentinel-1; Ice charts',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Hyperspectral',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Navigational guides'
-          },
-          {
-            Date: '2024-02-29',
-            Title: 'Disease Spread Mapping',
-            Link: 'http://example.com/disease-spread',
-            Outlet: 'The New York Times',
-            Country: 'United States',
-            Context: 'Public Health',
-            Category: 'Health',
-            'Data use': '2024',
-            Provider: 'CDC; WHO',
-            Platform: 'Health data',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar; Optical',
-            Viz: 'NDVI; RGB',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-          },
-          {
-            Date: '2023-05-05',
-            Title: 'Illegal Mining in Amazon',
-            Link: 'http://example.com/illegal-mining',
-            Outlet: 'The Guardian',
-            Country: 'Brazil',
-            Context: 'Environment',
-            Category: 'Environment',
-            'Data use': '2023',
-            Provider: 'Planet Labs',
-            Platform: 'PlanetScope',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Optical',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'NGO report'
-          },
-          {
-            Date: '2024-04-10',
-            Title: 'Infrastructure Development',
-            Link: 'http://example.com/infrastructure',
-            Outlet: 'Washington Post',
-            Country: 'China',
-            Context: 'Economic development',
-            Category: 'Development',
-            'Data use': '2020; 2024',
-            Provider: 'Maxar; Airbus',
-            Platform: 'WorldView; Pleiades',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Hyperspectral; Radar',
-            Viz: 'RGB; NDVI',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Analyst brief'
-          },
-          {
-            Date: '2023-03-03',
-            Title: 'Refugee Camp Expansion',
-            Link: 'http://example.com/refugee-camp',
-            Outlet: 'Reuters',
-            Country: 'Syria',
-            Context: 'Humanitarian crisis',
-            Category: 'Humanitarian',
-            'Data use': '2023',
-            Provider: 'UNITAR/UNOSAT; Maxar',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Optical',
-            Viz: 'NDVI',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'UN Report'
-          },
-          {
-            Date: '2024-03-22',
-            Title: 'Election Monitoring',
-            Link: 'http://example.com/election-monitoring',
-            Outlet: 'BBC',
-            Country: 'Ukraine',
-            Context: 'Political observation',
-            Category: 'Politics',
-            'Data use': '2024',
-            Provider: 'OSCE; DigitalGlobe',
-            Platform: 'Satellite Imagery; Ground reports',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Hyperspectral',
-            Viz: 'RGB',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-          },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-          },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-            },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-          }
-          
-        ];
-        allData = sampleData.map(row => {
-            const date = row.Date || '';
-            const publicationYear = date ? new Date(date).getFullYear() : null;
-
-            const providers = row.Provider ? row.Provider.split(/[,;]/).map(p => p.trim()).filter(p => p) : [''];
-            const resolutions = row.Resolution ? row.Resolution.split(/[,;]/).map(r => r.trim()).filter(r => r) : [''];
-            const platforms = row.Platform ? row.Platform.split(/[,;]/).map(p => p.trim()).filter(p => p) : [''];
-            const representations = row.Representation ? row.Representation.split(/[,;]/).map(r => r.trim()).filter(r => r) : [''];
-            const vizs = row.Viz ? row.Viz.split(/[,;]/).map(v => v.trim()).filter(v => v) : [''];
-
-            const dataUseYears = extractYears(row['Data use'] || '');
-            if (dataUseYears.length === 0) dataUseYears.push('');
-
-            let combinedDataPoints = [];
-
-            const hasProviderData = providers.some(p => p !== '') || resolutions.some(r => r !== '') || platforms.some(p => p !== '') ||
-                                    representations.some(r => r !== '') || vizs.some(v => v !== '');
-
-            if (!hasProviderData && dataUseYears.length > 0) {
+              if (!hasProviderData && dataUseYears.length > 0) {
                 dataUseYears.forEach(year => {
+                  combinedDataPoints.push({ dataUseYear: year, provider: '', platform: '', resolution: '', resolutionCategory: '', representation: '', viz: '' });
+                });
+              } else if (hasProviderData) {
+                dataUseYears.forEach(year => {
+                  const currentMaxLength = Math.max(providers.length, resolutions.length, platforms.length, representations.length, vizs.length);
+                  for (let i = 0; i < currentMaxLength; i++) {
                     combinedDataPoints.push({
-                        dataUseYear: year,
-                        provider: '',
-                        platform: '',
-                        resolution: '',
-                        resolutionCategory: '',
-                        representation: '',
-                        viz: ''
+                      dataUseYear: year,
+                      provider: providers[i] || providers[0] || '',
+                      platform: platforms[i] || platforms[0] || '',
+                      resolution: resolutions[i] || resolutions[0] || '',
+                      resolutionCategory: getMeterCategory(resolutions[i] || resolutions[0] || ''),
+                      representation: representations[i] || representations[0] || '',
+                      viz: vizs[i] || vizs[0] || ''
                     });
+                  }
                 });
-            } else if (hasProviderData) {
-                dataUseYears.forEach(year => {
-                    const currentMaxLength = Math.max(providers.length, resolutions.length, platforms.length, representations.length, vizs.length);
-                    for (let i = 0; i < currentMaxLength; i++) {
-                        combinedDataPoints.push({
-                            dataUseYear: year,
-                            provider: providers[i] || providers[0] || '',
-                            platform: platforms[i] || platforms[0] || '',
-                            resolution: resolutions[i] || resolutions[0] || '',
-                            resolutionCategory: getMeterCategory(resolutions[i] || resolutions[0] || ''),
-                            representation: representations[i] || representations[0] || '',
-                            viz: vizs[i] || vizs[0] || ''
-                        });
-                    }
-                });
-            } else {
-                combinedDataPoints.push({
-                    dataUseYear: '',
-                    provider: '',
-                    platform: '',
-                    resolution: '',
-                    resolutionCategory: '',
-                    viz: ''
-                });
-            }
+              } else {
+                combinedDataPoints.push({ dataUseYear: '', provider: '', platform: '', resolution: '', resolutionCategory: '', viz: '' });
+              }
 
-            return {
+              return {
                 date: date,
                 publicationYear: publicationYear,
                 title: row.Title || '',
@@ -3028,415 +1189,539 @@ document.getElementById('toYearInput').addEventListener('input', function () {
                 context: row.Context || '',
                 category: row.Category || '',
                 combinedDataPoints: combinedDataPoints,
-            };
+              };
+            });
+            initializeFilters();
+            filterTable();
+            loadingStatus.style.display = 'none';
+            statsDisplay.style.display = 'block';
+          }
         });
-        initializeFilters();
-        filterTable();
-        loadingStatus.style.display = 'none';
-        statsDisplay.style.display = 'block';
+      } catch (error) {
+        console.error('Error loading data from backend, falling back to sample data:', error);
+        loadSampleData();
+      }
+    }
+
+    function loadSampleData() {
+      const loadingStatus = document.getElementById('loadingStatus');
+      const statsDisplay = document.getElementById('statsDisplay');
+      const resolutionsList = ['<1m', '1-10m', '>10m'];
+      const sampleData = [
+        { Date: '2024-03-15', Title: 'Überschwemmungsgebiete Experts waarschuwen: Rusland bouwt lanceerinstallaties voor hypermoderne kernraket', Link: 'http://example.com/urban-expansion', Outlet: 'The New York Times', Country: 'United States', Context: 'Urban development patterns', Category: 'Environment', 'Data use': '2023; 2024', Provider: 'Planet Labs; Maxar', Platform: 'Sentinel-2; Landsat', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical; Hyperspectral', Viz: 'RGB; NRG', },
+        { Date: '2023-11-20', Title: 'Deforestation in Amazon', Link: 'http://example.com/deforestation', Outlet: 'The Guardian', Country: 'Brazil', Context: 'Environmental monitoring', Category: 'Environment', 'Data use': '2022', Provider: 'ESA', Platform: 'Sentinel-1', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical', Viz: 'NDVI', },
+        { Date: '2024-01-05', Title: 'Glacier Retreat in Alps', Link: 'http://example.com/glacier-retreat', Outlet: 'BBC', Country: 'Germany', Context: 'Climate change impact', Category: 'Climate', 'Data use': '2020; 2024', Provider: 'NASA', Platform: 'MODIS', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Hyperspectral', Viz: 'RGB', },
+        { Date: '2023-09-01', Title: 'Crop Yield Analysis', Link: 'http://example.com/crop-yield', Outlet: 'Reuters', Country: 'India', Context: 'Agriculture and food security', Category: 'Agriculture', 'Data use': '2023', Provider: 'USGS', Platform: 'Landsat', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Radar', Viz: 'NRG', },
+        { Date: '2024-02-10', Title: 'Coastal Erosion Study', Link: 'http://example.com/coastal-erosion', Outlet: 'CNN', Country: 'Japan', Context: 'Disaster preparedness', Category: 'Environment', 'Data use': '2024', Provider: 'Airbus', Platform: 'SPOT', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical', Viz: 'NDVI', },
+        { Date: '2024-04-22', Title: 'Urban Expansion in Shanghai', Link: 'http://example.com/shanghai-expansion', Outlet: 'The New York Times', Country: 'China', Context: 'City planning and development', Category: 'Urbanization', 'Data use': '2023', Provider: 'Planet Labs', Platform: 'Dove', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical', Viz: 'RGB', },
+        { Date: '2023-07-18', Title: 'Monitoring Conflict Zones in Syria', Link: 'http://example.com/syria-conflict', Outlet: 'Washington Post', Country: 'Syria', Context: 'Humanitarian crisis', Category: 'Conflict', 'Data use': '2022', Provider: 'Maxar', Platform: 'WorldView-3', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical', Viz: 'Pan-sharpened', },
+        { Date: '2024-01-25', Title: 'Arctic Ice Melt Acceleration', Link: 'http://example.com/arctic-melt', Outlet: 'The Guardian', Country: 'Canada', Context: 'Climate change research', Category: 'Climate', 'Data use': '2023', Provider: 'ESA', Platform: 'CryoSat-2', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Radar', Viz: 'Altimetry data', },
+        { Date: '2023-10-10', Title: 'Drought Impact in East Africa', Link: 'http://example.com/drought-africa', Outlet: 'BBC', Country: 'Sudan', Context: 'Food security and water scarcity', Category: 'Environment', 'Data use': '2023', Provider: 'NASA', Platform: 'GRACE', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Gravimetry', Viz: 'Anomaly maps', },
+        { Date: '2024-03-01', Title: 'Electoral Monitoring in Venezuela', Link: 'http://example.com/venezuela-election', Outlet: 'CNN', Country: 'Brazil', Context: 'Political analysis', Category: 'Politics', 'Data use': '2024', Provider: 'USGS', Platform: 'Landsat 8', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical', Viz: 'False Color', },
+        { Date: '2023-08-05', Title: 'Historical Urban Growth in Rome', Link: 'http://example.com/rome-urban', Outlet: 'Reuters', Country: 'Italy', Context: 'Historical studies', Category: 'Urbanization', 'Data use': '1990; 2020', Provider: 'ESA; USGS', Platform: 'Sentinel-2; Landsat', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical', Viz: 'Time-series animation', },
+        { Date: '2024-05-10', Title: 'Monitoring Illegal Mining in Amazon', Link: 'http://example.com/illegal-mining', Outlet: 'The Guardian', Country: 'Brazil', Context: 'Environmental crime', Category: 'Environment', 'Data use': '2024', Provider: 'Planet Labs', Platform: 'SkySat', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical', Viz: 'High-res imagery', },
+        { Date: '2023-12-01', Title: 'Wildfire Tracking in California', Link: 'http://example.com/california-fire', Outlet: 'CNN', Country: 'United States', Context: 'Disaster response', Category: 'Disaster', 'Data use': '2023', Provider: 'NASA', Platform: 'Terra; Aqua', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Thermal', Viz: 'Heat maps', },
+        { Date: '2024-06-12', Title: 'Infrastructure Development in Dubai', Link: 'http://example.com/dubai-infra', Outlet: 'BBC', Country: 'Middle East', Context: 'Urban planning', Category: 'Urbanization', 'Data use': '2022; 2024', Provider: 'Maxar; Airbus', Platform: 'WorldView-3; Pleiades', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical; SAR', Viz: '3D models', },
+        { Date: '2023-09-20', Title: 'Agricultural Land Use Change in France', Link: 'http://example.com/france-agriculture', Outlet: 'Reuters', Country: 'France', Context: 'Agricultural policy', Category: 'Agriculture', 'Data use': '2021; 2023', Provider: 'ESA', Platform: 'Sentinel-2', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical', Viz: 'Land cover maps', },
+        { Date: '2024-01-01', Title: 'Displacement in Gaza Strip', Link: 'http://example.com/gaza-displacement', Outlet: 'Al Jazeera', Country: 'Gaza Strip', Context: 'Conflict & Humanitarian', Category: 'Conflict', 'Data use': '2023-2024', Provider: 'UNOSAT; Maxar', Platform: 'WorldView-2; Pleiades', Resolution: '<1m', Representation: 'Optical', Viz: 'Damage Assessment', },
+        { Date: '2023-10-26', Title: 'War in Ukraine - Infrastructure Damage', Link: 'http://example.com/ukraine-damage', Outlet: 'CNN', Country: 'Ukraine', Context: 'Conflict', Category: 'Conflict', 'Data use': '2022-2023', Provider: 'Maxar', Platform: 'WorldView-3', Resolution: '<1m', Representation: 'Optical', Viz: 'Before/After Comparison', },
+        { Date: '2024-02-14', Title: 'North Korea Missile Sites', Link: 'http://example.com/nk-missile', Outlet: 'Reuters', Country: 'North Korea', Context: 'National Security', Category: 'Security', 'Data use': '2024', Provider: 'USGS', Platform: 'Landsat 8', Resolution: '>10m', Representation: 'Optical', Viz: 'Satellite Imagery', },
+        { Date: 'PENDING', Title: 'Future Research on Climate Models', Link: 'http://example.com/pending-climate', Outlet: 'PENDING', Country: 'PENDING', Context: 'PENDING', Category: 'Climate', 'Data use': 'PENDING', Provider: 'PENDING', Platform: 'PENDING', Resolution: 'PENDING', Representation: 'PENDING', Viz: 'PENDING', },
+        { Date: '2025-01-01', Title: 'New Satellite Launch Analysis', Link: 'http://example.com/new-launch', Outlet: 'Space News', Country: 'United States', Context: 'Space Industry', Category: 'Technology', 'Data use': '2025', Provider: 'PENDING', Platform: 'PENDING', Resolution: 'PENDING', Representation: 'PENDING', Viz: 'PENDING', },
+        { Date: '2024-07-20', Title: 'Urban Heat Island Effect Study', Link: 'http://example.com/urban-heat', Outlet: 'Science Daily', Country: 'Germany', Context: 'Environmental Science', Category: 'Environment', 'Data use': '2024', Provider: 'ESA', Platform: 'Sentinel-3', Resolution: '>10m', Representation: 'Thermal', Viz: 'Heat Maps', },
+        { Date: '2024-08-01', Title: 'Migration Patterns in Europe', Link: 'http://example.com/migration-europe', Outlet: 'The Guardian', Country: 'Europe', Context: 'Social Studies', Category: 'Social', 'Data use': '2023-2024', Provider: 'PENDING', Platform: 'PENDING', Resolution: 'PENDING', Representation: 'PENDING', Viz: 'PENDING', },
+        { Date: '2024-08-15', Title: 'Arctic Shipping Routes', Link: 'http://example.com/arctic-shipping', Outlet: 'Maritime News', Country: 'Arctic', Context: 'Commerce', Category: 'Commerce', 'Data use': '2024', Provider: 'PENDING', Platform: 'PENDING', Resolution: 'PENDING', Representation: 'PENDING', Viz: 'PENDING', },
+        { Date: '2024-09-01', Title: 'Volcanic Activity Monitoring', Link: 'http://example.com/volcano-monitor', Outlet: 'Geology Today', Country: 'Japan', Context: 'Natural Hazards', Category: 'Disaster', 'Data use': '2024', Provider: 'PENDING', Platform: 'PENDING', Resolution: 'PENDING', Representation: 'PENDING', Viz: 'PENDING', },
+        { Date: '2024-09-10', Title: 'Desertification in Africa', Link: 'http://example.com/desertification-africa', Outlet: 'Environmental Journal', Country: 'Sudan', Context: 'Environmental Degradation', Category: 'Environment', 'Data use': '2023-2024', Provider: 'PENDING', Platform: 'PENDING', Resolution: 'PENDING', Representation: 'PENDING', Viz: 'PENDING', },
+        { Date: '2024-09-20', Title: 'New Dam Construction in Asia', Link: 'http://example.com/dam-asia', Outlet: 'Engineering Weekly', Country: 'China', Context: 'Infrastructure', Category: 'Infrastructure', 'Data use': '2024', Provider: 'PENDING', Platform: 'PENDING', Resolution: 'PENDING', Representation: 'PENDING', Viz: 'PENDING', },
+      ];
+
+      allData = sampleData.map(row => {
+        const date = row.Date || '';
+        const publicationYear = date && date !== 'PENDING' ? new Date(date).getFullYear() : null; // Handle PENDING for publicationYear
+        const providers = row.Provider ? row.Provider.split(/[,;]/).map(p => p.trim()).filter(p => p) : [''];
+        const resolutions = row.Resolution ? row.Resolution.split(/[,;]/).map(r => r.trim()).filter(r => r) : [''];
+        const platforms = row.Platform ? row.Platform.split(/[,;]/).map(p => p.trim()).filter(p => p) : [''];
+        const representations = row.Representation ? row.Representation.split(/[,;]/).map(r => r.trim()).filter(r => r) : [''];
+        const vizs = row.Viz ? row.Viz.split(/[,;]/).map(v => v.trim()).filter(v => v) : [''];
+        const dataUseYears = extractYears(row['Data use'] || '');
+        if (dataUseYears.length === 0 && row['Data use'] !== 'PENDING') dataUseYears.push(''); // Exclude PENDING from dataUseYears if it's the only value
+
+        let combinedDataPoints = [];
+        const hasProviderData = providers.some(p => p !== '' && p !== 'PENDING') || resolutions.some(r => r !== '' && r !== 'PENDING') || platforms.some(p => p !== '' && p !== 'PENDING') || representations.some(r => r !== '' && r !== 'PENDING') || vizs.some(v => v !== '' && v !== 'PENDING');
+
+        if (!hasProviderData && dataUseYears.length > 0) {
+            dataUseYears.forEach(year => {
+                combinedDataPoints.push({ dataUseYear: year, provider: '', platform: '', resolution: '', resolutionCategory: '', representation: '', viz: '' });
+            });
+        } else if (hasProviderData) {
+            dataUseYears.forEach(year => {
+                const currentMaxLength = Math.max(providers.length, resolutions.length, platforms.length, representations.length, vizs.length);
+                for (let i = 0; i < currentMaxLength; i++) {
+                    combinedDataPoints.push({
+                        dataUseYear: (year === 'PENDING' ? '' : year), // Exclude PENDING from dataUseYear if it's explicitly 'PENDING'
+                        provider: (providers[i] || providers[0] || ''),
+                        platform: (platforms[i] || platforms[0] || ''),
+                        resolution: (resolutions[i] || resolutions[0] || ''),
+                        resolutionCategory: getMeterCategory(resolutions[i] || resolutions[0] || ''),
+                        representation: (representations[i] || representations[0] || ''),
+                        viz: (vizs[i] || vizs[0] || '')
+                    });
+                }
+            });
+        } else {
+             // Handle cases where all fields might be PENDING or empty
+            combinedDataPoints.push({
+                dataUseYear: '',
+                provider: '',
+                platform: '',
+                resolution: '',
+                resolutionCategory: '',
+                viz: '',
+                representation: ''
+            });
+        }
+
+        return {
+          date: row.Date || '',
+          publicationYear: publicationYear,
+          title: row.Title || '',
+          link: row.Link || '',
+          outlet: row.Outlet || '',
+          country: row.Country || '',
+          region: countryRegions[row.Country] || '',
+          context: row.Context || '',
+          category: row.Category || '',
+          combinedDataPoints: combinedDataPoints,
+          isPending: Object.values(row).some(value => typeof value === 'string' && value.toUpperCase().includes('PENDING'))
+        };
+      });
+      initializeFilters();
+      filterTable();
+      loadingStatus.style.display = 'none';
+      statsDisplay.style.display = 'block';
     }
 
 
     function initializeFilters() {
-        const uniqueOutlets = [...new Set(allData.map(item => item.outlet).filter(o => o))];
-        populatePills('outlet-filter-pills', uniqueOutlets, 'outlet');
+      const uniqueRegions = new Set();
+      const uniqueFocuses = new Set();
+      const uniqueMeters = new Set();
+      const uniqueYears = new Set();
+      const uniqueVizs = new Set();
+      const uniqueOutlets = new Set();
+      const uniqueProviders = new Set();
+      const uniqueRepresentations = new Set();
 
-        const uniqueProviders = [...new Set(allData.flatMap(item => item.combinedDataPoints.map(cdp => cdp.provider).filter(p => p)))];
-        populatePills('provider-filter-pills', uniqueProviders, 'provider');
+      allData.forEach(item => {
+        // Exclude 'PENDING' from being added to filter options
+        if (item.region && item.region.toUpperCase() !== 'PENDING') uniqueRegions.add(item.region);
+        if (item.country && item.country.toUpperCase() !== 'PENDING') uniqueFocuses.add(item.country);
+        if (item.outlet && item.outlet.toUpperCase() !== 'PENDING') uniqueOutlets.add(item.outlet);
+        if (item.combinedDataPoints) {
+            item.combinedDataPoints.forEach(cdp => {
+                if (cdp.resolutionCategory && cdp.resolutionCategory.toUpperCase() !== 'PENDING') uniqueMeters.add(cdp.resolutionCategory);
+                if (cdp.dataUseYear && cdp.dataUseYear.toUpperCase() !== 'PENDING') uniqueYears.add(cdp.dataUseYear);
+                if (cdp.viz && cdp.viz.toUpperCase() !== 'PENDING') uniqueVizs.add(cdp.viz);
+                if (cdp.provider && cdp.provider.toUpperCase() !== 'PENDING') uniqueProviders.add(cdp.provider);
+                if (cdp.representation && cdp.representation.toUpperCase() !== 'PENDING') uniqueRepresentations.add(cdp.representation);
+            });
+        }
+      });
 
-        const uniqueVizs = [...new Set(allData.flatMap(item => item.combinedDataPoints.map(cdp => cdp.viz).filter(v => v)))];
-        populatePills('viz-filter-pills', uniqueVizs, 'viz');
-
-        const uniqueRepresentations = [...new Set(allData.flatMap(item => item.combinedDataPoints.map(cdp => cdp.representation).filter(r => r)))];
-        populatePills('representation-filter-pills', uniqueRepresentations, 'representation');
-
-        // Removed interaction filter initialization
-        // const uniqueInteractions = [...new Set(allData.flatMap(item => item.combinedDataPoints.map(cdp => cdp.interaction).filter(i => i)))];
-        // populatePills('interaction-filter-pills', uniqueInteractions, 'interaction');
-
-        // Populate Data Use Years
-        const uniqueYears = [...new Set(allData.flatMap(item => item.combinedDataPoints.map(cdp => cdp.dataUseYear).filter(y => y)))].sort().reverse();
-        populatePills('years-filter-pills', uniqueYears, 'years');
-
-        // Populate Focus Countries dynamically with all initially
-        const allUniqueCountries = [...new Set(allData.map(item => item.country).filter(c => c))].sort();
-        populatePills('focus-filter-pills', allUniqueCountries, 'focus');
+      populateFilterPills('region-filter-pills', Array.from(uniqueRegions).sort());
+      populateFilterPills('focus-filter-pills', Array.from(uniqueFocuses).sort());
+      populateFilterPills('meters-filter-pills', Array.from(uniqueMeters).sort((a, b) => {
+          const order = {'<1m': 1, '1-10m': 2, '>10m': 3};
+          return (order[a] || 99) - (order[b] || 99);
+      }));
+      populateFilterPills('years-filter-pills', Array.from(uniqueYears).sort());
+      populateFilterPills('viz-filter-pills', Array.from(uniqueVizs).sort());
+      populateFilterPills('outlet-filter-pills', Array.from(uniqueOutlets).sort());
+      populateFilterPills('provider-filter-pills', Array.from(uniqueProviders).sort());
+      populateFilterPills('representation-filter-pills', Array.from(uniqueRepresentations).sort());
     }
 
-    function populatePills(containerId, values, type) {
-        const container = document.getElementById(containerId);
-        container.innerHTML = ''; // Clear existing pills
+    function populateFilterPills(containerId, items) {
+      const container = document.getElementById(containerId);
+      // Remove all existing pills except the "All" button
+      Array.from(container.children).forEach(child => {
+          if (child.dataset.value !== 'all') {
+              container.removeChild(child);
+          }
+      });
 
-        // Create and append the "All" pill first
-        const allButton = document.createElement('button');
-        allButton.classList.add('pill', 'active');
-        allButton.setAttribute('data-type', type);
-        allButton.setAttribute('data-value', 'all');
-        allButton.textContent = 'All';
-        allButton.addEventListener('click', handlePillClick);
-        container.appendChild(allButton);
-
-        // Append other values
-        values.forEach(value => {
-            if (value && value !== 'all') { // Ensure 'all' isn't added again
-                const button = document.createElement('button');
-                button.classList.add('pill');
-                button.setAttribute('data-type', type);
-                button.setAttribute('data-value', value);
-                button.textContent = value;
-                button.addEventListener('click', handlePillClick);
-                container.appendChild(button);
-            }
-        });
+      items.forEach(item => {
+        const button = document.createElement('button');
+        button.classList.add('pill');
+        button.dataset.type = containerId.replace('-filter-pills', '');
+        button.dataset.value = item;
+        button.textContent = item;
+        button.addEventListener('click', handlePillClick);
+        container.appendChild(button);
+      });
     }
 
     function handlePillClick(event) {
-        const clickedPill = event.target;
-        const type = clickedPill.getAttribute('data-type');
-        const value = clickedPill.getAttribute('data-value');
-        const parentContainer = clickedPill.closest('.filter-pills');
+      const clickedPill = event.target;
+      const type = clickedPill.dataset.type;
+      const value = clickedPill.dataset.value;
+      const parentContainer = clickedPill.closest('.filter-pills');
 
-        if (type === 'region') {
-            selectedRegion = value;
-            document.querySelectorAll('.pill[data-type="region"]').forEach(pill => pill.classList.remove('active'));
-            clickedPill.classList.add('active');
-
-            const focusFilterSection = document.getElementById('focus-filter-section');
-            
-            if (selectedRegion === 'all') {
-                focusFilterSection.style.display = 'none';
-                const allUniqueCountries = [...new Set(allData.map(item => item.country).filter(c => c))].sort();
-                populatePills('focus-filter-pills', allUniqueCountries, 'focus');
-                selectedFocuses = ['all'];
-            } else {
-                focusFilterSection.style.display = 'block';
-                const countriesInSelectedRegion = [...new Set(allData
-                    .filter(item => item.region === selectedRegion)
-                    .map(item => item.country)
-                    .filter(c => c)
-                )].sort();
-                populatePills('focus-filter-pills', countriesInSelectedRegion, 'focus');
-                selectedFocuses = ['all']; // Reset to 'all' for the newly filtered countries
-            }
-        } else if (type === 'focus') {
-            if (value === 'all') {
-                document.querySelectorAll('.pill[data-type="focus"]').forEach(pill => pill.classList.remove('active'));
-                clickedPill.classList.add('active');
-                selectedFocuses = ['all'];
-            } else {
-                const allPill = document.querySelector('.pill[data-type="focus"][data-value="all"]');
-                if (allPill.classList.contains('active')) {
-                    allPill.classList.remove('active');
-                    selectedFocuses = [value];
-                } else {
-                    if (clickedPill.classList.contains('active')) {
-                        selectedFocuses = selectedFocuses.filter(f => f !== value);
-                    } else {
-                        selectedFocuses.push(value);
-                    }
-                }
-                clickedPill.classList.toggle('active');
-                if (selectedFocuses.length === 0) {
-                    allPill.classList.add('active');
-                    selectedFocuses = ['all'];
-                }
-            }
-        } else if (type === 'years') {
-            if (value === 'all') {
-                document.querySelectorAll('.pill[data-type="years"]').forEach(pill => pill.classList.remove('active'));
-                clickedPill.classList.add('active');
-                selectedYears = ['all'];
-            } else {
-                const allPill = document.querySelector('.pill[data-type="years"][data-value="all"]');
-                if (allPill.classList.contains('active')) {
-                    allPill.classList.remove('active');
-                    selectedYears = [value];
-                } else {
-                    if (clickedPill.classList.contains('active')) {
-                        selectedYears = selectedYears.filter(y => y !== value);
-                    } else {
-                        selectedYears.push(value);
-                    }
-                }
-                clickedPill.classList.toggle('active');
-                if (selectedYears.length === 0) {
-                    allPill.classList.add('active');
-                    selectedYears = ['all'];
-                }
-            }
-        } else if (type === 'publicationYear') {
-            document.getElementById('fromYearInput').value = '';
-            document.getElementById('toYearInput').value = '';
-            document.querySelectorAll('.pill[data-type="publicationYear"]').forEach(pill => pill.classList.remove('active'));
-            clickedPill.classList.add('active');
-        } else {
-            if (value === 'all') {
-                parentContainer.querySelectorAll('.pill').forEach(pill => pill.classList.remove('active'));
-                clickedPill.classList.add('active');
-            } else {
-                const allPill = parentContainer.querySelector('.pill[data-value="all"]');
-                if (allPill && allPill.classList.contains('active')) {
-                    allPill.classList.remove('active');
-                }
-                clickedPill.classList.toggle('active');
-
-                if (!parentContainer.querySelector('.pill.active')) {
-                    allPill.classList.add('active');
-                }
-            }
-        }
-        filterTable();
-    }
-
-    function toggleAllFilters(forceClose = false) {
-        const filterGroups = document.querySelectorAll('.filter-group');
-        filterGroups.forEach(group => {
-            if (!filtersActive || forceClose) {
-                group.classList.remove('active');
-            } else {
-                group.classList.remove('active');
-            }
-        });
-        adjustContentViewHeight();
-    }
-
-    function updateView() {
-        const tableViewContainer = document.getElementById('tableViewContainer');
-        const feedViewContainer = document.getElementById('feedViewContainer'); // Changed from titleOnlyViewContainer
-
-        // Hide all view containers first
-        tableViewContainer.classList.add('hidden');
-        feedViewContainer.classList.add('hidden');
-
-        // Show the active view container
-        if (currentView === 'table') {
-            tableViewContainer.classList.remove('hidden');
-        } else if (currentView === 'feed') { // Changed from 'title'
-            feedViewContainer.classList.remove('hidden');
-        }
-        filterTable();
-        adjustContentViewHeight();
-    }
-
-
-    function renderTable() {
-        const tbody = document.querySelector('table tbody');
-        tbody.innerHTML = '';
-
-        const fromYear = parseInt(document.getElementById('fromYearInput').value);
-        const toYear = parseInt(document.getElementById('toYearInput').value);
-
-        const selectedOutlets = Array.from(document.querySelectorAll('.pill[data-type="outlet"].active'))
-            .map(pill => pill.getAttribute('data-value'))
-            .filter(value => value !== 'all');
-        const allOutletsActive = selectedOutlets.length === 0 || selectedOutlets.includes('all');
-
-        const filteredResults = [];
-
-        allData.forEach(item => {
-            const visibleCombinedDataPoints = item.combinedDataPoints.filter(cdp => {
-                return applyAllFiltersToItemAndCombinedDataPoint(item, cdp, fromYear, toYear, allOutletsActive, selectedOutlets);
-            });
-
-            if (visibleCombinedDataPoints.length > 0) {
-                filteredResults.push({ item: item, visibleCombinedDataPoints: visibleCombinedDataPoints });
-            }
-        });
-
-        filteredResults.forEach((result, articleIndex) => {
-            const item = result.item;
-            const visibleCombinedDataPoints = result.visibleCombinedDataPoints;
-            const rowspan = visibleCombinedDataPoints.length;
-
-            visibleCombinedDataPoints.forEach((cdp, cdpIndex) => {
-                const row = document.createElement('tr');
-                row.setAttribute('data-original-index', allData.indexOf(item));
-                row.setAttribute('data-combined-data-point-index', cdpIndex);
-
-                if (cdpIndex === 0) {
-                    row.classList.add('article-start');
-                }
-
-                if (cdpIndex === visibleCombinedDataPoints.length - 1) {
-                    row.classList.add('last-cdp-of-article');
-                }
-
-                if (cdpIndex === 0) {
-                    row.innerHTML = `
-                        <td rowspan="${rowspan}">${item.date}</td>
-                        <td rowspan="${rowspan}">${item.title}</td>
-                        <td rowspan="${rowspan}"><a href="${item.link}" target="_blank">Link</a></td>
-                        <td rowspan="${rowspan}">${item.outlet}</td>
-                        <td rowspan="${rowspan}">${item.country}</td>
-                        <td rowspan="${rowspan}">${item.context}</td>
-                        <td rowspan="${rowspan}">${item.category}</td>
-                        <td class="data-detail-cell">${cdp.dataUseYear}</td>
-                        <td class="data-detail-cell">${cdp.provider}</td>
-                        <td class="data-detail-cell">${cdp.platform}</td>
-                        <td class="data-detail-cell">${cdp.representation}</td>
-                        <td class="data-detail-cell">${cdp.resolution}</td>
-                        <td class="data-detail-cell">${cdp.viz}</td>
-                    `;
-                } else {
-                    row.innerHTML = `
-                        <td class="data-detail-cell">${cdp.dataUseYear}</td>
-                        <td class="data-detail-cell">${cdp.provider}</td>
-                        <td class="data-detail-cell">${cdp.platform}</td>
-                        <td class="data-detail-cell">${cdp.representation}</td>
-                        <td class="data-detail-cell">${cdp.resolution}</td>
-                        <td class="data-detail-cell">${cdp.viz}</td>
-                    `;
-                }
-                tbody.appendChild(row);
-            });
-        });
-        updateFilterCount(filteredResults.length);
-    }
-
-    function renderFeedOnlyView() { // Renamed from renderTitleOnlyView
-        let feedContainer = document.getElementById('feedViewContainer'); // Renamed ID
-        if (!feedContainer) { // Create if it doesn't exist
-            feedContainer = document.createElement('div');
-            feedContainer.id = 'feedViewContainer';
-            feedContainer.classList.add('feed-view-container'); // Renamed class
-            document.body.appendChild(feedContainer);
-        }
-        feedContainer.innerHTML = '';
-
-        const fromYear = parseInt(document.getElementById('fromYearInput').value);
-        const toYear = parseInt(document.getElementById('toYearInput').value);
-
-        const selectedOutlets = Array.from(document.querySelectorAll('.pill[data-type="outlet"].active'))
-            .map(pill => pill.getAttribute('data-value'))
-            .filter(value => value !== 'all');
-        const allOutletsActive = selectedOutlets.length === 0 || selectedOutlets.includes('all');
-
-        const filteredArticles = []; // Renamed from filteredTitles
-        const uniqueArticleTitles = new Set(); // To ensure unique articles
-
-        allData.forEach(item => {
-            const hasMatchingCdp = item.combinedDataPoints.some(cdp => {
-                return applyAllFiltersToItemAndCombinedDataPoint(item, cdp, fromYear, toYear, allOutletsActive, selectedOutlets);
-            });
-
-            if (hasMatchingCdp && item.title && !uniqueArticleTitles.has(item.title)) {
-                filteredArticles.push(item); // Push the entire item
-                uniqueArticleTitles.add(item.title);
-            }
-        });
-
-        if (filteredArticles.length === 0) {
-            feedContainer.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">No articles found matching the selected filters.</p>';
-        } else {
-            filteredArticles.forEach(item => {
-                const articleWrapper = document.createElement('div');
-                articleWrapper.classList.add('article-item'); // Apply main styling
-
-                const articleTitle = document.createElement('div');
-                articleTitle.classList.add('article-title'); // Add a class for the title text if needed
-                articleTitle.innerHTML = `<a href="${item.link}" target="_blank">${item.title}</a>`;
-
-                const articleDetails = document.createElement('div');
-                articleDetails.classList.add('article-details');
-
-                let detailsParts = [];
-                if (item.outlet) detailsParts.push(item.outlet);
-                if (item.date) detailsParts.push(item.date);
-
-                articleDetails.textContent = detailsParts.join(', ');
-
-                articleWrapper.appendChild(articleTitle);
-                articleWrapper.appendChild(articleDetails);
-
-                feedContainer.appendChild(articleWrapper);
-            });
-        }
-        updateFilterCount(filteredArticles.length);
-    }
-
-
-    function applyAllFiltersToItemAndCombinedDataPoint(item, cdp, fromYear, toYear, allOutletsActive, selectedOutlets) {
-        if (!filtersActive) return true;
-
-        const outletMatch = allOutletsActive || selectedOutlets.includes(item.outlet);
-        const regionMatch = (selectedRegion === 'all' || item.region === selectedRegion);
-        const countryMatch = (selectedFocuses.includes('all') || selectedFocuses.includes(item.country));
-
-        let publicationYearMatch = true;
-        const publicationYearPillAllActive = document.querySelector('.pill[data-type="publicationYear"][data-value="all"]').classList.contains('active');
-
-        if (!publicationYearPillAllActive) {
-            if (item.publicationYear !== null) {
-                if (fromYear && item.publicationYear < fromYear) {
-                    publicationYearMatch = false;
-                }
-                if (toYear && item.publicationYear > toYear) {
-                    publicationYearMatch = false;
-                }
-            } else {
-                publicationYearMatch = false; // If no publication year, it doesn't match a specific range
-            }
-        }
-
-
-        const providerPills = document.querySelectorAll('.pill[data-type="provider"].active');
-        const allProvidersActive = Array.from(providerPills).some(pill => pill.getAttribute('data-value') === 'all');
-        const selectedProviders = Array.from(providerPills)
-            .map(pill => pill.getAttribute('data-value'))
-            .filter(value => value !== 'all');
-
-        const resolutionCategoryPills = document.querySelectorAll('.pill[data-type="resolutionCategory"].active');
-        const allResolutionCategoriesActive = Array.from(resolutionCategoryPills).some(pill => pill.getAttribute('data-value') === 'all');
-        const selectedResolutionCategories = Array.from(resolutionCategoryPills)
-            .map(pill => pill.getAttribute('data-value'))
-            .filter(value => value !== 'all');
-
-        const yearsPills = document.querySelectorAll('.pill[data-type="years"].active');
-        const allYearsActive = Array.from(yearsPills).some(pill => pill.getAttribute('data-value') === 'all');
-        const currentSelectedYears = Array.from(yearsPills)
-                                    .map(pill => pill.getAttribute('data-value'))
-                                    .filter(value => value !== 'all');
-        selectedYears = currentSelectedYears.length === 0 && !allYearsActive ? ['all'] : currentSelectedYears;
-
-
-        const vizPills = document.querySelectorAll('.pill[data-type="viz"].active');
-        const allVizActive = Array.from(vizPills).some(pill => pill.getAttribute('data-value') === 'all');
-        const selectedViz = Array.from(vizPills)
-            .map(pill => pill.getAttribute('data-value'))
-            .filter(value => value !== 'all');
-
-        const representationPills = document.querySelectorAll('.pill[data-type="representation"].active');
-        const allRepresentationsActive = Array.from(representationPills).some(pill => pill.getAttribute('data-value') === 'all');
-        const selectedRepresentations = Array.from(representationPills)
-            .map(pill => pill.getAttribute('data-value'))
-            .filter(value => value !== 'all');
-
-        // Removed interaction filter logic
-        // const interactionPills = document.querySelectorAll('.pill[data-type="interaction"].active');
-        // const allInteractionsActive = Array.from(interactionPills).some(pill => pill.getAttribute('data-value') === 'all');
-        // const selectedInteractions = Array.from(interactionPills)
-        //     .map(pill => pill.getAttribute('data-value'))
-        //     .filter(value => value !== 'all');
-
-        const dataUseYearMatch = allYearsActive || selectedYears.includes(cdp.dataUseYear);
-        const providerMatch = allProvidersActive || selectedProviders.includes(cdp.provider);
-        const resolutionCategoryMatch = allResolutionCategoriesActive || selectedResolutionCategories.includes(cdp.resolutionCategory);
-        const vizMatch = allVizActive || selectedViz.includes(cdp.viz);
-        const representationMatch = allRepresentationsActive || selectedRepresentations.includes(cdp.representation);
-        // const interactionMatch = allInteractionsActive || selectedInteractions.includes(cdp.interaction); // Removed
-
-        return outletMatch && regionMatch && countryMatch && publicationYearMatch &&
-               dataUseYearMatch && providerMatch && resolutionCategoryMatch &&
-               vizMatch && representationMatch;
+      // Clear previous active pills for this filter type, unless it's the "All" button
+      if (value === 'all') {
+          parentContainer.querySelectorAll('.pill').forEach(pill => {
+              pill.classList.remove('active');
+          });
+          clickedPill.classList.add('active');
+          // Clear year inputs if "All" is selected for publicationYear
+          if (type === 'publicationYear') {
+              document.getElementById('fromYearInput').value = '';
+              document.getElementById('toYearInput').value = '';
+          }
+      } else {
+          // If a specific pill is clicked, deactivate the "All" pill if it's active
+          const allPill = parentContainer.querySelector('.pill[data-value="all"]');
+          if (allPill) {
+              allPill.classList.remove('active');
+          }
+          clickedPill.classList.toggle('active');
+      }
+      filterTable();
     }
 
 
     function filterTable() {
-        if (currentView === 'table') {
-            renderTable();
-        } else {
-            renderFeedOnlyView(); // Call the new feed rendering function
+        let filteredData = allData;
+
+        const activeFilters = {};
+        document.querySelectorAll('.filter-pills').forEach(container => {
+            const type = container.id.replace('-filter-pills', '');
+            if (type === 'publicationYear') return; // Handled separately
+            const selectedPills = Array.from(container.querySelectorAll('.pill.active'))
+                                   .map(pill => pill.dataset.value)
+                                   .filter(value => value !== 'all');
+            if (selectedPills.length > 0) {
+                activeFilters[type] = selectedPills;
+            }
+        });
+
+        const fromYear = document.getElementById('fromYearInput').value;
+        const toYear = document.getElementById('toYearInput').value;
+
+        // Apply filters
+        if (filtersActive) {
+            filteredData = allData.filter(item => {
+                // Items with isPending should always pass the filter to be displayed, but not count towards filter logic
+                if (item.isPending) {
+                    return true;
+                }
+
+                let pass = true;
+
+                // Publication Year Filter
+                if ((fromYear && item.publicationYear < parseInt(fromYear)) ||
+                    (toYear && item.publicationYear > parseInt(toYear))) {
+                    pass = false;
+                }
+
+                // General filters (Region, Focus, Outlet, Meters, Years, Viz, Provider, Representation)
+                for (const type in activeFilters) {
+                    if (activeFilters[type].length > 0) {
+                        if (type === 'region') {
+                            if (!activeFilters[type].includes(item.region)) {
+                                pass = false;
+                            }
+                        } else if (type === 'focus') {
+                            if (!activeFilters[type].includes(item.country)) {
+                                pass = false;
+                            }
+                        } else if (type === 'outlet') {
+                            if (!activeFilters[type].includes(item.outlet)) {
+                                pass = false;
+                            }
+                        } else {
+                            // For combinedDataPoints related filters (resolutionCategory, years, viz, provider, representation)
+                            const matchingCdp = item.combinedDataPoints.some(cdp => {
+                                let cdpPass = true;
+                                if (type === 'meters') {
+                                    if (!activeFilters[type].includes(cdp.resolutionCategory)) cdpPass = false;
+                                } else if (type === 'years') {
+                                    // Check if any year in the item's dataUseYears matches any selected year filter
+                                    if (!activeFilters[type].some(filterYear => cdp.dataUseYear.includes(filterYear))) cdpPass = false;
+                                } else if (type === 'viz') {
+                                    if (!activeFilters[type].includes(cdp.viz)) cdpPass = false;
+                                } else if (type === 'provider') {
+                                    if (!activeFilters[type].includes(cdp.provider)) cdpPass = false;
+                                } else if (type === 'representation') {
+                                    if (!activeFilters[type].includes(cdp.representation)) cdpPass = false;
+                                }
+                                return cdpPass;
+                            });
+                            if (!matchingCdp) pass = false;
+                        }
+                    }
+                }
+                return pass;
+            });
         }
+
+        // Separate pending items for display, without counting them in filteredCount for active filters.
+        const pendingItems = allData.filter(item => item.isPending);
+        // Filter out pending items from the `filteredData` if `filtersActive` is true
+        // This ensures pending items don't affect the count of actually filtered items
+        const nonPendingFilteredData = filteredData.filter(item => !item.isPending);
+
+        // Concatenate the filtered non-pending items with all pending items for display
+        const finalDisplayedData = [...nonPendingFilteredData, ...pendingItems];
+
+        updateFilterCount(nonPendingFilteredData.length); // Count only non-pending items for filtering stats
+        if (currentView === 'table') {
+            renderTable(finalDisplayedData);
+        } else {
+            renderFeed(finalDisplayedData);
+        }
+    }
+
+
+    function renderTable(dataToRender) {
+      const tbody = document.querySelector('#tableViewContainer tbody');
+      tbody.innerHTML = ''; // Clear existing rows
+
+      dataToRender.forEach(item => {
+        // Handle cases where item.combinedDataPoints might be empty or undefined
+        if (!item.combinedDataPoints || item.combinedDataPoints.length === 0) {
+            // Render a single row for articles with no data points
+            const row = tbody.insertRow();
+            row.classList.add('article-start', 'last-cdp-of-article');
+            insertArticleCells(row, item, true); // True means no data points, so render all cells in main row
+            insertDataDetailCells(row, { dataUseYear: '', provider: '', platform: '', sensor: '', resolution: '', viz: '', representation: '' }, true); // Pass true to indicate last CDP
+        } else {
+            item.combinedDataPoints.forEach((cdp, index) => {
+                const row = tbody.insertRow();
+                const isFirstCdp = index === 0;
+                const isLastCdp = index === item.combinedDataPoints.length - 1;
+
+                if (isFirstCdp) {
+                    row.classList.add('article-start');
+                }
+                if (isLastCdp) {
+                    row.classList.add('last-cdp-of-article');
+                }
+
+                insertArticleCells(row, item, isFirstCdp);
+                insertDataDetailCells(row, cdp, isLastCdp);
+            });
+        }
+      });
+    }
+
+    function insertArticleCells(row, item, isFirstCdp) {
+        const cells = ['date', 'title', 'link', 'outlet', 'country', 'context', 'category'];
+        cells.forEach(key => {
+            const cell = row.insertCell();
+            if (isFirstCdp) {
+                if (key === 'link') {
+                    if (item.link) {
+                        const linkElement = document.createElement('a');
+                        linkElement.href = item.link;
+                        linkElement.textContent = 'Link';
+                        linkElement.target = '_blank';
+                        cell.appendChild(linkElement);
+                    } else if (item.link === 'PENDING') {
+                        cell.textContent = 'PENDING';
+                        cell.classList.add('pending-status');
+                    }
+                } else {
+                    let content = item[key];
+                    if (content === 'PENDING') {
+                        cell.classList.add('pending-status');
+                    }
+                    cell.textContent = content;
+                }
+            }
+        });
+    }
+
+    function insertDataDetailCells(row, cdp, isLastCdp) {
+        const dataDetailCells = ['dataUseYear', 'provider', 'platform', 'resolution', 'representation', 'viz'];
+        dataDetailCells.forEach(key => {
+            const cell = row.insertCell();
+            cell.classList.add('data-detail-cell');
+            let content = cdp[key] || '';
+            // For resolution, use the original resolution field if available, otherwise resolutionCategory
+            if (key === 'resolution') {
+                content = cdp.resolution || cdp.resolutionCategory || '';
+            }
+
+            if (content.toUpperCase().includes('PENDING')) {
+                cell.classList.add('pending-status');
+            }
+            cell.textContent = content;
+        });
+    }
+
+
+    function renderFeed(dataToRender) {
+      const feedViewContainer = document.getElementById('feedViewContainer');
+      feedViewContainer.innerHTML = ''; // Clear existing feed items
+
+      dataToRender.forEach(item => {
+        const articleItem = document.createElement('div');
+        articleItem.classList.add('article-item');
+
+        const titleText = item.title;
+        const linkHref = item.link;
+
+        // Check if title or link is PENDING
+        const isTitlePending = titleText.toUpperCase().includes('PENDING');
+        const isLinkPending = linkHref.toUpperCase().includes('PENDING');
+
+        // Create the title element
+        const titleElement = document.createElement('span');
+        titleElement.textContent = titleText;
+        if (isTitlePending) {
+            titleElement.classList.add('pending-status');
+        }
+
+        // Create the link wrapper (<a> tag)
+        const linkWrapper = document.createElement('a');
+        linkWrapper.href = isLinkPending ? '#' : linkHref; // If PENDING, link to # or prevent navigation
+        linkWrapper.target = '_blank'; // Open in new tab
+        if (isLinkPending) {
+            linkWrapper.classList.add('pending-status'); // Apply color to the link
+            linkWrapper.style.pointerEvents = 'none'; // Make link unclickable
+        }
+        linkWrapper.appendChild(titleElement); // Nest title span inside the link
+
+        articleItem.appendChild(linkWrapper);
+
+        // Details
+        const details = document.createElement('div');
+        details.classList.add('article-details');
+        let detailsContent = '';
+
+        if (item.date && item.date.toUpperCase() !== 'PENDING') {
+            detailsContent += item.date;
+        } else if (item.date.toUpperCase() === 'PENDING') {
+            detailsContent += '<span class="pending-status">PENDING</span>';
+        }
+
+        if (item.outlet && item.outlet.toUpperCase() !== 'PENDING') {
+            if (detailsContent) detailsContent += ' • ';
+            detailsContent += item.outlet;
+        } else if (item.outlet.toUpperCase() === 'PENDING') {
+            if (detailsContent) detailsContent += ' • ';
+            detailsContent += '<span class="pending-status">PENDING</span>';
+        }
+
+        if (item.country && item.country.toUpperCase() !== 'PENDING') {
+            if (detailsContent) detailsContent += ' • ';
+            detailsContent += item.country;
+        } else if (item.country.toUpperCase() === 'PENDING') {
+            if (detailsContent) detailsContent += ' • ';
+            detailsContent += '<span class="pending-status">PENDING</span>';
+        }
+
+        if (item.category && item.category.toUpperCase() !== 'PENDING') {
+            if (detailsContent) detailsContent += ' • ';
+            detailsContent += item.category;
+        } else if (item.category.toUpperCase() === 'PENDING') {
+            if (detailsContent) detailsContent += ' • ';
+            detailsContent += '<span class="pending-status">PENDING</span>';
+        }
+
+        details.innerHTML = detailsContent;
+        articleItem.appendChild(details);
+
+        feedViewContainer.appendChild(articleItem);
+      });
+    }
+
+
+    function updateView() {
+      const tableViewContainer = document.getElementById('tableViewContainer');
+      const feedViewContainer = document.getElementById('feedViewContainer');
+
+      if (currentView === 'table') {
+        tableViewContainer.classList.remove('hidden');
+        feedViewContainer.classList.add('hidden');
+        renderTable(allData.filter(item => filterItem(item)));
+      } else { // currentView === 'feed'
+        tableViewContainer.classList.add('hidden');
+        feedViewContainer.classList.remove('hidden');
+        renderFeed(allData.filter(item => filterItem(item)));
+      }
+      adjustContentViewHeight();
+    }
+
+    function filterItem(item) {
+        // PENDING items are always displayed, so they should always pass this filter,
+        // but their content should not be used for actual filter logic.
+        if (item.isPending) {
+            return true;
+        }
+
+        if (!filtersActive) {
+            return true; // If filters are not active, all non-pending items are displayed
+        }
+
+        const fromYear = document.getElementById('fromYearInput').value;
+        const toYear = document.getElementById('toYearInput').value;
+
+        // Publication Year Filter
+        if (item.publicationYear && ((fromYear && item.publicationYear < parseInt(fromYear)) ||
+            (toYear && item.publicationYear > parseInt(toYear)))) {
+            return false;
+        }
+
+        const activeFilters = {};
+        document.querySelectorAll('.filter-pills').forEach(container => {
+            const type = container.id.replace('-filter-pills', '');
+            if (type === 'publicationYear') return;
+            const selectedPills = Array.from(container.querySelectorAll('.pill.active'))
+                                   .map(pill => pill.dataset.value)
+                                   .filter(value => value !== 'all');
+            if (selectedPills.length > 0) {
+                activeFilters[type] = selectedPills;
+            }
+        });
+
+        for (const type in activeFilters) {
+            if (activeFilters[type].length > 0) {
+                if (type === 'region') {
+                    if (!activeFilters[type].includes(item.region)) return false;
+                } else if (type === 'focus') {
+                    if (!activeFilters[type].includes(item.country)) return false;
+                } else if (type === 'outlet') {
+                    if (!activeFilters[type].includes(item.outlet)) return false;
+                } else {
+                    const matchingCdp = item.combinedDataPoints.some(cdp => {
+                        let cdpMatches = true;
+                        if (type === 'meters' && !activeFilters[type].includes(cdp.resolutionCategory)) cdpMatches = false;
+                        if (type === 'years' && !activeFilters[type].some(filterYear => cdp.dataUseYear.includes(filterYear))) cdpMatches = false;
+                        if (type === 'viz' && !activeFilters[type].includes(cdp.viz)) cdpMatches = false;
+                        if (type === 'provider' && !activeFilters[type].includes(cdp.provider)) cdpMatches = false;
+                        if (type === 'representation' && !activeFilters[type].includes(cdp.representation)) cdpMatches = false;
+                        return cdpMatches;
+                    });
+                    if (!matchingCdp) return false;
+                }
+            }
+        }
+        return true;
+    }
+
+
+    function toggleAllFilters(open) {
+      document.querySelectorAll('.filter-group').forEach(group => {
+        if (open) {
+          group.classList.add('active');
+        } else {
+          group.classList.remove('active');
+        }
+      });
+      adjustContentViewHeight();
     }
 
     function updateFilterCount(filteredCount) {
@@ -3444,7 +1729,7 @@ document.getElementById('toYearInput').addEventListener('input', function () {
       const statsDisplay = document.getElementById('statsDisplay');
       if (statsDisplay) {
         // Determine if any filters are actively narrowing down the literature data
-        const hasActiveFilters = document.querySelectorAll('.filter-pills .pill.active:not([data-value="all"])').length > 0 ||
+        const hasActiveFilters = document.querySelectorAll('.filter-pills .pill.active:not([data-value=\"all\"])').length > 0 ||
                                  document.getElementById('fromYearInput').value !== '' ||
                                  document.getElementById('toYearInput').value !== '';
 
@@ -3454,10 +1739,10 @@ document.getElementById('toYearInput').addEventListener('input', function () {
         if (currentView === 'table' || currentView === 'feed') { // Apply to both table and feed views
             if (hasActiveFilters && filtersActive) {
                 // Now using the CSS class for spacing instead of inline style
-                statsDisplay.innerHTML = `Articles:<span class="${numberSpanClass}">${filteredCount}</span><sup style="font-size: 0.5em; vertical-align: super; color: lightgrey;">/<span class="${numberSpanClass}">${totalCount}</span></sup>`;
+                statsDisplay.innerHTML = `Articles:<span class=\"${numberSpanClass}\">${filteredCount}</span><sup style=\"font-size: 0.5em; vertical-align: super; color: lightgrey;\">/<span class=\"${numberSpanClass}\">${totalCount}</span></sup>`;
             } else {
                 // Now using the CSS class for spacing instead of inline style
-                statsDisplay.innerHTML = `Articles:<span class="${numberSpanClass}">${totalCount}</span>`;
+                statsDisplay.innerHTML = `Articles:<span class=\"${numberSpanClass}\">${totalCount}</span>`;
             }
         }
       }
