@@ -564,11 +564,6 @@
       'opsz' 24
     }
 
-    /* New style for PENDING status */
-    .pending-status {
-        color: blue;
-    }
-
     /* --- Responsive Design --- */
 
     /* New media query for screens smaller than or equal to 1600px */
@@ -793,6 +788,11 @@
         position: relative;
         top: -0.2em;
       }
+    }
+    td.pending {
+      background-color: #fff9c4;
+      color: #000;
+      font-style: italic;
     }
   </style>
 </head>
@@ -1030,6 +1030,14 @@
         }
       }
     }
+
+    function highlightPendingCells() {
+      document.querySelectorAll("td").forEach(cell => {
+        if (cell.textContent.trim().toUpperCase().includes("PENDING")) {
+          cell.classList.add("pending");
+        }
+      });
+    }
     // --- END GLOBAL FUNCTIONS ---
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -1067,7 +1075,7 @@ document.getElementById('toYearInput').addEventListener('input', function () {
       document.querySelectorAll('.filter-group-header').forEach(header => {
         header.addEventListener('click', function() {
           const group = this.closest('.filter-group');
-          if (filtersActive) { // Only toggle if filters are active
+          if (filtersActive) {
             group.classList.toggle('active');
             adjustContentViewHeight();
           }
@@ -1079,31 +1087,30 @@ document.getElementById('toYearInput').addEventListener('input', function () {
         filtersActive = this.checked;
         if (filtersActive) {
             document.body.classList.add('filters-active');
-            toggleAllFilters(true); // Expand all when toggled on
         } else {
             document.body.classList.remove('filters-active');
-            toggleAllFilters(false); // Collapse all when toggled off
         }
+        toggleAllFilters(true);
         filterTable();
       });
 
       // Feed Toggle Switch (renamed from feedToggle/titleToggle)
       const feedToggle = document.getElementById('feedToggle');
       feedToggle.addEventListener('change', function() {
-        currentView = this.checked ? 'feed' : 'table'; // 'feed' instead of 'title'
-        updateView();
+          currentView = this.checked ? 'feed' : 'table'; // 'feed' instead of 'title'
+          updateView();
       });
+
 
       const currentPath = window.location.pathname.split('/').pop();
       document.querySelectorAll('.nav a').forEach(link => {
-        if (link.getAttribute('href') === currentPath && link.getAttribute('href') !== 'index.html') {
-          document.querySelector('.nav a[href="index.html"]').classList.remove('active');
-          link.classList.add('active');
-        } else if (currentPath === '' && link.getAttribute('href') === 'index.html') {
-          // This ensures index.html is active when directly loading the root or index.html
-        }
+          if (link.getAttribute('href') === currentPath && link.getAttribute('href') !== 'index.html') {
+              document.querySelector('.nav a[href="index.html"]').classList.remove('active');
+              link.classList.add('active');
+          } else if (currentPath === '' && link.getAttribute('href') === 'index.html') {
+              // This ensures index.html is active when directly loading the root or index.html
+          }
       });
-
       adjustContentViewHeight();
       window.addEventListener('resize', adjustContentViewHeight);
 
@@ -1122,6 +1129,9 @@ document.getElementById('toYearInput').addEventListener('input', function () {
       document.addEventListener('scroll', hideOverlay);
       document.addEventListener('click', hideOverlay);
       document.addEventListener('keydown', hideOverlay);
+
+      filterTable();
+      highlightPendingCells();
     });
 
     async function loadDataFromBackend() {
@@ -1208,79 +1218,61 @@ document.getElementById('toYearInput').addEventListener('input', function () {
       const loadingStatus = document.getElementById('loadingStatus');
       const statsDisplay = document.getElementById('statsDisplay');
       const resolutionsList = ['<1m', '1-10m', '>10m'];
+      // const interactionsList = ['On-Scroll', 'Slider', 'Zoom']; // Removed
       const sampleData = [
-        { Date: '2024-03-15', Title: 'Überschwemmungsgebiete Experts waarschuwen: Rusland bouwt lanceerinstallaties voor hypermoderne kernraket', Link: 'http://example.com/urban-expansion', Outlet: 'The New York Times', Country: 'United States', Context: 'Urban development patterns', Category: 'Environment', 'Data use': '2023; 2024', Provider: 'Planet Labs; Maxar', Platform: 'Sentinel-2; Landsat', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical; Hyperspectral', Viz: 'RGB; NRG', },
-        { Date: '2023-11-20', Title: 'Deforestation in Amazon', Link: 'http://example.com/deforestation', Outlet: 'The Guardian', Country: 'Brazil', Context: 'Environmental monitoring', Category: 'Environment', 'Data use': '2022', Provider: 'ESA', Platform: 'Sentinel-1', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical', Viz: 'NDVI', },
-        { Date: '2024-01-05', Title: 'Glacier Retreat in Alps', Link: 'http://example.com/glacier-retreat', Outlet: 'BBC', Country: 'Germany', Context: 'Climate change impact', Category: 'Climate', 'Data use': '2020; 2024', Provider: 'NASA', Platform: 'MODIS', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Hyperspectral', Viz: 'RGB', },
-        { Date: '2023-09-01', Title: 'Crop Yield Analysis', Link: 'http://example.com/crop-yield', Outlet: 'Reuters', Country: 'India', Context: 'Agriculture and food security', Category: 'Agriculture', 'Data use': '2023', Provider: 'USGS', Platform: 'Landsat', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Radar', Viz: 'NRG', },
-        { Date: '2024-02-10', Title: 'Coastal Erosion Study', Link: 'http://example.com/coastal-erosion', Outlet: 'CNN', Country: 'Japan', Context: 'Disaster preparedness', Category: 'Environment', 'Data use': '2024', Provider: 'Airbus', Platform: 'SPOT', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical', Viz: 'NDVI', },
-        { Date: '2024-04-22', Title: 'Urban Expansion in Shanghai', Link: 'http://example.com/shanghai-expansion', Outlet: 'The New York Times', Country: 'China', Context: 'City planning and development', Category: 'Urbanization', 'Data use': '2023', Provider: 'Planet Labs', Platform: 'Dove', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical', Viz: 'RGB', },
-        { Date: '2023-07-18', Title: 'Monitoring Conflict Zones in Syria', Link: 'http://example.com/syria-conflict', Outlet: 'Washington Post', Country: 'Syria', Context: 'Humanitarian crisis', Category: 'Conflict', 'Data use': '2022', Provider: 'Maxar', Platform: 'WorldView-3', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical', Viz: 'Pan-sharpened', },
-        { Date: '2024-01-25', Title: 'Arctic Ice Melt Acceleration', Link: 'http://example.com/arctic-melt', Outlet: 'The Guardian', Country: 'Canada', Context: 'Climate change research', Category: 'Climate', 'Data use': '2023', Provider: 'ESA', Platform: 'CryoSat-2', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Radar', Viz: 'Altimetry data', },
-        { Date: '2023-10-10', Title: 'Drought Impact in East Africa', Link: 'http://example.com/drought-africa', Outlet: 'BBC', Country: 'Sudan', Context: 'Food security and water scarcity', Category: 'Environment', 'Data use': '2023', Provider: 'NASA', Platform: 'GRACE', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Gravimetry', Viz: 'Anomaly maps', },
-        { Date: '2024-03-01', Title: 'Electoral Monitoring in Venezuela', Link: 'http://example.com/venezuela-election', Outlet: 'CNN', Country: 'Brazil', Context: 'Political analysis', Category: 'Politics', 'Data use': '2024', Provider: 'USGS', Platform: 'Landsat 8', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical', Viz: 'False Color', },
-        { Date: '2023-08-05', Title: 'Historical Urban Growth in Rome', Link: 'http://example.com/rome-urban', Outlet: 'Reuters', Country: 'Italy', Context: 'Historical studies', Category: 'Urbanization', 'Data use': '1990; 2020', Provider: 'ESA; USGS', Platform: 'Sentinel-2; Landsat', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical', Viz: 'Time-series animation', },
-        { Date: '2024-05-10', Title: 'Monitoring Illegal Mining in Amazon', Link: 'http://example.com/illegal-mining', Outlet: 'The Guardian', Country: 'Brazil', Context: 'Environmental crime', Category: 'Environment', 'Data use': '2024', Provider: 'Planet Labs', Platform: 'SkySat', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical', Viz: 'High-res imagery', },
-        { Date: '2023-12-01', Title: 'Wildfire Tracking in California', Link: 'http://example.com/california-fire', Outlet: 'CNN', Country: 'United States', Context: 'Disaster response', Category: 'Disaster', 'Data use': '2023', Provider: 'NASA', Platform: 'Terra; Aqua', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Thermal', Viz: 'Heat maps', },
-        { Date: '2024-06-12', Title: 'Infrastructure Development in Dubai', Link: 'http://example.com/dubai-infra', Outlet: 'BBC', Country: 'Middle East', Context: 'Urban planning', Category: 'Urbanization', 'Data use': '2022; 2024', Provider: 'Maxar; Airbus', Platform: 'WorldView-3; Pleiades', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical; SAR', Viz: '3D models', },
-        { Date: '2023-09-20', Title: 'Agricultural Land Use Change in France', Link: 'http://example.com/france-agriculture', Outlet: 'Reuters', Country: 'France', Context: 'Agricultural policy', Category: 'Agriculture', 'Data use': '2021; 2023', Provider: 'ESA', Platform: 'Sentinel-2', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical', Viz: 'Land cover maps', },
-        { Date: '2024-01-01', Title: 'Displacement in Gaza Strip', Link: 'http://example.com/gaza-displacement', Outlet: 'Al Jazeera', Country: 'Gaza Strip', Context: 'Conflict & Humanitarian', Category: 'Conflict', 'Data use': '2023-2024', Provider: 'UNOSAT; Maxar', Platform: 'WorldView-2; Pleiades', Resolution: '<1m', Representation: 'Optical', Viz: 'Damage Assessment', },
-        { Date: '2023-10-26', Title: 'War in Ukraine - Infrastructure Damage', Link: 'http://example.com/ukraine-damage', Outlet: 'CNN', Country: 'Ukraine', Context: 'Conflict', Category: 'Conflict', 'Data use': '2022-2023', Provider: 'Maxar', Platform: 'WorldView-3', Resolution: '<1m', Representation: 'Optical', Viz: 'Before/After Comparison', },
-        { Date: '2024-02-14', Title: 'North Korea Missile Sites', Link: 'http://example.com/nk-missile', Outlet: 'Reuters', Country: 'North Korea', Context: 'National Security', Category: 'Security', 'Data use': '2024', Provider: 'USGS', Platform: 'Landsat 8', Resolution: '>10m', Representation: 'Optical', Viz: 'Satellite Imagery', },
-        { Date: 'PENDING', Title: 'Future Research on Climate Models', Link: 'http://example.com/pending-climate', Outlet: 'PENDING', Country: 'PENDING', Context: 'PENDING', Category: 'Climate', 'Data use': 'PENDING', Provider: 'PENDING', Platform: 'PENDING', Resolution: 'PENDING', Representation: 'PENDING', Viz: 'PENDING', },
-        { Date: '2025-01-01', Title: 'New Satellite Launch Analysis', Link: 'http://example.com/new-launch', Outlet: 'Space News', Country: 'United States', Context: 'Space Industry', Category: 'Technology', 'Data use': '2025', Provider: 'PENDING', Platform: 'PENDING', Resolution: 'PENDING', Representation: 'PENDING', Viz: 'PENDING', },
-        { Date: '2024-07-20', Title: 'Urban Heat Island Effect Study', Link: 'http://example.com/urban-heat', Outlet: 'Science Daily', Country: 'Germany', Context: 'Environmental Science', Category: 'Environment', 'Data use': '2024', Provider: 'ESA', Platform: 'Sentinel-3', Resolution: '>10m', Representation: 'Thermal', Viz: 'Heat Maps', },
-        { Date: '2024-08-01', Title: 'Migration Patterns in Europe', Link: 'http://example.com/migration-europe', Outlet: 'The Guardian', Country: 'Europe', Context: 'Social Studies', Category: 'Social', 'Data use': '2023-2024', Provider: 'PENDING', Platform: 'PENDING', Resolution: 'PENDING', Representation: 'PENDING', Viz: 'PENDING', },
-        { Date: '2024-08-15', Title: 'Arctic Shipping Routes', Link: 'http://example.com/arctic-shipping', Outlet: 'Maritime News', Country: 'Arctic', Context: 'Commerce', Category: 'Commerce', 'Data use': '2024', Provider: 'PENDING', Platform: 'PENDING', Resolution: 'PENDING', Representation: 'PENDING', Viz: 'PENDING', },
-        { Date: '2024-09-01', Title: 'Volcanic Activity Monitoring', Link: 'http://example.com/volcano-monitor', Outlet: 'Geology Today', Country: 'Japan', Context: 'Natural Hazards', Category: 'Disaster', 'Data use': '2024', Provider: 'PENDING', Platform: 'PENDING', Resolution: 'PENDING', Representation: 'PENDING', Viz: 'PENDING', },
-        { Date: '2024-09-10', Title: 'Desertification in Africa', Link: 'http://example.com/desertification-africa', Outlet: 'Environmental Journal', Country: 'Sudan', Context: 'Environmental Degradation', Category: 'Environment', 'Data use': '2023-2024', Provider: 'PENDING', Platform: 'PENDING', Resolution: 'PENDING', Representation: 'PENDING', Viz: 'PENDING', },
-        { Date: '2024-09-20', Title: 'New Dam Construction in Asia', Link: 'http://example.com/dam-asia', Outlet: 'Engineering Weekly', Country: 'China', Context: 'Infrastructure', Category: 'Infrastructure', 'Data use': '2024', Provider: 'PENDING', Platform: 'PENDING', Resolution: 'PENDING', Representation: 'PENDING', Viz: 'PENDING', },
+        { Date: '2024-03-15', Title: 'Überschwemmungsgebiete Experts waarschuwen: Rusland bouwt lanceerinstallaties voor hypermoderne kernraket', Link: 'http://example.com/urban-expansion', Outlet: 'The New York Times', Country: 'United States', Context: 'Urban development patterns', Category: 'Environment', 'Data use': '2023; 2024', Provider: 'Planet Labs; Maxar', Platform: 'Sentinel-2; Landsat', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical; Hyperspectral', Viz: 'RGB', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'Tutorial available' },
+        { Date: '2023-11-20', Title: 'Deforestation in Amazon', Link: 'http://example.com/deforestation', Outlet: 'The Guardian', Country: 'Brazil', Context: 'Environmental monitoring', Category: 'Environment', 'Data use': '2022', Provider: 'ESA', Platform: 'Sentinel-1', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical', Viz: 'NDVI', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'N/A' },
+        { Date: '2024-01-05', Title: 'Glacier Retreat in Alps', Link: 'http://example.com/glacier-retreat', Outlet: 'BBC', Country: 'Germany', Context: 'Climate change impact', Category: 'Climate', 'Data use': '2020; 2024', Provider: 'NASA', Platform: 'MODIS', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Hyperspectral', Viz: 'RGB', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'Data publicly available' },
+        { Date: '2023-09-01', Title: 'Crop Yield Analysis', Link: 'http://example.com/crop-yield', Outlet: 'Reuters', Country: 'India', Context: 'Agriculture and food security', Category: 'Agriculture', 'Data use': '2023', Provider: 'USGS', Platform: 'Landsat', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Radar', Viz: 'NRG', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'Contact for data' },
+        { Date: '2024-02-10', Title: 'Coastal Erosion Study', Link: 'http://example.com/coastal-erosion', Outlet: 'CNN', Country: 'Japan', Context: 'Disaster preparedness', Category: 'Environment', 'Data use': '2024', Provider: 'Airbus', Platform: 'SPOT', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical', Viz: 'NDVI', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'Report access limited' },
+        { Date: '2023-07-25', Title: 'Urban Population Density', Link: 'http://example.com/urban-density', Outlet: 'The New York Times', Country: 'France', Context: 'Urban planning', Category: 'Society', 'Data use': '2021', Provider: 'Planet Labs', Platform: 'SkySat', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical', Viz: 'Grayscale', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'Available on request' },
+        { Date: '2024-04-01', Title: 'Wildfire Extent Mapping', Link: 'http://example.com/wildfire-mapping', Outlet: 'Washington Post', Country: 'Australia', Context: 'Emergency response', Category: 'Disaster', 'Data use': '2024', Provider: 'Maxar', Platform: 'WorldView-3', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Thermal', Viz: 'Heatmap', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'Open source tools' },
+        { Date: '2023-10-10', Title: 'Arctic Ice Melt Monitoring', Link: 'http://example.com/arctic-ice', Outlet: 'The Guardian', Country: 'Canada', Context: 'Climate change research', Category: 'Climate', 'Data use': '2023', Provider: 'ESA', Platform: 'CryoSat-2', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Radar', Viz: 'Elevation Map', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'University access' },
+        { Date: '2024-01-20', Title: 'Volcanic Activity Analysis', Link: 'http://example.com/volcano', Outlet: 'BBC', Country: 'Italy', Context: 'Geological hazards', Category: 'Environment', 'Data use': '2023; 2024', Provider: 'NASA', Platform: 'Terra', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Infrared', Viz: 'False Color', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'GIS software required' },
+        { Date: '2023-08-12', Title: 'Drought Impact Assessment', Link: 'http://example.com/drought', Outlet: 'Reuters', Country: 'Egypt', Context: 'Water resource management', Category: 'Agriculture', 'Data use': '2022', Provider: 'USGS', Platform: 'Aqua', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Microwave', Viz: 'Spectral Index', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'Custom script' },
+        { Date: '2024-03-01', Title: 'Desertification Trends', Link: 'http://example.com/desertification', Outlet: 'Sky News', Country: 'Sudan', Context: 'Land degradation', Category: 'Environment', 'Data use': '2023; 2024', Provider: 'Airbus', Platform: 'Sentinel-2', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical', Viz: 'RGB', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'Provided by agency' },
+        { Date: '2023-06-18', Title: 'Urban Heat Island Effect', Link: 'http://example.com/heat-island', Outlet: 'CNN', Country: 'China', Context: 'Climate change in cities', Category: 'Climate', 'Data use': '2021; 2023', Provider: 'Planet Labs', Platform: 'Landsat', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Thermal', Viz: 'Heatmap', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'Academic paper' },
+        { Date: '2024-02-28', Title: 'Conflict Zone Damage Assessment', Link: 'http://example.com/conflict-damage', Outlet: 'The New York Times', Country: 'Syria', Context: 'Humanitarian crisis', Category: 'Conflict', 'Data use': '2024', Provider: 'Maxar', Platform: 'WorldView-2', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical', Viz: 'False Color', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'Classified' },
+        { Date: '2023-09-15', Title: 'Infrastructure Development', Link: 'http://example.com/infrastructure', Outlet: 'Washington Post', Country: 'Iraq', Context: 'Post-conflict reconstruction', Category: 'Development', 'Data use': '2022', Provider: 'ESA', Platform: 'Sentinel-1', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Radar', Viz: 'RGB', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'Public report' },
+        { Date: '2024-01-10', Title: 'Human Migration Patterns', Link: 'http://example.com/migration', Outlet: 'The Guardian', Country: 'Afghanistan', Context: 'Displacement and refugees', Category: 'Society', 'Data use': '2023', Provider: 'NASA', Platform: 'Suomi NPP', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Night Lights', Viz: 'Density Map', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'Research team contact' },
+        { Date: '2023-07-01', Title: 'Nuclear Site Monitoring', Link: 'http://example.com/nuclear', Outlet: 'BBC', Country: 'North Korea', Context: 'Non-proliferation efforts', Category: 'Security', 'Data use': '2023', Provider: 'USGS', Platform: 'Landsat', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical', Viz: 'RGB', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'Intelligence access' }
       ];
 
       allData = sampleData.map(row => {
         const date = row.Date || '';
-        const publicationYear = date && date !== 'PENDING' ? new Date(date).getFullYear() : null; // Handle PENDING for publicationYear
+        const publicationYear = date ? new Date(date).getFullYear() : null;
         const providers = row.Provider ? row.Provider.split(/[,;]/).map(p => p.trim()).filter(p => p) : [''];
         const resolutions = row.Resolution ? row.Resolution.split(/[,;]/).map(r => r.trim()).filter(r => r) : [''];
         const platforms = row.Platform ? row.Platform.split(/[,;]/).map(p => p.trim()).filter(p => p) : [''];
         const representations = row.Representation ? row.Representation.split(/[,;]/).map(r => r.trim()).filter(r => r) : [''];
         const vizs = row.Viz ? row.Viz.split(/[,;]/).map(v => v.trim()).filter(v => v) : [''];
         const dataUseYears = extractYears(row['Data use'] || '');
-        if (dataUseYears.length === 0 && row['Data use'] !== 'PENDING') dataUseYears.push(''); // Exclude PENDING from dataUseYears if it's the only value
+        if (dataUseYears.length === 0) dataUseYears.push('');
 
         let combinedDataPoints = [];
-        const hasProviderData = providers.some(p => p !== '' && p !== 'PENDING') || resolutions.some(r => r !== '' && r !== 'PENDING') || platforms.some(p => p !== '' && p !== 'PENDING') || representations.some(r => r !== '' && r !== 'PENDING') || vizs.some(v => v !== '' && v !== 'PENDING');
+        const hasProviderData = providers.some(p => p !== '') || resolutions.some(r => r !== '') || platforms.some(p => p !== '') || representations.some(r => r !== '') || vizs.some(v => v !== '');
 
         if (!hasProviderData && dataUseYears.length > 0) {
-            dataUseYears.forEach(year => {
-                combinedDataPoints.push({ dataUseYear: year, provider: '', platform: '', resolution: '', resolutionCategory: '', representation: '', viz: '' });
-            });
+          dataUseYears.forEach(year => {
+            combinedDataPoints.push({ dataUseYear: year, provider: '', platform: '', resolution: '', resolutionCategory: '', representation: '', viz: '' });
+          });
         } else if (hasProviderData) {
-            dataUseYears.forEach(year => {
-                const currentMaxLength = Math.max(providers.length, resolutions.length, platforms.length, representations.length, vizs.length);
-                for (let i = 0; i < currentMaxLength; i++) {
-                    combinedDataPoints.push({
-                        dataUseYear: (year === 'PENDING' ? '' : year), // Exclude PENDING from dataUseYear if it's explicitly 'PENDING'
-                        provider: (providers[i] || providers[0] || ''),
-                        platform: (platforms[i] || platforms[0] || ''),
-                        resolution: (resolutions[i] || resolutions[0] || ''),
-                        resolutionCategory: getMeterCategory(resolutions[i] || resolutions[0] || ''),
-                        representation: (representations[i] || representations[0] || ''),
-                        viz: (vizs[i] || vizs[0] || '')
-                    });
-                }
-            });
+          dataUseYears.forEach(year => {
+            const currentMaxLength = Math.max(providers.length, resolutions.length, platforms.length, representations.length, vizs.length);
+            for (let i = 0; i < currentMaxLength; i++) {
+              combinedDataPoints.push({
+                dataUseYear: year,
+                provider: providers[i] || providers[0] || '',
+                platform: platforms[i] || platforms[0] || '',
+                resolution: resolutions[i] || resolutions[0] || '',
+                resolutionCategory: getMeterCategory(resolutions[i] || resolutions[0] || ''),
+                representation: representations[i] || representations[0] || '',
+                viz: vizs[i] || vizs[0] || ''
+              });
+            }
+          });
         } else {
-             // Handle cases where all fields might be PENDING or empty
-            combinedDataPoints.push({
-                dataUseYear: '',
-                provider: '',
-                platform: '',
-                resolution: '',
-                resolutionCategory: '',
-                viz: '',
-                representation: ''
-            });
+          combinedDataPoints.push({ dataUseYear: '', provider: '', platform: '', resolution: '', resolutionCategory: '', viz: '' });
         }
 
         return {
@@ -1294,443 +1286,337 @@ document.getElementById('toYearInput').addEventListener('input', function () {
           context: row.Context || '',
           category: row.Category || '',
           combinedDataPoints: combinedDataPoints,
-          isPending: Object.values(row).some(value => typeof value === 'string' && value.toUpperCase().includes('PENDING'))
         };
       });
+
       initializeFilters();
       filterTable();
       loadingStatus.style.display = 'none';
       statsDisplay.style.display = 'block';
     }
 
-
     function initializeFilters() {
-      const uniqueRegions = new Set();
-      const uniqueFocuses = new Set();
-      const uniqueMeters = new Set();
-      const uniqueYears = new Set();
-      const uniqueVizs = new Set();
-      const uniqueOutlets = new Set();
-      const uniqueProviders = new Set();
-      const uniqueRepresentations = new Set();
+      const allOutlets = new Set();
+      const allProviders = new Set();
+      const allVizs = new Set();
+      const allYears = new Set();
+      const allRepresentations = new Set();
+      const allFocuses = new Set();
 
       allData.forEach(item => {
-        // Exclude 'PENDING' from being added to filter options
-        if (item.region && item.region.toUpperCase() !== 'PENDING') uniqueRegions.add(item.region);
-        if (item.country && item.country.toUpperCase() !== 'PENDING') uniqueFocuses.add(item.country);
-        if (item.outlet && item.outlet.toUpperCase() !== 'PENDING') uniqueOutlets.add(item.outlet);
-        if (item.combinedDataPoints) {
-            item.combinedDataPoints.forEach(cdp => {
-                if (cdp.resolutionCategory && cdp.resolutionCategory.toUpperCase() !== 'PENDING') uniqueMeters.add(cdp.resolutionCategory);
-                if (cdp.dataUseYear && cdp.dataUseYear.toUpperCase() !== 'PENDING') uniqueYears.add(cdp.dataUseYear);
-                if (cdp.viz && cdp.viz.toUpperCase() !== 'PENDING') uniqueVizs.add(cdp.viz);
-                if (cdp.provider && cdp.provider.toUpperCase() !== 'PENDING') uniqueProviders.add(cdp.provider);
-                if (cdp.representation && cdp.representation.toUpperCase() !== 'PENDING') uniqueRepresentations.add(cdp.representation);
-            });
-        }
+        if (item.outlet) allOutlets.add(item.outlet);
+        if (item.country) allFocuses.add(item.country); // Collect all unique countries for "Country/Area" filter
+
+        item.combinedDataPoints.forEach(dp => {
+            if (dp.provider) allProviders.add(dp.provider);
+            if (dp.viz) allVizs.add(dp.viz);
+            if (dp.dataUseYear) allYears.add(dp.dataUseYear);
+            if (dp.representation) allRepresentations.add(dp.representation);
+        });
       });
 
-      populateFilterPills('region-filter-pills', Array.from(uniqueRegions).sort());
-      populateFilterPills('focus-filter-pills', Array.from(uniqueFocuses).sort());
-      populateFilterPills('meters-filter-pills', Array.from(uniqueMeters).sort((a, b) => {
-          const order = {'<1m': 1, '1-10m': 2, '>10m': 3};
-          return (order[a] || 99) - (order[b] || 99);
-      }));
-      populateFilterPills('years-filter-pills', Array.from(uniqueYears).sort());
-      populateFilterPills('viz-filter-pills', Array.from(uniqueVizs).sort());
-      populateFilterPills('outlet-filter-pills', Array.from(uniqueOutlets).sort());
-      populateFilterPills('provider-filter-pills', Array.from(uniqueProviders).sort());
-      populateFilterPills('representation-filter-pills', Array.from(uniqueRepresentations).sort());
+      populateFilterPills('outlet-filter-pills', Array.from(allOutlets).sort(), 'outlet');
+      populateFilterPills('provider-filter-pills', Array.from(allProviders).sort(), 'provider');
+      populateFilterPills('viz-filter-pills', Array.from(allVizs).sort(), 'viz');
+      populateFilterPills('years-filter-pills', Array.from(allYears).sort(), 'years');
+      populateFilterPills('representation-filter-pills', Array.from(allRepresentations).sort(), 'representation');
+      populateFilterPills('focus-filter-pills', Array.from(allFocuses).sort(), 'focus'); // Populate "Country/Area" filter
     }
 
-    function populateFilterPills(containerId, items) {
+    function populateFilterPills(containerId, items, dataType) {
       const container = document.getElementById(containerId);
-      // Remove all existing pills except the "All" button
-      Array.from(container.children).forEach(child => {
-          if (child.dataset.value !== 'all') {
-              container.removeChild(child);
-          }
-      });
-
+      container.innerHTML = `<button class="pill active" data-type="${dataType}" data-value="all">All</button>`;
       items.forEach(item => {
         const button = document.createElement('button');
         button.classList.add('pill');
-        button.dataset.type = containerId.replace('-filter-pills', '');
+        button.dataset.type = dataType;
         button.dataset.value = item;
         button.textContent = item;
-        button.addEventListener('click', handlePillClick);
         container.appendChild(button);
+      });
+      container.querySelectorAll('.pill').forEach(pill => {
+        pill.addEventListener('click', handlePillClick);
       });
     }
 
     function handlePillClick(event) {
       const clickedPill = event.target;
-      const type = clickedPill.dataset.type;
+      const dataType = clickedPill.dataset.type;
       const value = clickedPill.dataset.value;
       const parentContainer = clickedPill.closest('.filter-pills');
 
-      // Clear previous active pills for this filter type, unless it's the "All" button
       if (value === 'all') {
-          parentContainer.querySelectorAll('.pill').forEach(pill => {
-              pill.classList.remove('active');
-          });
-          clickedPill.classList.add('active');
-          // Clear year inputs if "All" is selected for publicationYear
-          if (type === 'publicationYear') {
-              document.getElementById('fromYearInput').value = '';
-              document.getElementById('toYearInput').value = '';
-          }
+        parentContainer.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+        clickedPill.classList.add('active');
+        if (dataType === 'region') {
+          selectedRegion = 'all';
+          document.getElementById('focus-filter-section').style.display = 'none';
+          document.querySelector('#focus-filter-pills .pill[data-value="all"]').click(); // Reset focus filter
+        } else if (dataType === 'focus') {
+          selectedFocuses = ['all'];
+        } else if (dataType === 'years') {
+          selectedYears = ['all'];
+        }
       } else {
-          // If a specific pill is clicked, deactivate the "All" pill if it's active
-          const allPill = parentContainer.querySelector('.pill[data-value="all"]');
-          if (allPill) {
-              allPill.classList.remove('active');
-          }
-          clickedPill.classList.toggle('active');
+        parentContainer.querySelector('.pill[data-value="all"]').classList.remove('active');
+        clickedPill.classList.toggle('active');
+
+        // Special handling for region and focus (country) filters
+        if (dataType === 'region') {
+            selectedRegion = value;
+            const focusFilterSection = document.getElementById('focus-filter-section');
+            if (value !== 'all') {
+                focusFilterSection.style.display = 'block';
+                // Filter and re-populate country/area pills based on selected region
+                const filteredFocuses = Array.from(new Set(allData
+                    .filter(item => item.region === selectedRegion)
+                    .map(item => item.country)))
+                    .sort();
+                populateFilterPills('focus-filter-pills', filteredFocuses, 'focus');
+            } else {
+                focusFilterSection.style.display = 'none';
+                // Reset to all countries when region is 'all'
+                const allFocuses = Array.from(new Set(allData.map(item => item.country))).sort();
+                populateFilterPills('focus-filter-pills', allFocuses, 'focus');
+            }
+            selectedFocuses = ['all']; // Reset focus selection on region change
+        } else if (dataType === 'focus') {
+            selectedFocuses = Array.from(parentContainer.querySelectorAll('.pill.active'))
+                                .map(p => p.dataset.value)
+                                .filter(val => val !== 'all');
+            if (selectedFocuses.length === 0) {
+                selectedFocuses = ['all'];
+                parentContainer.querySelector('.pill[data-value="all"]').classList.add('active');
+            }
+        } else if (dataType === 'years') {
+            selectedYears = Array.from(parentContainer.querySelectorAll('.pill.active'))
+                            .map(p => p.dataset.value)
+                            .filter(val => val !== 'all');
+            if (selectedYears.length === 0) {
+                selectedYears = ['all'];
+                parentContainer.querySelector('.pill[data-value="all"]').classList.add('active');
+            }
+        }
       }
       filterTable();
     }
 
-
-    function filterTable() {
-        let filteredData = allData;
-
-        const activeFilters = {};
-        document.querySelectorAll('.filter-pills').forEach(container => {
-            const type = container.id.replace('-filter-pills', '');
-            if (type === 'publicationYear') return; // Handled separately
-            const selectedPills = Array.from(container.querySelectorAll('.pill.active'))
-                                   .map(pill => pill.dataset.value)
-                                   .filter(value => value !== 'all');
-            if (selectedPills.length > 0) {
-                activeFilters[type] = selectedPills;
-            }
-        });
-
-        const fromYear = document.getElementById('fromYearInput').value;
-        const toYear = document.getElementById('toYearInput').value;
-
-        // Apply filters
-        if (filtersActive) {
-            filteredData = allData.filter(item => {
-                // Items with isPending should always pass the filter to be displayed, but not count towards filter logic
-                if (item.isPending) {
-                    return true;
-                }
-
-                let pass = true;
-
-                // Publication Year Filter
-                if (item.publicationYear === null || (fromYear && item.publicationYear < parseInt(fromYear)) ||
-                    (toYear && item.publicationYear > parseInt(toYear))) {
-                    pass = false;
-                }
-
-                // General filters (Region, Focus, Outlet, Meters, Years, Viz, Provider, Representation)
-                for (const type in activeFilters) {
-                    if (activeFilters[type].length > 0) {
-                        if (type === 'region') {
-                            if (!activeFilters[type].includes(item.region)) {
-                                pass = false;
-                            }
-                        } else if (type === 'focus') {
-                            if (!activeFilters[type].includes(item.country)) {
-                                pass = false;
-                            }
-                        } else if (type === 'outlet') {
-                            if (!activeFilters[type].includes(item.outlet)) {
-                                pass = false;
-                            }
-                        } else {
-                            // For combinedDataPoints related filters (resolutionCategory, years, viz, provider, representation)
-                            const matchingCdp = item.combinedDataPoints.some(cdp => {
-                                let cdpPass = true;
-                                if (type === 'meters') {
-                                    if (!activeFilters[type].includes(cdp.resolutionCategory)) cdpPass = false;
-                                } else if (type === 'years') {
-                                    // Check if any year in the item's dataUseYears matches any selected year filter
-                                    if (!activeFilters[type].some(filterYear => cdp.dataUseYear.includes(filterYear))) cdpPass = false;
-                                } else if (type === 'viz') {
-                                    if (!activeFilters[type].includes(cdp.viz)) cdpPass = false;
-                                } else if (type === 'provider') {
-                                    if (!activeFilters[type].includes(cdp.provider)) cdpPass = false;
-                                } else if (type === 'representation') {
-                                    if (!activeFilters[type].includes(cdp.representation)) cdpPass = false;
-                                }
-                                return cdpPass;
-                            });
-                            if (!matchingCdp) pass = false;
-                        }
-                    }
-                }
-                return pass;
-            });
-        }
-
-        // Separate pending items for display, without counting them in filteredCount for active filters.
-        const pendingItems = allData.filter(item => item.isPending);
-        // Filter out pending items from the `filteredData` if `filtersActive` is true
-        // This ensures pending items don't affect the count of actually filtered items
-        const nonPendingFilteredData = filteredData.filter(item => !item.isPending);
-
-        // Concatenate the filtered non-pending items with all pending items for display
-        // Ensure pending items appear at the very end of the table/feed
-        const finalDisplayedData = [...nonPendingFilteredData, ...pendingItems];
-
-        updateFilterCount(nonPendingFilteredData.length); // Count only non-pending items for filtering stats
-        if (currentView === 'table') {
-            renderTable(finalDisplayedData);
-        } else {
-            renderFeed(finalDisplayedData);
-        }
-    }
-
-
-    function renderTable(dataToRender) {
-      const tbody = document.querySelector('#tableViewContainer tbody');
-      tbody.innerHTML = ''; // Clear existing rows
-
-      dataToRender.forEach(item => {
-        const numDataPoints = item.combinedDataPoints.length > 0 ? item.combinedDataPoints.length : 1; // At least 1 row for articles with no data points
-
-        if (!item.combinedDataPoints || item.combinedDataPoints.length === 0) {
-            // Case: Article has no data points
-            const row = tbody.insertRow();
-            row.classList.add('article-start', 'last-cdp-of-article');
-            insertArticleCells(row, item, numDataPoints); // Pass numDataPoints for rowspan
-            insertDataDetailCells(row, { dataUseYear: '', provider: '', platform: '', sensor: '', resolution: '', viz: '', representation: '' });
-        } else {
-            item.combinedDataPoints.forEach((cdp, index) => {
-                const row = tbody.insertRow();
-                const isFirstCdp = index === 0;
-                const isLastCdp = index === item.combinedDataPoints.length - 1;
-
-                if (isFirstCdp) {
-                    row.classList.add('article-start');
-                    insertArticleCells(row, item, numDataPoints); // Pass numDataPoints for rowspan
-                }
-                if (isLastCdp) {
-                    row.classList.add('last-cdp-of-article');
-                }
-
-                insertDataDetailCells(row, cdp);
-            });
-        }
-      });
-    }
-
-    function insertArticleCells(row, item, rowspanCount) {
-        const cells = ['date', 'title', 'link', 'outlet', 'country', 'context', 'category'];
-        cells.forEach(key => {
-            const cell = row.insertCell();
-            cell.rowSpan = rowspanCount; // Apply rowspan here
-            
-            if (key === 'link') {
-                if (item.link && item.link.toUpperCase() !== 'PENDING') {
-                    const linkElement = document.createElement('a');
-                    linkElement.href = item.link;
-                    linkElement.textContent = 'Link';
-                    linkElement.target = '_blank';
-                    cell.appendChild(linkElement);
-                } else {
-                    cell.textContent = item.link;
-                    if (item.link === 'PENDING') {
-                        cell.classList.add('pending-status');
-                    }
-                }
+    function toggleAllFilters(forceClose) {
+        document.querySelectorAll('.filter-group').forEach(group => {
+            if (forceClose) {
+                group.classList.remove('active');
             } else {
-                let content = item[key];
-                if (content.toUpperCase().includes('PENDING')) {
-                    cell.classList.add('pending-status');
-                }
-                cell.textContent = content;
+                group.classList.toggle('active');
             }
         });
+        adjustContentViewHeight();
     }
-
-    function insertDataDetailCells(row, cdp) {
-        const dataDetailCells = ['dataUseYear', 'provider', 'platform', 'sensor', 'resolution', 'representation', 'viz']; // Added 'sensor' based on headers
-        dataDetailCells.forEach(key => {
-            const cell = row.insertCell();
-            cell.classList.add('data-detail-cell');
-            let content = cdp[key] || '';
-            // For resolution, use the original resolution field if available, otherwise resolutionCategory
-            if (key === 'resolution') {
-                content = cdp.resolution || cdp.resolutionCategory || '';
-            }
-
-            if (content.toUpperCase().includes('PENDING')) {
-                cell.classList.add('pending-status');
-            }
-            cell.textContent = content;
-        });
-    }
-
-
-    function renderFeed(dataToRender) {
-      const feedViewContainer = document.getElementById('feedViewContainer');
-      feedViewContainer.innerHTML = ''; // Clear existing feed items
-
-      dataToRender.forEach(item => {
-        const articleItem = document.createElement('div');
-        articleItem.classList.add('article-item');
-
-        const titleText = item.title;
-        const linkHref = item.link;
-
-        // Check if title or link is PENDING
-        const isTitlePending = titleText.toUpperCase().includes('PENDING');
-        const isLinkPending = linkHref.toUpperCase().includes('PENDING');
-
-        // Create the title element
-        const titleElement = document.createElement('span');
-        titleElement.textContent = titleText;
-        if (isTitlePending) {
-            titleElement.classList.add('pending-status');
-        }
-
-        // Create the link wrapper (<a> tag)
-        const linkWrapper = document.createElement('a');
-        linkWrapper.href = isLinkPending ? '#' : linkHref; // If PENDING, link to # or prevent navigation
-        linkWrapper.target = '_blank'; // Open in new tab
-        if (isLinkPending) {
-            linkWrapper.classList.add('pending-status'); // Apply color to the link
-            linkWrapper.style.pointerEvents = 'none'; // Make link unclickable
-        }
-        linkWrapper.appendChild(titleElement); // Nest title span inside the link
-
-        articleItem.appendChild(linkWrapper);
-
-        // Details
-        const details = document.createElement('div');
-        details.classList.add('article-details');
-        let detailsContent = '';
-
-        if (item.date && item.date.toUpperCase() !== 'PENDING') {
-            detailsContent += item.date;
-        } else if (item.date.toUpperCase() === 'PENDING') {
-            detailsContent += '<span class="pending-status">PENDING</span>';
-        }
-
-        if (item.outlet && item.outlet.toUpperCase() !== 'PENDING') {
-            if (detailsContent) detailsContent += ' • ';
-            detailsContent += item.outlet;
-        } else if (item.outlet.toUpperCase() === 'PENDING') {
-            if (detailsContent) detailsContent += ' • ';
-            detailsContent += '<span class="pending-status">PENDING</span>';
-        }
-
-        if (item.country && item.country.toUpperCase() !== 'PENDING') {
-            if (detailsContent) detailsContent += ' • ';
-            detailsContent += item.country;
-        } else if (item.country.toUpperCase() === 'PENDING') {
-            if (detailsContent) detailsContent += ' • ';
-            detailsContent += '<span class="pending-status">PENDING</span>';
-        }
-
-        if (item.category && item.category.toUpperCase() !== 'PENDING') {
-            if (detailsContent) detailsContent += ' • ';
-            detailsContent += item.category;
-        } else if (item.category.toUpperCase() === 'PENDING') {
-            if (detailsContent) detailsContent += ' • ';
-            detailsContent += '<span class="pending-status">PENDING</span>';
-        }
-
-        details.innerHTML = detailsContent;
-        articleItem.appendChild(details);
-
-        feedViewContainer.appendChild(articleItem);
-      });
-    }
-
 
     function updateView() {
-      const tableViewContainer = document.getElementById('tableViewContainer');
-      const feedViewContainer = document.getElementById('feedViewContainer');
-
-      // Re-filter and re-render the data based on current filters and view
-      const dataToRender = allData.filter(item => filterItem(item));
+      const tableView = document.getElementById('tableViewContainer');
+      const feedView = document.getElementById('feedViewContainer');
 
       if (currentView === 'table') {
-        tableViewContainer.classList.remove('hidden');
-        feedViewContainer.classList.add('hidden');
-        renderTable(dataToRender);
-      } else { // currentView === 'feed'
-        tableViewContainer.classList.add('hidden');
-        feedViewContainer.classList.remove('hidden');
-        renderFeed(dataToRender);
+        tableView.classList.remove('hidden');
+        feedView.classList.add('hidden');
+      } else {
+        tableView.classList.add('hidden');
+        feedView.classList.remove('hidden');
       }
-      adjustContentViewHeight();
+      filterTable(); // Re-render content for the active view
     }
 
-    function filterItem(item) {
-        // PENDING items are always displayed, so they should always pass this filter,
-        // but their content should not be used for actual filter logic.
-        if (item.isPending) {
-            return true;
-        }
+    function filterTable() {
+      const tbody = document.querySelector('#tableViewContainer tbody');
+      const feedViewContainer = document.getElementById('feedViewContainer');
+      tbody.innerHTML = '';
+      feedViewContainer.innerHTML = '';
 
+      const activeOutletPills = Array.from(document.querySelectorAll('#outlet-filter-pills .pill.active'))
+                                  .map(p => p.dataset.value)
+                                  .filter(value => value !== 'all');
+      const activeResolutionPills = Array.from(document.querySelectorAll('#meters-filter-pills .pill.active'))
+                                    .map(p => p.dataset.value)
+                                    .filter(value => value !== 'all');
+      const activeVizPills = Array.from(document.querySelectorAll('#viz-filter-pills .pill.active'))
+                               .map(p => p.dataset.value)
+                               .filter(value => value !== 'all');
+      const activeYearsPills = Array.from(document.querySelectorAll('#years-filter-pills .pill.active'))
+                               .map(p => p.dataset.value)
+                               .filter(value => value !== 'all');
+      const activeRepresentationPills = Array.from(document.querySelectorAll('#representation-filter-pills .pill.active'))
+                                        .map(p => p.dataset.value)
+                                        .filter(value => value !== 'all');
+      const activeProviderPills = Array.from(document.querySelectorAll('#provider-filter-pills .pill.active'))
+                                   .map(p => p.dataset.value)
+                                   .filter(value => value !== 'all');
+
+      const fromYear = parseInt(document.getElementById('fromYearInput').value);
+      const toYear = parseInt(document.getElementById('toYearInput').value);
+
+      let filteredData = allData.filter(item => {
+        // Apply filter toggle switch logic
         if (!filtersActive) {
-            return true; // If filters are not active, all non-pending items are displayed
+            return true; // If filters are inactive, show all items
         }
 
-        const fromYear = document.getElementById('fromYearInput').value;
-        const toYear = document.getElementById('toYearInput').value;
-
-        // Publication Year Filter
-        if (item.publicationYear === null || (fromYear && item.publicationYear < parseInt(fromYear)) ||
-            (toYear && item.publicationYear > parseInt(toYear))) {
+        // Publication Year Range Filter
+        if ((!isNaN(fromYear) && item.publicationYear < fromYear) ||
+            (!isNaN(toYear) && item.publicationYear > toYear)) {
             return false;
         }
 
-        const activeFilters = {};
-        document.querySelectorAll('.filter-pills').forEach(container => {
-            const type = container.id.replace('-filter-pills', '');
-            if (type === 'publicationYear') return;
-            const selectedPills = Array.from(container.querySelectorAll('.pill.active'))
-                                   .map(pill => pill.dataset.value)
-                                   .filter(value => value !== 'all');
-            if (selectedPills.length > 0) {
-                activeFilters[type] = selectedPills;
-            }
+        // Region Filter
+        if (selectedRegion !== 'all' && item.region !== selectedRegion) {
+            return false;
+        }
+
+        // Country/Area Filter (focus)
+        if (selectedFocuses.length > 0 && selectedFocuses[0] !== 'all' && !selectedFocuses.includes(item.country)) {
+            return false;
+        }
+
+        // Check if any of the combinedDataPoints match the data-related filters
+        const dataPointMatches = item.combinedDataPoints.some(dp => {
+            const matchesResolution = activeResolutionPills.length === 0 || activeResolutionPills.includes(dp.resolutionCategory);
+            const matchesViz = activeVizPills.length === 0 || activeVizPills.includes(dp.viz);
+            const matchesYear = activeYearsPills.length === 0 || activeYearsPills.includes(dp.dataUseYear);
+            const matchesRepresentation = activeRepresentationPills.length === 0 || activeRepresentationPills.includes(dp.representation);
+            const matchesProvider = activeProviderPills.length === 0 || activeProviderPills.includes(dp.provider);
+            
+            return matchesResolution && matchesViz && matchesYear && matchesRepresentation && matchesProvider;
         });
 
-        for (const type in activeFilters) {
-            if (activeFilters[type].length > 0) {
-                if (type === 'region') {
-                    if (!activeFilters[type].includes(item.region)) return false;
-                } else if (type === 'focus') {
-                    if (!activeFilters[type].includes(item.country)) return false;
-                } else if (type === 'outlet') {
-                    if (!activeFilters[type].includes(item.outlet)) return false;
-                } else {
-                    const matchingCdp = item.combinedDataPoints.some(cdp => {
-                        let cdpMatches = true;
-                        if (type === 'meters' && !activeFilters[type].includes(cdp.resolutionCategory)) cdpMatches = false;
-                        if (type === 'years' && !activeFilters[type].some(filterYear => cdp.dataUseYear.includes(filterYear))) cdpMatches = false;
-                        if (type === 'viz' && !activeFilters[type].includes(cdp.viz)) cdpMatches = false;
-                        if (type === 'provider' && !activeFilters[type].includes(cdp.provider)) cdpMatches = false;
-                        if (type === 'representation' && !activeFilters[type].includes(cdp.representation)) cdpMatches = false;
-                        return cdpMatches;
-                    });
-                    if (!matchingCdp) return false;
-                }
-            }
+        if (!dataPointMatches && (activeResolutionPills.length > 0 || activeVizPills.length > 0 || activeYearsPills.length > 0 || activeRepresentationPills.length > 0 || activeProviderPills.length > 0)) {
+            return false;
         }
+
+        // Outlet Filter
+        if (activeOutletPills.length > 0 && !activeOutletPills.includes(item.outlet)) {
+          return false;
+        }
+
         return true;
-    }
+      });
 
+      filteredData.sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort by date, newest first
 
-    function toggleAllFilters(open) {
-      document.querySelectorAll('.filter-group').forEach(group => {
-        if (open) {
-          group.classList.add('active');
-        } else {
-          group.classList.remove('active');
+      let currentArticleLink = null;
+      let articleRowCount = 0;
+
+      filteredData.forEach((item, index) => {
+        // Table View Rendering
+        if (currentView === 'table') {
+            item.combinedDataPoints.forEach((dp, dpIndex) => {
+                const tr = document.createElement('tr');
+                tr.classList.add('article-row'); // Add class for all rows that are part of an article
+
+                // Add article-start class for the first row of each article
+                if (dpIndex === 0) {
+                    tr.classList.add('article-start');
+                }
+
+                // Add last-cdp-of-article for the very last combined data point row of an article
+                if (dpIndex === item.combinedDataPoints.length - 1) {
+                    tr.classList.add('last-cdp-of-article');
+                }
+
+                if (dpIndex === 0) {
+                    const dateTd = document.createElement('td');
+                    dateTd.textContent = item.date;
+                    tr.appendChild(dateTd);
+
+                    const titleTd = document.createElement('td');
+                    titleTd.textContent = item.title;
+                    tr.appendChild(titleTd);
+
+                    const linkTd = document.createElement('td');
+                    if (item.link) {
+                        const linkA = document.createElement('a');
+                        linkA.href = item.link;
+                        linkA.textContent = 'Link';
+                        linkA.target = "_blank";
+                        linkTd.appendChild(linkA);
+                    }
+                    tr.appendChild(linkTd);
+
+                    const outletTd = document.createElement('td');
+                    outletTd.textContent = item.outlet;
+                    tr.appendChild(outletTd);
+
+                    const countryTd = document.createElement('td');
+                    countryTd.textContent = item.country;
+                    tr.appendChild(countryTd);
+
+                    const contextTd = document.createElement('td');
+                    contextTd.textContent = item.context;
+                    tr.appendChild(contextTd);
+
+                    const categoryTd = document.createElement('td');
+                    categoryTd.textContent = item.category;
+                    tr.appendChild(categoryTd);
+                } else {
+                    // For subsequent rows of the same article, create empty cells for the main columns
+                    for (let i = 0; i < 7; i++) {
+                        tr.appendChild(document.createElement('td'));
+                    }
+                }
+
+                const dataUseTd = document.createElement('td');
+                dataUseTd.classList.add('data-detail-cell'); // Apply the specific class
+                dataUseTd.textContent = dp.dataUseYear;
+                tr.appendChild(dataUseTd);
+
+                const providerTd = document.createElement('td');
+                providerTd.classList.add('data-detail-cell'); // Apply the specific class
+                providerTd.textContent = dp.provider;
+                tr.appendChild(providerTd);
+
+                const platformTd = document.createElement('td');
+                platformTd.classList.add('data-detail-cell'); // Apply the specific class
+                platformTd.textContent = dp.platform;
+                tr.appendChild(platformTd);
+
+                const sensorTd = document.createElement('td');
+                sensorTd.classList.add('data-detail-cell'); // Apply the specific class
+                sensorTd.textContent = dp.sensor || ''; // Placeholder, as sensor isn't in sample data
+                tr.appendChild(sensorTd);
+
+                const resTd = document.createElement('td');
+                resTd.classList.add('data-detail-cell'); // Apply the specific class
+                resTd.textContent = dp.resolution;
+                tr.appendChild(resTd);
+
+                const vizTd = document.createElement('td');
+                vizTd.classList.add('data-detail-cell'); // Apply the specific class
+                vizTd.textContent = dp.viz;
+                tr.appendChild(vizTd);
+
+                tbody.appendChild(tr);
+            });
+        }
+        // Feed View Rendering
+        else if (currentView === 'feed') {
+          const articleItem = document.createElement('div');
+          articleItem.classList.add('article-item');
+
+          const titleLink = document.createElement('a');
+          titleLink.href = item.link;
+          titleLink.target = "_blank";
+          titleLink.textContent = item.title;
+          articleItem.appendChild(titleLink);
+
+          const detailsDiv = document.createElement('div');
+          detailsDiv.classList.add('article-details');
+          detailsDiv.textContent = `${item.date} | ${item.outlet} | ${item.country}`;
+          articleItem.appendChild(detailsDiv);
+
+          feedViewContainer.appendChild(articleItem);
         }
       });
-      adjustContentViewHeight();
-    }
+      updateFilterCount(filteredData.length);
+    } // Call the new feed rendering function
+
 
     function updateFilterCount(filteredCount) {
       const totalCount = allData.length;
