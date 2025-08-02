@@ -1175,7 +1175,7 @@ document.getElementById('toYearInput').addEventListener('input', function () {
 
             // Now, transform the consolidated articles into the final allData structure
             allData = Array.from(articlesMap.values()).map(article => {
-                // Remove duplicates from collected arrays (e.g., if 'PENDING' appears multiple times for one article)
+                // Remove duplicates from collected arrays (e.g., if 'TBA' appears multiple times for one article)
                 article.dataUses = [...new Set(article.dataUses)];
                 article.providers = [...new Set(article.providers)];
                 article.platforms = [...new Set(article.platforms)];
