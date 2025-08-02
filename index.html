@@ -6,18 +6,12 @@
   <title>Geospatial Narratives</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Geist&family=Geist+Mono&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=filter_list" />
   <style>
     /* Add box-sizing to all elements for consistent box model behavior */
     *, *::before, *::after {
       box-sizing: border-box;
-    }
-
-    /* Text selection styling */
-    ::selection {
-      background: rgb(221, 255, 109); /* Red background when selecting text */
-      color: rgb(0, 0, 0); /* White text on selection */
     }
 
     body {
@@ -37,14 +31,14 @@
       align-items: center;
       padding: 3px 40px 3px 20px; /* Increased top padding to move lower */
       font-size: 17.5px;
-      font-weight: 450;
+      font-weight: bold;
       color: #000;
       gap: 10px;
       background: rgb(221, 255, 109);
     }
     .nav a {
       font-size: 17.5px;
-      font-weight: 450;
+      text-decoration: none;
       color: rgb(155, 180, 72);
       border-bottom: none;
       padding: 5px 10px;
@@ -55,23 +49,11 @@
     .nav a.active {
       color: #000; /* Changed from #5f56ff to #000 */
     }
-  
     .csv-upload {
       display: none;
     }
-
-       /* New style for the update date */
-    .update-date {
-        font-family: 'Geist Mono', monospace;
-        font-size: 15px; /* Smaller font size for date */
-        font-weight: 300;
-        color: #9f9e9e; /* Softer color for date */
-        padding: 10px 0 0 29px; /* Padding to position it */
-    }
-
     .stats {
       font-size: 96px; /* Same as the counter text */
-      font-weight: 400;
       padding-top: 20px;
       padding-bottom: 10px;
       padding-left: 20px;
@@ -93,9 +75,9 @@
       border-top: 1px solid #000;
     }
     .filter-group-header {
-      padding: 6px 20px; /* Adjusted padding */
+      padding: 8px 20px; /* Adjusted padding */
       font-size: 18px;
-      font-weight: 500;
+      font-weight: bold;
       background: #e6e6e6;
       cursor: pointer;
       display: flex;
@@ -125,7 +107,7 @@
     }
     .filter-title {
       font-size: 14px; /* Made smaller */
-      font-weight: 500;
+      font-weight: bold;
       margin-top: 10px; /* Reduced space */
       margin-bottom: 5px; /* Reduced space */
       color: #666; /* Closer to background gray */
@@ -198,7 +180,7 @@
       background: #fff;
       table-layout: fixed;
     }
-    th {
+    th, td {
       text-align: left;
       padding: 4px 12px;
       border-bottom: 1px solid #D3D3D3;
@@ -206,18 +188,6 @@
       font-family: 'Geist Mono', monospace;
       vertical-align: top;
       font-size: 13px; /* Base font size */
-      font-weight: 500;
-      word-wrap: break-word; /* Allows text to break to the next line */
-    }
-    td {
-      text-align: left;
-      padding: 4px 12px;
-      border-bottom: 1px solid #D3D3D3;
-      border-top: 1px solid #D3D3D3;
-      font-family: 'Geist Mono', monospace;
-      vertical-align: top;
-      font-size: 13px; /* Base font size */
-      font-weight: 400;
       word-wrap: break-word; /* Allows text to break to the next line */
     }
     /* Specific styles for columns 1-8 */
@@ -372,8 +342,8 @@
 
     .filter-toggle-label, .feed-toggle-label {
       font-size: 18px;
-      font-weight: 500;
-      color: #000000;
+      font-weight: bold;
+      color: #000;
     }
 
     /* The switch - the box around the slider */
@@ -506,10 +476,10 @@
 
     .feed-view-container .article-item {
       font-size: 80px; /* Increased font size, similar to quotes */
-      font-weight: 500;
+      font-weight: bold;
       margin-bottom: 20px;
       line-height: 1.2;
-      color: #000000;
+      color: #000;
       border-bottom: 1px solid #eee; /* Light separator */
       padding-bottom: 15px;
       cursor: pointer; /* Clickable */
@@ -538,7 +508,7 @@
 
     .article-details {
       font-size: 14px; /* Details font size */
-      font-weight: 350; /* Not bold */
+      font-weight: normal; /* Not bold */
       color: #969696; /* A bit lighter color for details */
       margin-top: 5px; /* Reduced space above details */
       text-align: left; /* Aligned to the left */
@@ -564,9 +534,6 @@
       'GRAD' 0,
       'opsz' 24
     }
-      .pending-text {
-    color: #1900ff; /* Or any color you prefer, e.g., orange, red, etc. */
-  }
 
     /* --- Responsive Design --- */
 
@@ -588,7 +555,6 @@
         font-size: 18px;
         padding: 3px 8px;
       }
-    
       .stats {
         font-size: 60px;
         padding: 15px 20px 5px 20px;
@@ -688,19 +654,13 @@
         font-size: 17px;
         padding: 3px 8px;
       }
-      .update-date {
-        font-size: 12px;
-        padding: 10px 0 0 13px;
-      }
       .stats {
-        font-size: 42px;
-        padding-top: 17px;
-        padding-left: 1.5px;
-        padding-bottom: 10px;
+        font-size: 40px;
+        padding-top: 30px;
         padding-left: 10px;
       }
       .toggles-container {
-        padding: 0 20px 10px 12px;
+        padding: 0 20px 10px 15px;
         gap: 15px;
       }
       .filter-toggle-label, .feed-toggle-label {
@@ -708,7 +668,7 @@
       }
       .filter-group-header {
         font-size: 16px;
-        padding: 6px 15px; /* Adjusted padding */
+        padding: 6px 16px; /* Adjusted padding */
       }
       .filter-group-content {
         padding: 0 15px;
@@ -783,17 +743,27 @@
 
       /* Mobile-specific spacing for article count numbers */
       .article-count-number {
-        margin-left: 8px;
+        margin-left: 20px;
       }
 
       sup .article-count-number {
         margin-left: 0px;
-        font-size: 75%; /* Adjust as needed, e.g., 60% for slightly larger */
-        position: relative;
-        top: -0.2em;
       }
     }
-  </style>
+  
+table tbody tr:hover {
+  background-color: #2445ff;
+  color: #fff;
+}
+table tbody tr:hover a {
+  background-color: #2445ff;
+  color: #fff;
+}
+table tbody tr {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+</style>
 </head>
 <body>
   <div id="fixed-header-area">
@@ -801,9 +771,6 @@
       <a href="index.html" class="active">Index</a>
       <a href="literacy.html">Literacy</a>
       <a href="about.html">About</a>
-    </div>
-      <div class="update-date">
-        updated: 2025-07-15
     </div>
     <div class="stats">
       <span id="loadingStatus">Loading data...</span>
@@ -1238,12 +1205,12 @@ document.getElementById('toYearInput').addEventListener('input', function () {
             Country: 'United States',
             Context: 'Urban development patterns',
             Category: 'Environment',
-            'Data use': '2022; 2023',
-            Provider: 'PENDING',
-            Platform: 'PENDING',
-            Resolution: 'PENDING',
-            Representation: 'PENDING',
-            Viz: 'PENDING',
+            'Data use': '2023; 2024',
+            Provider: 'Planet Labs; Maxar',
+            Platform: 'Sentinel-2; Landsat',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Optical; Hyperspectral',
+            Viz: 'RGB; NRG',
             // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
             'How To': 'Tutorial available'
           },
@@ -1314,8 +1281,260 @@ document.getElementById('toYearInput').addEventListener('input', function () {
             Viz: 'NDVI',
             // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
             'How To': 'Report access limited'
+          },
+          {
+            Date: '2023-07-25',
+            Title: 'Urban Population Density',
+            Link: 'http://example.com/urban-density',
+            Outlet: 'The New York Times',
+            Country: 'France',
+            Context: 'Demographic trends',
+            Category: 'Demographics',
+            'Data use': '2020; 2021; 2022',
+            Provider: 'OpenStreetMap',
+            Platform: 'Open Data',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Hyperspectral',
+            Viz: 'RGB',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'Data available via API'
+          },
+          {
+            Date: '2024-04-01',
+            Title: 'Arctic Ice Melt',
+            Link: 'http://example.com/arctic-ice',
+            Outlet: 'The Guardian',
+            Country: 'Canada',
+            Context: 'Climate change research',
+            Category: 'Climate',
+            'Data use': '2023; 2024',
+            Provider: 'NASA; ESA',
+            Platform: 'CryoSat-2; ICESat-2',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Radar; Optical',
+            Viz: 'NRG; NDVI',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'Scientific paper'
+          },
+          {
+            Date: '2023-10-10',
+            Title: 'Desertification in Africa',
+            Link: 'http://example.com/desertification',
+            Outlet: 'BBC',
+            Country: 'Sudan',
+            Context: 'Land degradation',
+            Category: 'Environment',
+            'Data use': '2021',
+            Provider: 'USGS',
+            Platform: 'Landsat',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Optical',
+            Viz: 'RGB',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'University study'
+          },
+          {
+            Date: '2024-03-01',
+            Title: 'Wildfire Tracking',
+            Link: 'http://example.com/wildfire',
+            Outlet: 'CNN',
+            Country: 'United States',
+            Context: 'Emergency response',
+            Category: 'Disaster',
+            'Data use': '2024',
+            Provider: 'NOAA; NASA',
+            Platform: 'GOES; VIIRS',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Hyperspectral',
+            Viz: 'NRG',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'Public dashboard'
+          },
+          {
+            Date: '2023-08-12',
+            Title: 'Historical City Growth',
+            Link: 'http://example.com/city-growth',
+            Outlet: 'Washington Post',
+            Country: 'United Kingdom',
+            Context: 'Urban history',
+            Category: 'History',
+            'Data use': '1950; 2000; 2020',
+            Provider: 'Ordnance Survey',
+            Platform: 'Historical Maps',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Radar',
+            Viz: 'NDVI',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'Archival research'
+          },
+          {
+            Date: '2024-05-20',
+            Title: 'Ocean Plastic Accumulation',
+            Link: 'http://example.com/ocean-plastic',
+            Outlet: 'Sky News',
+            Country: 'Japan',
+            Context: 'Marine pollution',
+            Category: 'Environment',
+            'Data use': '2024',
+            Provider: 'Sentinel Hub; ESA',
+            Platform: 'Sentinel-3',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Optical; Hyperspectral',
+            Viz: 'RGB; NRG',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'Ongoing research'
+          },
+          {
+            Date: '2023-06-01',
+            Title: 'Volcanic Activity Monitoring',
+            Link: 'http://example.com/volcano',
+            Outlet: 'Reuters',
+            Country: 'Italy',
+            Context: 'Geological hazards',
+            Category: 'Geology',
+            'Data use': '2023',
+            Provider: 'USGS',
+            Platform: 'GPS; Seismometers',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Radar',
+            Viz: 'NDVI',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'Scientific publication'
+          },
+          {
+            Date: '2024-01-25',
+            Title: 'Water Scarcity in Middle East',
+            Link: 'http://example.com/water-scarcity',
+            Outlet: 'The Guardian',
+            Country: 'Iraq',
+            Context: 'Resource management',
+            Category: 'Environment',
+            'Data use': '2020; 2021; 2022; 2023; 2024',
+            Provider: 'NASA',
+            Platform: 'GRACE',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Optical; Radar',
+            Viz: 'RGB; NDVI',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'UN Report'
+          },
+          {
+            Date: '2023-04-18',
+            Title: 'Arctic Shipping Routes',
+            Link: 'http://example.com/arctic-routes',
+            Outlet: 'BBC',
+            Country: 'Russia',
+            Context: 'Geopolitics; Climate Change',
+            Category: 'Geopolitics',
+            'Data use': '2023',
+            Provider: 'ESA; Private Firms',
+            Platform: 'Sentinel-1; Ice charts',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Hyperspectral',
+            Viz: 'NRG',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'Navigational guides'
+          },
+          {
+            Date: '2024-02-29',
+            Title: 'Disease Spread Mapping',
+            Link: 'http://example.com/disease-spread',
+            Outlet: 'The New York Times',
+            Country: 'United States',
+            Context: 'Public Health',
+            Category: 'Health',
+            'Data use': '2024',
+            Provider: 'CDC; WHO',
+            Platform: 'Health data',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Radar; Optical',
+            Viz: 'NDVI; RGB',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+          },
+          {
+            Date: '2023-05-05',
+            Title: 'Illegal Mining in Amazon',
+            Link: 'http://example.com/illegal-mining',
+            Outlet: 'The Guardian',
+            Country: 'Brazil',
+            Context: 'Environment',
+            Category: 'Environment',
+            'Data use': '2023',
+            Provider: 'Planet Labs',
+            Platform: 'PlanetScope',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Optical',
+            Viz: 'NRG',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'NGO report'
+          },
+          {
+            Date: '2024-04-10',
+            Title: 'Infrastructure Development',
+            Link: 'http://example.com/infrastructure',
+            Outlet: 'Washington Post',
+            Country: 'China',
+            Context: 'Economic development',
+            Category: 'Development',
+            'Data use': '2020; 2024',
+            Provider: 'Maxar; Airbus',
+            Platform: 'WorldView; Pleiades',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Hyperspectral; Radar',
+            Viz: 'RGB; NDVI',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'Analyst brief'
+          },
+          {
+            Date: '2023-03-03',
+            Title: 'Refugee Camp Expansion',
+            Link: 'http://example.com/refugee-camp',
+            Outlet: 'Reuters',
+            Country: 'Syria',
+            Context: 'Humanitarian crisis',
+            Category: 'Humanitarian',
+            'Data use': '2023',
+            Provider: 'UNITAR/UNOSAT; Maxar',
+            Platform: 'Satellite Imagery',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Optical',
+            Viz: 'NDVI',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'UN Report'
+          },
+          {
+            Date: '2024-03-22',
+            Title: 'Election Monitoring',
+            Link: 'http://example.com/election-monitoring',
+            Outlet: 'BBC',
+            Country: 'Ukraine',
+            Context: 'Political observation',
+            Category: 'Politics',
+            'Data use': '2024',
+            Provider: 'OSCE; DigitalGlobe',
+            Platform: 'Satellite Imagery; Ground reports',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Hyperspectral',
+            Viz: 'RGB',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+          },
+          {
+            Date: '2023-11-01',
+            Title: 'Military Base Construction',
+            Link: 'http://example.com/military-base',
+            Outlet: 'CNN',
+            Country: 'North Korea',
+            Context: 'National Security',
+            Category: 'Security',
+            'Data use': '2023',
+            Provider: 'NGA; Private Satellite',
+            Platform: 'Satellite Imagery',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Radar',
+            Viz: 'NRG',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'Intelligence analysis'
           }
-          
         ];
         allData = sampleData.map(row => {
             const date = row.Date || '';
@@ -1626,21 +1845,21 @@ document.getElementById('toYearInput').addEventListener('input', function () {
                         <td rowspan="${rowspan}">${item.country}</td>
                         <td rowspan="${rowspan}">${item.context}</td>
                         <td rowspan="${rowspan}">${item.category}</td>
-                        <td class="data-detail-cell ${cdp.dataUseYear === 'PENDING' ? 'pending-text' : ''}">${cdp.dataUseYear}</td>
-                        <td class="data-detail-cell ${cdp.provider === 'PENDING' ? 'pending-text' : ''}">${cdp.provider}</td>
-                        <td class="data-detail-cell ${cdp.platform === 'PENDING' ? 'pending-text' : ''}">${cdp.platform}</td>
-                        <td class="data-detail-cell ${cdp.representation === 'PENDING' ? 'pending-text' : ''}">${cdp.representation}</td>
-                        <td class="data-detail-cell ${cdp.resolution === 'PENDING' ? 'pending-text' : ''}">${cdp.resolution}</td>
-                        <td class="data-detail-cell ${cdp.viz === 'PENDING' ? 'pending-text' : ''}">${cdp.viz}</td>
+                        <td class="data-detail-cell">${cdp.dataUseYear}</td>
+                        <td class="data-detail-cell">${cdp.provider}</td>
+                        <td class="data-detail-cell">${cdp.platform}</td>
+                        <td class="data-detail-cell">${cdp.representation}</td>
+                        <td class="data-detail-cell">${cdp.resolution}</td>
+                        <td class="data-detail-cell">${cdp.viz}</td>
                     `;
                 } else {
                     row.innerHTML = `
-                        <td class="data-detail-cell ${cdp.dataUseYear === 'PENDING' ? 'pending-text' : ''}">${cdp.dataUseYear}</td>
-                        <td class="data-detail-cell ${cdp.provider === 'PENDING' ? 'pending-text' : ''}">${cdp.provider}</td>
-                        <td class="data-detail-cell ${cdp.platform === 'PENDING' ? 'pending-text' : ''}">${cdp.platform}</td>
-                        <td class="data-detail-cell ${cdp.representation === 'PENDING' ? 'pending-text' : ''}">${cdp.representation}</td>
-                        <td class="data-detail-cell ${cdp.resolution === 'PENDING' ? 'pending-text' : ''}">${cdp.resolution}</td>
-                        <td class="data-detail-cell ${cdp.viz === 'PENDING' ? 'pending-text' : ''}">${cdp.viz}</td>
+                        <td class="data-detail-cell">${cdp.dataUseYear}</td>
+                        <td class="data-detail-cell">${cdp.provider}</td>
+                        <td class="data-detail-cell">${cdp.platform}</td>
+                        <td class="data-detail-cell">${cdp.representation}</td>
+                        <td class="data-detail-cell">${cdp.resolution}</td>
+                        <td class="data-detail-cell">${cdp.viz}</td>
                     `;
                 }
                 tbody.appendChild(row);
