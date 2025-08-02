@@ -4,9 +4,10 @@ Date,Title,Link,Outlet,Region,Country,Context,Category,Data use,Provider,Platfor
 2024-12-14,Satellitenbilder sollen Rückzug russischer Truppen aus Syrien zeigen,https://www.zeit.de/politik/2024-12/syrien-russland-rueckzug-truppen-satellitenbilder,Die Zeit,Middle East,Syria,Syria War,Armed Conflict,2024,Maxar,Worldview,<1m,Optical,RGB,Single,None
 2024-11-01,So sehen Spaniens Überschwemmungsgebiete aus dem All aus,https://www.spiegel.de/ausland/spanien-so-sehen-die-ueberschwemmungsgebiete-aus-dem-all-aus-satellitenbilder-a-3ceeb0a0-3474-404f-8d71-a90464a29ce2,Der Spiegel,Europe,Spain,2024 Spanish floods,Natural Disaster,2024,USGS/NASA,Landsat,>10m,Comparison,RGB,Slider,
 2024-10-29,What satellite images reveal about Israel's strikes on Iran,https://www.bbc.com/news/articles/cy7dkgz71x6o,BBC,West Asia,Iran,Iran–Israel proxy conflict,Armed Conflict,"2024, 2023, 2000","ESA, Planet Labs, Planet Labs","Sentinel-2, PlanetScope, SkySat",">10m, 1m-10m, <1m","PENDING, Hyperspectral, Optical, Optical","RGB, RGB, NRG","Comparison, Slider, Single",None
-2024-10-08,"Vertrieben, getötet, ohne ausreichende Hilfe",https://www.zeit.de/politik/ausland/2024-10/gaza-krieg-zerstoerung-7-oktober-israel-satellitenbilder,Die Zeit,Middle East,Gaza,Gaza War,Armed Conflict,PENDING,PENDING,PENDING,PENDING,PENDING,PENDING,RGB,
+2024-10-08,"Vertrieben, getötet, ohne ausreichende Hilfe",https://www.zeit.de/politik/ausland/2024-10/gaza-krieg-zerstoerung-7-oktober-israel-satellitenbilder,Die Zeit,Middle East,Gaza,Gaza War,Armed Conflict,PENDING,PENDING,PENDING,PENDING,RGB,RGB,RGB,
 2024-09-25,How a U.S. Ally Uses Aid as a Cover in War,https://www.nytimes.com/2024/09/21/world/africa/uae-sudan-civil-war.html,New York Times,Africa,Sudan,Sudanese civil war,Armed Conflict,"2023, 2024, 2023, 2024","Airbus, Airbus, Blacksky, Planet Labs","Pleiades Neo, Pleiades Neo, None, Planet Scope","<1m, <1m, 1m-10m, 1m-10m","Radar, Optical, Optical, Optical","RGB, RGB, NDVI, NDVI","Comparison, Single, Single, Single",None
 2022-09-19,Pakistan and its submerged cities,https://www.reuters.com/graphics/PAKISTAN-WEATHER/FLOODS/zgvomodervd/,Reuters,Asia,Pakistan,Pakistan Floods,Flooding,2022,ESA,Sentinel-2,1m-10m,Optical,RGB,On Scroll,
+
 
 
 
