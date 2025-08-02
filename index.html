@@ -1067,7 +1067,7 @@ document.getElementById('toYearInput').addEventListener('input', function () {
       document.querySelectorAll('.filter-group-header').forEach(header => {
         header.addEventListener('click', function() {
           const group = this.closest('.filter-group');
-          if (filtersActive) {
+          if (filtersActive) { // Only toggle if filters are active
             group.classList.toggle('active');
             adjustContentViewHeight();
           }
@@ -1079,10 +1079,11 @@ document.getElementById('toYearInput').addEventListener('input', function () {
         filtersActive = this.checked;
         if (filtersActive) {
             document.body.classList.add('filters-active');
+            toggleAllFilters(true); // Expand all when toggled on
         } else {
             document.body.classList.remove('filters-active');
+            toggleAllFilters(false); // Collapse all when toggled off
         }
-        toggleAllFilters(true);
         filterTable();
       });
 
@@ -1420,7 +1421,7 @@ document.getElementById('toYearInput').addEventListener('input', function () {
                 let pass = true;
 
                 // Publication Year Filter
-                if ((fromYear && item.publicationYear < parseInt(fromYear)) ||
+                if (item.publicationYear === null || (fromYear && item.publicationYear < parseInt(fromYear)) ||
                     (toYear && item.publicationYear > parseInt(toYear))) {
                     pass = false;
                 }
@@ -1473,6 +1474,7 @@ document.getElementById('toYearInput').addEventListener('input', function () {
         const nonPendingFilteredData = filteredData.filter(item => !item.isPending);
 
         // Concatenate the filtered non-pending items with all pending items for display
+        // Ensure pending items appear at the very end of the table/feed
         const finalDisplayedData = [...nonPendingFilteredData, ...pendingItems];
 
         updateFilterCount(nonPendingFilteredData.length); // Count only non-pending items for filtering stats
@@ -1489,13 +1491,14 @@ document.getElementById('toYearInput').addEventListener('input', function () {
       tbody.innerHTML = ''; // Clear existing rows
 
       dataToRender.forEach(item => {
-        // Handle cases where item.combinedDataPoints might be empty or undefined
+        const numDataPoints = item.combinedDataPoints.length > 0 ? item.combinedDataPoints.length : 1; // At least 1 row for articles with no data points
+
         if (!item.combinedDataPoints || item.combinedDataPoints.length === 0) {
-            // Render a single row for articles with no data points
+            // Case: Article has no data points
             const row = tbody.insertRow();
             row.classList.add('article-start', 'last-cdp-of-article');
-            insertArticleCells(row, item, true); // True means no data points, so render all cells in main row
-            insertDataDetailCells(row, { dataUseYear: '', provider: '', platform: '', sensor: '', resolution: '', viz: '', representation: '' }, true); // Pass true to indicate last CDP
+            insertArticleCells(row, item, numDataPoints); // Pass numDataPoints for rowspan
+            insertDataDetailCells(row, { dataUseYear: '', provider: '', platform: '', sensor: '', resolution: '', viz: '', representation: '' });
         } else {
             item.combinedDataPoints.forEach((cdp, index) => {
                 const row = tbody.insertRow();
@@ -1504,47 +1507,49 @@ document.getElementById('toYearInput').addEventListener('input', function () {
 
                 if (isFirstCdp) {
                     row.classList.add('article-start');
+                    insertArticleCells(row, item, numDataPoints); // Pass numDataPoints for rowspan
                 }
                 if (isLastCdp) {
                     row.classList.add('last-cdp-of-article');
                 }
 
-                insertArticleCells(row, item, isFirstCdp);
-                insertDataDetailCells(row, cdp, isLastCdp);
+                insertDataDetailCells(row, cdp);
             });
         }
       });
     }
 
-    function insertArticleCells(row, item, isFirstCdp) {
+    function insertArticleCells(row, item, rowspanCount) {
         const cells = ['date', 'title', 'link', 'outlet', 'country', 'context', 'category'];
         cells.forEach(key => {
             const cell = row.insertCell();
-            if (isFirstCdp) {
-                if (key === 'link') {
-                    if (item.link) {
-                        const linkElement = document.createElement('a');
-                        linkElement.href = item.link;
-                        linkElement.textContent = 'Link';
-                        linkElement.target = '_blank';
-                        cell.appendChild(linkElement);
-                    } else if (item.link === 'PENDING') {
-                        cell.textContent = 'PENDING';
-                        cell.classList.add('pending-status');
-                    }
+            cell.rowSpan = rowspanCount; // Apply rowspan here
+            
+            if (key === 'link') {
+                if (item.link && item.link.toUpperCase() !== 'PENDING') {
+                    const linkElement = document.createElement('a');
+                    linkElement.href = item.link;
+                    linkElement.textContent = 'Link';
+                    linkElement.target = '_blank';
+                    cell.appendChild(linkElement);
                 } else {
-                    let content = item[key];
-                    if (content === 'PENDING') {
+                    cell.textContent = item.link;
+                    if (item.link === 'PENDING') {
                         cell.classList.add('pending-status');
                     }
-                    cell.textContent = content;
                 }
+            } else {
+                let content = item[key];
+                if (content.toUpperCase().includes('PENDING')) {
+                    cell.classList.add('pending-status');
+                }
+                cell.textContent = content;
             }
         });
     }
 
-    function insertDataDetailCells(row, cdp, isLastCdp) {
-        const dataDetailCells = ['dataUseYear', 'provider', 'platform', 'resolution', 'representation', 'viz'];
+    function insertDataDetailCells(row, cdp) {
+        const dataDetailCells = ['dataUseYear', 'provider', 'platform', 'sensor', 'resolution', 'representation', 'viz']; // Added 'sensor' based on headers
         dataDetailCells.forEach(key => {
             const cell = row.insertCell();
             cell.classList.add('data-detail-cell');
@@ -1643,14 +1648,17 @@ document.getElementById('toYearInput').addEventListener('input', function () {
       const tableViewContainer = document.getElementById('tableViewContainer');
       const feedViewContainer = document.getElementById('feedViewContainer');
 
+      // Re-filter and re-render the data based on current filters and view
+      const dataToRender = allData.filter(item => filterItem(item));
+
       if (currentView === 'table') {
         tableViewContainer.classList.remove('hidden');
         feedViewContainer.classList.add('hidden');
-        renderTable(allData.filter(item => filterItem(item)));
+        renderTable(dataToRender);
       } else { // currentView === 'feed'
         tableViewContainer.classList.add('hidden');
         feedViewContainer.classList.remove('hidden');
-        renderFeed(allData.filter(item => filterItem(item)));
+        renderFeed(dataToRender);
       }
       adjustContentViewHeight();
     }
@@ -1670,8 +1678,8 @@ document.getElementById('toYearInput').addEventListener('input', function () {
         const toYear = document.getElementById('toYearInput').value;
 
         // Publication Year Filter
-        if (item.publicationYear && ((fromYear && item.publicationYear < parseInt(fromYear)) ||
-            (toYear && item.publicationYear > parseInt(toYear)))) {
+        if (item.publicationYear === null || (fromYear && item.publicationYear < parseInt(fromYear)) ||
+            (toYear && item.publicationYear > parseInt(toYear))) {
             return false;
         }
 
