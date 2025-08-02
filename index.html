@@ -55,6 +55,9 @@
     .nav a.active {
       color: #000; /* Changed from #5f56ff to #000 */
     }
+    .pending-text {
+    color: #1900ff; /* Or any color you prefer, e.g., orange, red, etc. */
+  }
     .csv-upload {
       display: none;
     }
@@ -789,11 +792,6 @@
         top: -0.2em;
       }
     }
-    td.pending {
-      background-color: #fff9c4;
-      color: #000;
-      font-style: italic;
-    }
   </style>
 </head>
 <body>
@@ -1030,14 +1028,6 @@
         }
       }
     }
-
-    function highlightPendingCells() {
-      document.querySelectorAll("td").forEach(cell => {
-        if (cell.textContent.trim().toUpperCase().includes("PENDING")) {
-          cell.classList.add("pending");
-        }
-      });
-    }
     // --- END GLOBAL FUNCTIONS ---
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -1104,13 +1094,14 @@ document.getElementById('toYearInput').addEventListener('input', function () {
 
       const currentPath = window.location.pathname.split('/').pop();
       document.querySelectorAll('.nav a').forEach(link => {
-          if (link.getAttribute('href') === currentPath && link.getAttribute('href') !== 'index.html') {
-              document.querySelector('.nav a[href="index.html"]').classList.remove('active');
-              link.classList.add('active');
-          } else if (currentPath === '' && link.getAttribute('href') === 'index.html') {
-              // This ensures index.html is active when directly loading the root or index.html
-          }
+        if (link.getAttribute('href') === currentPath && link.getAttribute('href') !== 'index.html') {
+          document.querySelector('.nav a[href="index.html"]').classList.remove('active');
+          link.classList.add('active');
+        } else if (currentPath === '' && link.getAttribute('href') === 'index.html') {
+          // This ensures index.html is active when directly loading the root or index.html
+        }
       });
+
       adjustContentViewHeight();
       window.addEventListener('resize', adjustContentViewHeight);
 
@@ -1129,67 +1120,259 @@ document.getElementById('toYearInput').addEventListener('input', function () {
       document.addEventListener('scroll', hideOverlay);
       document.addEventListener('click', hideOverlay);
       document.addEventListener('keydown', hideOverlay);
-
-      filterTable();
-      highlightPendingCells();
     });
 
     async function loadDataFromBackend() {
-      const loadingStatus = document.getElementById('loadingStatus');
-      const statsDisplay = document.getElementById('statsDisplay');
-      try {
-        loadingStatus.textContent = 'Loading data from server...';
-        const response = await fetch('./data.csv');
-        if (!response.ok) {
-          // If the file is not found or other HTTP error, trigger fallback
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const csvText = await response.text();
-        Papa.parse(csvText, {
-          header: true,
-          skipEmptyLines: true,
-          dynamicTyping: false,
-          complete: function(results) {
-            const parsedData = results.data;
-            allData = parsedData.map(row => {
-              // Ensure required fields exist, provide defaults if missing
-              const date = row.Date || '';
-              const publicationYear = date ? new Date(date).getFullYear() : null;
-              const providers = row.Provider ? row.Provider.split(/[,;]/).map(p => p.trim()).filter(p => p) : [''];
-              const resolutions = row.Resolution ? row.Resolution.split(/[,;]/).map(r => r.trim()).filter(r => r) : [''];
-              const platforms = row.Platform ? row.Platform.split(/[,;]/).map(p => p.trim()).filter(p => p) : [''];
-              const representations = row.Representation ? row.Representation.split(/[,;]/).map(r => r.trim()).filter(r => r) : [''];
-              const vizs = row.Viz ? row.Viz.split(/[,;]/).map(v => v.trim()).filter(v => v) : [''];
-              const dataUseYears = extractYears(row['Data use'] || '');
-              if (dataUseYears.length === 0) dataUseYears.push('');
+        const loadingStatus = document.getElementById('loadingStatus');
+        const statsDisplay = document.getElementById('statsDisplay');
+        try {
+            loadingStatus.textContent = 'Loading data from server...';
+            const response = await fetch('./data.csv');
+            if (!response.ok) {
+                // If the file is not found or other HTTP error, trigger fallback
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const csvText = await response.text();
+            Papa.parse(csvText, {
+                header: true,
+                skipEmptyLines: true,
+                dynamicTyping: false,
+                complete: function(results) {
+                    const parsedData = results.data;
+                    allData = parsedData.map(row => {
+                        // Ensure required fields exist, provide defaults if missing
+                        const date = row.Date || '';
+                        const publicationYear = date ? new Date(date).getFullYear() : null;
 
-              let combinedDataPoints = [];
-              const hasProviderData = providers.some(p => p !== '') || resolutions.some(r => r !== '') || platforms.some(p => p !== '') || representations.some(r => r !== '') || vizs.some(v => v !== '');
+                        const providers = row.Provider ? row.Provider.split(/[,;]/).map(p => p.trim()).filter(p => p) : [''];
+                        const resolutions = row.Resolution ? row.Resolution.split(/[,;]/).map(r => r.trim()).filter(r => r) : [''];
+                        const platforms = row.Platform ? row.Platform.split(/[,;]/).map(p => p.trim()).filter(p => p) : [''];
+                        const representations = row.Representation ? row.Representation.split(/[,;]/).map(r => r.trim()).filter(r => r) : [''];
+                        const vizs = row.Viz ? row.Viz.split(/[,;]/).map(v => v.trim()).filter(v => v) : [''];
 
-              if (!hasProviderData && dataUseYears.length > 0) {
-                dataUseYears.forEach(year => {
-                  combinedDataPoints.push({ dataUseYear: year, provider: '', platform: '', resolution: '', resolutionCategory: '', representation: '', viz: '' });
-                });
-              } else if (hasProviderData) {
-                dataUseYears.forEach(year => {
-                  const currentMaxLength = Math.max(providers.length, resolutions.length, platforms.length, representations.length, vizs.length);
-                  for (let i = 0; i < currentMaxLength; i++) {
-                    combinedDataPoints.push({
-                      dataUseYear: year,
-                      provider: providers[i] || providers[0] || '',
-                      platform: platforms[i] || platforms[0] || '',
-                      resolution: resolutions[i] || resolutions[0] || '',
-                      resolutionCategory: getMeterCategory(resolutions[i] || resolutions[0] || ''),
-                      representation: representations[i] || representations[0] || '',
-                      viz: vizs[i] || vizs[0] || ''
+                        const dataUseYears = extractYears(row['Data use'] || '');
+                        if (dataUseYears.length === 0) dataUseYears.push('');
+
+                        let combinedDataPoints = [];
+
+                        const hasProviderData = providers.some(p => p !== '') || resolutions.some(r => r !== '') || platforms.some(p => p !== '') ||
+                                                representations.some(r => r !== '') || vizs.some(v => v !== '');
+
+                        if (!hasProviderData && dataUseYears.length > 0) {
+                            dataUseYears.forEach(year => {
+                                combinedDataPoints.push({
+                                    dataUseYear: year,
+                                    provider: '',
+                                    platform: '',
+                                    resolution: '',
+                                    resolutionCategory: '',
+                                    representation: '',
+                                    viz: ''
+                                });
+                            });
+                        } else if (hasProviderData) {
+                            dataUseYears.forEach(year => {
+                                const currentMaxLength = Math.max(providers.length, resolutions.length, platforms.length, representations.length, vizs.length);
+                                for (let i = 0; i < currentMaxLength; i++) {
+                                    combinedDataPoints.push({
+                                        dataUseYear: year,
+                                        provider: providers[i] || providers[0] || '',
+                                        platform: platforms[i] || platforms[0] || '',
+                                        resolution: resolutions[i] || resolutions[0] || '',
+                                        resolutionCategory: getMeterCategory(resolutions[i] || resolutions[0] || ''),
+                                        representation: representations[i] || representations[0] || '',
+                                        viz: vizs[i] || vizs[0] || ''
+                                    });
+                                }
+                            });
+                        } else {
+                            combinedDataPoints.push({
+                                dataUseYear: '',
+                                provider: '',
+                                platform: '',
+                                resolution: '',
+                                resolutionCategory: '',
+                                viz: ''
+                            });
+                        }
+
+                        return {
+                            date: date,
+                            publicationYear: publicationYear,
+                            title: row.Title || '',
+                            link: row.Link || '',
+                            outlet: row.Outlet || '',
+                            country: row.Country || '',
+                            region: countryRegions[row.Country] || '',
+                            context: row.Context || '',
+                            category: row.Category || '',
+                            combinedDataPoints: combinedDataPoints,
+                        };
                     });
-                  }
-                });
-              } else {
-                combinedDataPoints.push({ dataUseYear: '', provider: '', platform: '', resolution: '', resolutionCategory: '', viz: '' });
-              }
+                    initializeFilters();
+                    filterTable();
+                    loadingStatus.style.display = 'none';
+                    statsDisplay.style.display = 'block';
+                }
+            });
+        } catch (error) {
+            console.error('Error loading data from backend, falling back to sample data:', error);
+            loadSampleData();
+        }
+    }
 
-              return {
+    function loadSampleData() {
+        const loadingStatus = document.getElementById('loadingStatus');
+        const statsDisplay = document.getElementById('statsDisplay');
+
+        const resolutionsList = ['<1m', '1-10m', '>10m'];
+        // const interactionsList = ['On-Scroll', 'Slider', 'Zoom']; // Removed
+
+        const sampleData = [
+          {
+            Date: '2024-03-15',
+            Title: 'Überschwemmungsgebiete Experts waarschuwen: Rusland bouwt lanceerinstallaties voor hypermoderne kernraket',
+            Link: 'http://example.com/urban-expansion',
+            Outlet: 'The New York Times',
+            Country: 'United States',
+            Context: 'Urban development patterns',
+            Category: 'Environment',
+            'Data use': '2023; 2024',
+            Provider: 'PENDING',
+            Platform: 'PENDING',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Optical; Hyperspectral',
+            Viz: 'RGB; NRG',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'Tutorial available'
+          },
+          {
+            Date: '2023-11-20',
+            Title: 'Deforestation in Amazon',
+            Link: 'http://example.com/deforestation',
+            Outlet: 'The Guardian',
+            Country: 'Brazil',
+            Context: 'Environmental monitoring',
+            Category: 'Environment',
+            'Data use': '2022',
+            Provider: 'ESA',
+            Platform: 'Sentinel-1',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Optical',
+            Viz: 'NDVI',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'N/A'
+          },
+          {
+            Date: '2024-01-05',
+            Title: 'Glacier Retreat in Alps',
+            Link: 'http://example.com/glacier-retreat',
+            Outlet: 'BBC',
+            Country: 'Germany',
+            Context: 'Climate change impact',
+            Category: 'Climate',
+            'Data use': '2020; 2024',
+            Provider: 'NASA',
+            Platform: 'MODIS',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Hyperspectral',
+            Viz: 'RGB',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'Data publicly available'
+          },
+          {
+            Date: '2023-09-01',
+            Title: 'Crop Yield Analysis',
+            Link: 'http://example.com/crop-yield',
+            Outlet: 'Reuters',
+            Country: 'India',
+            Context: 'Agriculture and food security',
+            Category: 'Agriculture',
+            'Data use': '2023',
+            Provider: 'USGS',
+            Platform: 'Landsat',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Radar',
+            Viz: 'NRG',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'Contact for data'
+          },
+          {
+            Date: '2024-02-10',
+            Title: 'Coastal Erosion Study',
+            Link: 'http://example.com/coastal-erosion',
+            Outlet: 'CNN',
+            Country: 'Japan',
+            Context: 'Disaster preparedness',
+            Category: 'Environment',
+            'Data use': '2024',
+            Provider: 'Airbus',
+            Platform: 'SPOT',
+            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
+            Representation: 'Optical',
+            Viz: 'NDVI',
+            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
+            'How To': 'Report access limited'
+          }
+          
+        ];
+        allData = sampleData.map(row => {
+            const date = row.Date || '';
+            const publicationYear = date ? new Date(date).getFullYear() : null;
+
+            const providers = row.Provider ? row.Provider.split(/[,;]/).map(p => p.trim()).filter(p => p) : [''];
+            const resolutions = row.Resolution ? row.Resolution.split(/[,;]/).map(r => r.trim()).filter(r => r) : [''];
+            const platforms = row.Platform ? row.Platform.split(/[,;]/).map(p => p.trim()).filter(p => p) : [''];
+            const representations = row.Representation ? row.Representation.split(/[,;]/).map(r => r.trim()).filter(r => r) : [''];
+            const vizs = row.Viz ? row.Viz.split(/[,;]/).map(v => v.trim()).filter(v => v) : [''];
+
+            const dataUseYears = extractYears(row['Data use'] || '');
+            if (dataUseYears.length === 0) dataUseYears.push('');
+
+            let combinedDataPoints = [];
+
+            const hasProviderData = providers.some(p => p !== '') || resolutions.some(r => r !== '') || platforms.some(p => p !== '') ||
+                                    representations.some(r => r !== '') || vizs.some(v => v !== '');
+
+            if (!hasProviderData && dataUseYears.length > 0) {
+                dataUseYears.forEach(year => {
+                    combinedDataPoints.push({
+                        dataUseYear: year,
+                        provider: '',
+                        platform: '',
+                        resolution: '',
+                        resolutionCategory: '',
+                        representation: '',
+                        viz: ''
+                    });
+                });
+            } else if (hasProviderData) {
+                dataUseYears.forEach(year => {
+                    const currentMaxLength = Math.max(providers.length, resolutions.length, platforms.length, representations.length, vizs.length);
+                    for (let i = 0; i < currentMaxLength; i++) {
+                        combinedDataPoints.push({
+                            dataUseYear: year,
+                            provider: providers[i] || providers[0] || '',
+                            platform: platforms[i] || platforms[0] || '',
+                            resolution: resolutions[i] || resolutions[0] || '',
+                            resolutionCategory: getMeterCategory(resolutions[i] || resolutions[0] || ''),
+                            representation: representations[i] || representations[0] || '',
+                            viz: vizs[i] || vizs[0] || ''
+                        });
+                    }
+                });
+            } else {
+                combinedDataPoints.push({
+                    dataUseYear: '',
+                    provider: '',
+                    platform: '',
+                    resolution: '',
+                    resolutionCategory: '',
+                    viz: ''
+                });
+            }
+
+            return {
                 date: date,
                 publicationYear: publicationYear,
                 title: row.Title || '',
@@ -1200,430 +1383,423 @@ document.getElementById('toYearInput').addEventListener('input', function () {
                 context: row.Context || '',
                 category: row.Category || '',
                 combinedDataPoints: combinedDataPoints,
-              };
-            });
-            initializeFilters();
-            filterTable();
-            loadingStatus.style.display = 'none';
-            statsDisplay.style.display = 'block';
-          }
+            };
         });
-      } catch (error) {
-        console.error('Error loading data from backend, falling back to sample data:', error);
-        loadSampleData();
-      }
+        initializeFilters();
+        filterTable();
+        loadingStatus.style.display = 'none';
+        statsDisplay.style.display = 'block';
     }
 
-    function loadSampleData() {
-      const loadingStatus = document.getElementById('loadingStatus');
-      const statsDisplay = document.getElementById('statsDisplay');
-      const resolutionsList = ['<1m', '1-10m', '>10m'];
-      // const interactionsList = ['On-Scroll', 'Slider', 'Zoom']; // Removed
-      const sampleData = [
-        { Date: '2024-03-15', Title: 'Überschwemmungsgebiete Experts waarschuwen: Rusland bouwt lanceerinstallaties voor hypermoderne kernraket', Link: 'http://example.com/urban-expansion', Outlet: 'The New York Times', Country: 'United States', Context: 'Urban development patterns', Category: 'Environment', 'Data use': '2023; 2024', Provider: 'Planet Labs; Maxar', Platform: 'Sentinel-2; Landsat', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical; Hyperspectral', Viz: 'RGB', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'Tutorial available' },
-        { Date: '2023-11-20', Title: 'Deforestation in Amazon', Link: 'http://example.com/deforestation', Outlet: 'The Guardian', Country: 'Brazil', Context: 'Environmental monitoring', Category: 'Environment', 'Data use': '2022', Provider: 'ESA', Platform: 'Sentinel-1', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical', Viz: 'NDVI', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'N/A' },
-        { Date: '2024-01-05', Title: 'Glacier Retreat in Alps', Link: 'http://example.com/glacier-retreat', Outlet: 'BBC', Country: 'Germany', Context: 'Climate change impact', Category: 'Climate', 'Data use': '2020; 2024', Provider: 'NASA', Platform: 'MODIS', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Hyperspectral', Viz: 'RGB', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'Data publicly available' },
-        { Date: '2023-09-01', Title: 'Crop Yield Analysis', Link: 'http://example.com/crop-yield', Outlet: 'Reuters', Country: 'India', Context: 'Agriculture and food security', Category: 'Agriculture', 'Data use': '2023', Provider: 'USGS', Platform: 'Landsat', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Radar', Viz: 'NRG', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'Contact for data' },
-        { Date: '2024-02-10', Title: 'Coastal Erosion Study', Link: 'http://example.com/coastal-erosion', Outlet: 'CNN', Country: 'Japan', Context: 'Disaster preparedness', Category: 'Environment', 'Data use': '2024', Provider: 'Airbus', Platform: 'SPOT', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical', Viz: 'NDVI', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'Report access limited' },
-        { Date: '2023-07-25', Title: 'Urban Population Density', Link: 'http://example.com/urban-density', Outlet: 'The New York Times', Country: 'France', Context: 'Urban planning', Category: 'Society', 'Data use': '2021', Provider: 'Planet Labs', Platform: 'SkySat', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical', Viz: 'Grayscale', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'Available on request' },
-        { Date: '2024-04-01', Title: 'Wildfire Extent Mapping', Link: 'http://example.com/wildfire-mapping', Outlet: 'Washington Post', Country: 'Australia', Context: 'Emergency response', Category: 'Disaster', 'Data use': '2024', Provider: 'Maxar', Platform: 'WorldView-3', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Thermal', Viz: 'Heatmap', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'Open source tools' },
-        { Date: '2023-10-10', Title: 'Arctic Ice Melt Monitoring', Link: 'http://example.com/arctic-ice', Outlet: 'The Guardian', Country: 'Canada', Context: 'Climate change research', Category: 'Climate', 'Data use': '2023', Provider: 'ESA', Platform: 'CryoSat-2', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Radar', Viz: 'Elevation Map', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'University access' },
-        { Date: '2024-01-20', Title: 'Volcanic Activity Analysis', Link: 'http://example.com/volcano', Outlet: 'BBC', Country: 'Italy', Context: 'Geological hazards', Category: 'Environment', 'Data use': '2023; 2024', Provider: 'NASA', Platform: 'Terra', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Infrared', Viz: 'False Color', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'GIS software required' },
-        { Date: '2023-08-12', Title: 'Drought Impact Assessment', Link: 'http://example.com/drought', Outlet: 'Reuters', Country: 'Egypt', Context: 'Water resource management', Category: 'Agriculture', 'Data use': '2022', Provider: 'USGS', Platform: 'Aqua', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Microwave', Viz: 'Spectral Index', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'Custom script' },
-        { Date: '2024-03-01', Title: 'Desertification Trends', Link: 'http://example.com/desertification', Outlet: 'Sky News', Country: 'Sudan', Context: 'Land degradation', Category: 'Environment', 'Data use': '2023; 2024', Provider: 'Airbus', Platform: 'Sentinel-2', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical', Viz: 'RGB', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'Provided by agency' },
-        { Date: '2023-06-18', Title: 'Urban Heat Island Effect', Link: 'http://example.com/heat-island', Outlet: 'CNN', Country: 'China', Context: 'Climate change in cities', Category: 'Climate', 'Data use': '2021; 2023', Provider: 'Planet Labs', Platform: 'Landsat', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Thermal', Viz: 'Heatmap', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'Academic paper' },
-        { Date: '2024-02-28', Title: 'Conflict Zone Damage Assessment', Link: 'http://example.com/conflict-damage', Outlet: 'The New York Times', Country: 'Syria', Context: 'Humanitarian crisis', Category: 'Conflict', 'Data use': '2024', Provider: 'Maxar', Platform: 'WorldView-2', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical', Viz: 'False Color', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'Classified' },
-        { Date: '2023-09-15', Title: 'Infrastructure Development', Link: 'http://example.com/infrastructure', Outlet: 'Washington Post', Country: 'Iraq', Context: 'Post-conflict reconstruction', Category: 'Development', 'Data use': '2022', Provider: 'ESA', Platform: 'Sentinel-1', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Radar', Viz: 'RGB', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'Public report' },
-        { Date: '2024-01-10', Title: 'Human Migration Patterns', Link: 'http://example.com/migration', Outlet: 'The Guardian', Country: 'Afghanistan', Context: 'Displacement and refugees', Category: 'Society', 'Data use': '2023', Provider: 'NASA', Platform: 'Suomi NPP', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Night Lights', Viz: 'Density Map', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'Research team contact' },
-        { Date: '2023-07-01', Title: 'Nuclear Site Monitoring', Link: 'http://example.com/nuclear', Outlet: 'BBC', Country: 'North Korea', Context: 'Non-proliferation efforts', Category: 'Security', 'Data use': '2023', Provider: 'USGS', Platform: 'Landsat', Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)], Representation: 'Optical', Viz: 'RGB', // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed 'How To': 'Intelligence access' }
-      ];
-
-      allData = sampleData.map(row => {
-        const date = row.Date || '';
-        const publicationYear = date ? new Date(date).getFullYear() : null;
-        const providers = row.Provider ? row.Provider.split(/[,;]/).map(p => p.trim()).filter(p => p) : [''];
-        const resolutions = row.Resolution ? row.Resolution.split(/[,;]/).map(r => r.trim()).filter(r => r) : [''];
-        const platforms = row.Platform ? row.Platform.split(/[,;]/).map(p => p.trim()).filter(p => p) : [''];
-        const representations = row.Representation ? row.Representation.split(/[,;]/).map(r => r.trim()).filter(r => r) : [''];
-        const vizs = row.Viz ? row.Viz.split(/[,;]/).map(v => v.trim()).filter(v => v) : [''];
-        const dataUseYears = extractYears(row['Data use'] || '');
-        if (dataUseYears.length === 0) dataUseYears.push('');
-
-        let combinedDataPoints = [];
-        const hasProviderData = providers.some(p => p !== '') || resolutions.some(r => r !== '') || platforms.some(p => p !== '') || representations.some(r => r !== '') || vizs.some(v => v !== '');
-
-        if (!hasProviderData && dataUseYears.length > 0) {
-          dataUseYears.forEach(year => {
-            combinedDataPoints.push({ dataUseYear: year, provider: '', platform: '', resolution: '', resolutionCategory: '', representation: '', viz: '' });
-          });
-        } else if (hasProviderData) {
-          dataUseYears.forEach(year => {
-            const currentMaxLength = Math.max(providers.length, resolutions.length, platforms.length, representations.length, vizs.length);
-            for (let i = 0; i < currentMaxLength; i++) {
-              combinedDataPoints.push({
-                dataUseYear: year,
-                provider: providers[i] || providers[0] || '',
-                platform: platforms[i] || platforms[0] || '',
-                resolution: resolutions[i] || resolutions[0] || '',
-                resolutionCategory: getMeterCategory(resolutions[i] || resolutions[0] || ''),
-                representation: representations[i] || representations[0] || '',
-                viz: vizs[i] || vizs[0] || ''
-              });
-            }
-          });
-        } else {
-          combinedDataPoints.push({ dataUseYear: '', provider: '', platform: '', resolution: '', resolutionCategory: '', viz: '' });
-        }
-
-        return {
-          date: row.Date || '',
-          publicationYear: publicationYear,
-          title: row.Title || '',
-          link: row.Link || '',
-          outlet: row.Outlet || '',
-          country: row.Country || '',
-          region: countryRegions[row.Country] || '',
-          context: row.Context || '',
-          category: row.Category || '',
-          combinedDataPoints: combinedDataPoints,
-        };
-      });
-
-      initializeFilters();
-      filterTable();
-      loadingStatus.style.display = 'none';
-      statsDisplay.style.display = 'block';
-    }
 
     function initializeFilters() {
-      const allOutlets = new Set();
-      const allProviders = new Set();
-      const allVizs = new Set();
-      const allYears = new Set();
-      const allRepresentations = new Set();
-      const allFocuses = new Set();
+        const uniqueOutlets = [...new Set(allData.map(item => item.outlet).filter(o => o))];
+        populatePills('outlet-filter-pills', uniqueOutlets, 'outlet');
 
-      allData.forEach(item => {
-        if (item.outlet) allOutlets.add(item.outlet);
-        if (item.country) allFocuses.add(item.country); // Collect all unique countries for "Country/Area" filter
+        const uniqueProviders = [...new Set(allData.flatMap(item => item.combinedDataPoints.map(cdp => cdp.provider).filter(p => p)))];
+        populatePills('provider-filter-pills', uniqueProviders, 'provider');
 
-        item.combinedDataPoints.forEach(dp => {
-            if (dp.provider) allProviders.add(dp.provider);
-            if (dp.viz) allVizs.add(dp.viz);
-            if (dp.dataUseYear) allYears.add(dp.dataUseYear);
-            if (dp.representation) allRepresentations.add(dp.representation);
-        });
-      });
+        const uniqueVizs = [...new Set(allData.flatMap(item => item.combinedDataPoints.map(cdp => cdp.viz).filter(v => v)))];
+        populatePills('viz-filter-pills', uniqueVizs, 'viz');
 
-      populateFilterPills('outlet-filter-pills', Array.from(allOutlets).sort(), 'outlet');
-      populateFilterPills('provider-filter-pills', Array.from(allProviders).sort(), 'provider');
-      populateFilterPills('viz-filter-pills', Array.from(allVizs).sort(), 'viz');
-      populateFilterPills('years-filter-pills', Array.from(allYears).sort(), 'years');
-      populateFilterPills('representation-filter-pills', Array.from(allRepresentations).sort(), 'representation');
-      populateFilterPills('focus-filter-pills', Array.from(allFocuses).sort(), 'focus'); // Populate "Country/Area" filter
+        const uniqueRepresentations = [...new Set(allData.flatMap(item => item.combinedDataPoints.map(cdp => cdp.representation).filter(r => r)))];
+        populatePills('representation-filter-pills', uniqueRepresentations, 'representation');
+
+        // Removed interaction filter initialization
+        // const uniqueInteractions = [...new Set(allData.flatMap(item => item.combinedDataPoints.map(cdp => cdp.interaction).filter(i => i)))];
+        // populatePills('interaction-filter-pills', uniqueInteractions, 'interaction');
+
+        // Populate Data Use Years
+        const uniqueYears = [...new Set(allData.flatMap(item => item.combinedDataPoints.map(cdp => cdp.dataUseYear).filter(y => y)))].sort().reverse();
+        populatePills('years-filter-pills', uniqueYears, 'years');
+
+        // Populate Focus Countries dynamically with all initially
+        const allUniqueCountries = [...new Set(allData.map(item => item.country).filter(c => c))].sort();
+        populatePills('focus-filter-pills', allUniqueCountries, 'focus');
     }
 
-    function populateFilterPills(containerId, items, dataType) {
-      const container = document.getElementById(containerId);
-      container.innerHTML = `<button class="pill active" data-type="${dataType}" data-value="all">All</button>`;
-      items.forEach(item => {
-        const button = document.createElement('button');
-        button.classList.add('pill');
-        button.dataset.type = dataType;
-        button.dataset.value = item;
-        button.textContent = item;
-        container.appendChild(button);
-      });
-      container.querySelectorAll('.pill').forEach(pill => {
-        pill.addEventListener('click', handlePillClick);
-      });
+    function populatePills(containerId, values, type) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = ''; // Clear existing pills
+
+        // Create and append the "All" pill first
+        const allButton = document.createElement('button');
+        allButton.classList.add('pill', 'active');
+        allButton.setAttribute('data-type', type);
+        allButton.setAttribute('data-value', 'all');
+        allButton.textContent = 'All';
+        allButton.addEventListener('click', handlePillClick);
+        container.appendChild(allButton);
+
+        // Append other values
+        values.forEach(value => {
+            if (value && value !== 'all') { // Ensure 'all' isn't added again
+                const button = document.createElement('button');
+                button.classList.add('pill');
+                button.setAttribute('data-type', type);
+                button.setAttribute('data-value', value);
+                button.textContent = value;
+                button.addEventListener('click', handlePillClick);
+                container.appendChild(button);
+            }
+        });
     }
 
     function handlePillClick(event) {
-      const clickedPill = event.target;
-      const dataType = clickedPill.dataset.type;
-      const value = clickedPill.dataset.value;
-      const parentContainer = clickedPill.closest('.filter-pills');
+        const clickedPill = event.target;
+        const type = clickedPill.getAttribute('data-type');
+        const value = clickedPill.getAttribute('data-value');
+        const parentContainer = clickedPill.closest('.filter-pills');
 
-      if (value === 'all') {
-        parentContainer.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-        clickedPill.classList.add('active');
-        if (dataType === 'region') {
-          selectedRegion = 'all';
-          document.getElementById('focus-filter-section').style.display = 'none';
-          document.querySelector('#focus-filter-pills .pill[data-value="all"]').click(); // Reset focus filter
-        } else if (dataType === 'focus') {
-          selectedFocuses = ['all'];
-        } else if (dataType === 'years') {
-          selectedYears = ['all'];
-        }
-      } else {
-        parentContainer.querySelector('.pill[data-value="all"]').classList.remove('active');
-        clickedPill.classList.toggle('active');
-
-        // Special handling for region and focus (country) filters
-        if (dataType === 'region') {
+        if (type === 'region') {
             selectedRegion = value;
+            document.querySelectorAll('.pill[data-type="region"]').forEach(pill => pill.classList.remove('active'));
+            clickedPill.classList.add('active');
+
             const focusFilterSection = document.getElementById('focus-filter-section');
-            if (value !== 'all') {
-                focusFilterSection.style.display = 'block';
-                // Filter and re-populate country/area pills based on selected region
-                const filteredFocuses = Array.from(new Set(allData
-                    .filter(item => item.region === selectedRegion)
-                    .map(item => item.country)))
-                    .sort();
-                populateFilterPills('focus-filter-pills', filteredFocuses, 'focus');
-            } else {
+            
+            if (selectedRegion === 'all') {
                 focusFilterSection.style.display = 'none';
-                // Reset to all countries when region is 'all'
-                const allFocuses = Array.from(new Set(allData.map(item => item.country))).sort();
-                populateFilterPills('focus-filter-pills', allFocuses, 'focus');
-            }
-            selectedFocuses = ['all']; // Reset focus selection on region change
-        } else if (dataType === 'focus') {
-            selectedFocuses = Array.from(parentContainer.querySelectorAll('.pill.active'))
-                                .map(p => p.dataset.value)
-                                .filter(val => val !== 'all');
-            if (selectedFocuses.length === 0) {
+                const allUniqueCountries = [...new Set(allData.map(item => item.country).filter(c => c))].sort();
+                populatePills('focus-filter-pills', allUniqueCountries, 'focus');
                 selectedFocuses = ['all'];
-                parentContainer.querySelector('.pill[data-value="all"]').classList.add('active');
+            } else {
+                focusFilterSection.style.display = 'block';
+                const countriesInSelectedRegion = [...new Set(allData
+                    .filter(item => item.region === selectedRegion)
+                    .map(item => item.country)
+                    .filter(c => c)
+                )].sort();
+                populatePills('focus-filter-pills', countriesInSelectedRegion, 'focus');
+                selectedFocuses = ['all']; // Reset to 'all' for the newly filtered countries
             }
-        } else if (dataType === 'years') {
-            selectedYears = Array.from(parentContainer.querySelectorAll('.pill.active'))
-                            .map(p => p.dataset.value)
-                            .filter(val => val !== 'all');
-            if (selectedYears.length === 0) {
+        } else if (type === 'focus') {
+            if (value === 'all') {
+                document.querySelectorAll('.pill[data-type="focus"]').forEach(pill => pill.classList.remove('active'));
+                clickedPill.classList.add('active');
+                selectedFocuses = ['all'];
+            } else {
+                const allPill = document.querySelector('.pill[data-type="focus"][data-value="all"]');
+                if (allPill.classList.contains('active')) {
+                    allPill.classList.remove('active');
+                    selectedFocuses = [value];
+                } else {
+                    if (clickedPill.classList.contains('active')) {
+                        selectedFocuses = selectedFocuses.filter(f => f !== value);
+                    } else {
+                        selectedFocuses.push(value);
+                    }
+                }
+                clickedPill.classList.toggle('active');
+                if (selectedFocuses.length === 0) {
+                    allPill.classList.add('active');
+                    selectedFocuses = ['all'];
+                }
+            }
+        } else if (type === 'years') {
+            if (value === 'all') {
+                document.querySelectorAll('.pill[data-type="years"]').forEach(pill => pill.classList.remove('active'));
+                clickedPill.classList.add('active');
                 selectedYears = ['all'];
-                parentContainer.querySelector('.pill[data-value="all"]').classList.add('active');
+            } else {
+                const allPill = document.querySelector('.pill[data-type="years"][data-value="all"]');
+                if (allPill.classList.contains('active')) {
+                    allPill.classList.remove('active');
+                    selectedYears = [value];
+                } else {
+                    if (clickedPill.classList.contains('active')) {
+                        selectedYears = selectedYears.filter(y => y !== value);
+                    } else {
+                        selectedYears.push(value);
+                    }
+                }
+                clickedPill.classList.toggle('active');
+                if (selectedYears.length === 0) {
+                    allPill.classList.add('active');
+                    selectedYears = ['all'];
+                }
+            }
+        } else if (type === 'publicationYear') {
+            document.getElementById('fromYearInput').value = '';
+            document.getElementById('toYearInput').value = '';
+            document.querySelectorAll('.pill[data-type="publicationYear"]').forEach(pill => pill.classList.remove('active'));
+            clickedPill.classList.add('active');
+        } else {
+            if (value === 'all') {
+                parentContainer.querySelectorAll('.pill').forEach(pill => pill.classList.remove('active'));
+                clickedPill.classList.add('active');
+            } else {
+                const allPill = parentContainer.querySelector('.pill[data-value="all"]');
+                if (allPill && allPill.classList.contains('active')) {
+                    allPill.classList.remove('active');
+                }
+                clickedPill.classList.toggle('active');
+
+                if (!parentContainer.querySelector('.pill.active')) {
+                    allPill.classList.add('active');
+                }
             }
         }
-      }
-      filterTable();
+        filterTable();
     }
 
-    function toggleAllFilters(forceClose) {
-        document.querySelectorAll('.filter-group').forEach(group => {
-            if (forceClose) {
+    function toggleAllFilters(forceClose = false) {
+        const filterGroups = document.querySelectorAll('.filter-group');
+        filterGroups.forEach(group => {
+            if (!filtersActive || forceClose) {
                 group.classList.remove('active');
             } else {
-                group.classList.toggle('active');
+                group.classList.remove('active');
             }
         });
         adjustContentViewHeight();
     }
 
     function updateView() {
-      const tableView = document.getElementById('tableViewContainer');
-      const feedView = document.getElementById('feedViewContainer');
+        const tableViewContainer = document.getElementById('tableViewContainer');
+        const feedViewContainer = document.getElementById('feedViewContainer'); // Changed from titleOnlyViewContainer
 
-      if (currentView === 'table') {
-        tableView.classList.remove('hidden');
-        feedView.classList.add('hidden');
-      } else {
-        tableView.classList.add('hidden');
-        feedView.classList.remove('hidden');
-      }
-      filterTable(); // Re-render content for the active view
+        // Hide all view containers first
+        tableViewContainer.classList.add('hidden');
+        feedViewContainer.classList.add('hidden');
+
+        // Show the active view container
+        if (currentView === 'table') {
+            tableViewContainer.classList.remove('hidden');
+        } else if (currentView === 'feed') { // Changed from 'title'
+            feedViewContainer.classList.remove('hidden');
+        }
+        filterTable();
+        adjustContentViewHeight();
     }
 
-    function filterTable() {
-      const tbody = document.querySelector('#tableViewContainer tbody');
-      const feedViewContainer = document.getElementById('feedViewContainer');
-      tbody.innerHTML = '';
-      feedViewContainer.innerHTML = '';
 
-      const activeOutletPills = Array.from(document.querySelectorAll('#outlet-filter-pills .pill.active'))
-                                  .map(p => p.dataset.value)
-                                  .filter(value => value !== 'all');
-      const activeResolutionPills = Array.from(document.querySelectorAll('#meters-filter-pills .pill.active'))
-                                    .map(p => p.dataset.value)
-                                    .filter(value => value !== 'all');
-      const activeVizPills = Array.from(document.querySelectorAll('#viz-filter-pills .pill.active'))
-                               .map(p => p.dataset.value)
-                               .filter(value => value !== 'all');
-      const activeYearsPills = Array.from(document.querySelectorAll('#years-filter-pills .pill.active'))
-                               .map(p => p.dataset.value)
-                               .filter(value => value !== 'all');
-      const activeRepresentationPills = Array.from(document.querySelectorAll('#representation-filter-pills .pill.active'))
-                                        .map(p => p.dataset.value)
-                                        .filter(value => value !== 'all');
-      const activeProviderPills = Array.from(document.querySelectorAll('#provider-filter-pills .pill.active'))
-                                   .map(p => p.dataset.value)
-                                   .filter(value => value !== 'all');
+    function renderTable() {
+        const tbody = document.querySelector('table tbody');
+        tbody.innerHTML = '';
 
-      const fromYear = parseInt(document.getElementById('fromYearInput').value);
-      const toYear = parseInt(document.getElementById('toYearInput').value);
+        const fromYear = parseInt(document.getElementById('fromYearInput').value);
+        const toYear = parseInt(document.getElementById('toYearInput').value);
 
-      let filteredData = allData.filter(item => {
-        // Apply filter toggle switch logic
-        if (!filtersActive) {
-            return true; // If filters are inactive, show all items
-        }
+        const selectedOutlets = Array.from(document.querySelectorAll('.pill[data-type="outlet"].active'))
+            .map(pill => pill.getAttribute('data-value'))
+            .filter(value => value !== 'all');
+        const allOutletsActive = selectedOutlets.length === 0 || selectedOutlets.includes('all');
 
-        // Publication Year Range Filter
-        if ((!isNaN(fromYear) && item.publicationYear < fromYear) ||
-            (!isNaN(toYear) && item.publicationYear > toYear)) {
-            return false;
-        }
+        const filteredResults = [];
 
-        // Region Filter
-        if (selectedRegion !== 'all' && item.region !== selectedRegion) {
-            return false;
-        }
+        allData.forEach(item => {
+            const visibleCombinedDataPoints = item.combinedDataPoints.filter(cdp => {
+                return applyAllFiltersToItemAndCombinedDataPoint(item, cdp, fromYear, toYear, allOutletsActive, selectedOutlets);
+            });
 
-        // Country/Area Filter (focus)
-        if (selectedFocuses.length > 0 && selectedFocuses[0] !== 'all' && !selectedFocuses.includes(item.country)) {
-            return false;
-        }
-
-        // Check if any of the combinedDataPoints match the data-related filters
-        const dataPointMatches = item.combinedDataPoints.some(dp => {
-            const matchesResolution = activeResolutionPills.length === 0 || activeResolutionPills.includes(dp.resolutionCategory);
-            const matchesViz = activeVizPills.length === 0 || activeVizPills.includes(dp.viz);
-            const matchesYear = activeYearsPills.length === 0 || activeYearsPills.includes(dp.dataUseYear);
-            const matchesRepresentation = activeRepresentationPills.length === 0 || activeRepresentationPills.includes(dp.representation);
-            const matchesProvider = activeProviderPills.length === 0 || activeProviderPills.includes(dp.provider);
-            
-            return matchesResolution && matchesViz && matchesYear && matchesRepresentation && matchesProvider;
+            if (visibleCombinedDataPoints.length > 0) {
+                filteredResults.push({ item: item, visibleCombinedDataPoints: visibleCombinedDataPoints });
+            }
         });
 
-        if (!dataPointMatches && (activeResolutionPills.length > 0 || activeVizPills.length > 0 || activeYearsPills.length > 0 || activeRepresentationPills.length > 0 || activeProviderPills.length > 0)) {
-            return false;
-        }
+        filteredResults.forEach((result, articleIndex) => {
+            const item = result.item;
+            const visibleCombinedDataPoints = result.visibleCombinedDataPoints;
+            const rowspan = visibleCombinedDataPoints.length;
 
-        // Outlet Filter
-        if (activeOutletPills.length > 0 && !activeOutletPills.includes(item.outlet)) {
-          return false;
-        }
+            visibleCombinedDataPoints.forEach((cdp, cdpIndex) => {
+                const row = document.createElement('tr');
+                row.setAttribute('data-original-index', allData.indexOf(item));
+                row.setAttribute('data-combined-data-point-index', cdpIndex);
 
-        return true;
-      });
-
-      filteredData.sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort by date, newest first
-
-      let currentArticleLink = null;
-      let articleRowCount = 0;
-
-      filteredData.forEach((item, index) => {
-        // Table View Rendering
-        if (currentView === 'table') {
-            item.combinedDataPoints.forEach((dp, dpIndex) => {
-                const tr = document.createElement('tr');
-                tr.classList.add('article-row'); // Add class for all rows that are part of an article
-
-                // Add article-start class for the first row of each article
-                if (dpIndex === 0) {
-                    tr.classList.add('article-start');
+                if (cdpIndex === 0) {
+                    row.classList.add('article-start');
                 }
 
-                // Add last-cdp-of-article for the very last combined data point row of an article
-                if (dpIndex === item.combinedDataPoints.length - 1) {
-                    tr.classList.add('last-cdp-of-article');
+                if (cdpIndex === visibleCombinedDataPoints.length - 1) {
+                    row.classList.add('last-cdp-of-article');
                 }
 
-                if (dpIndex === 0) {
-                    const dateTd = document.createElement('td');
-                    dateTd.textContent = item.date;
-                    tr.appendChild(dateTd);
-
-                    const titleTd = document.createElement('td');
-                    titleTd.textContent = item.title;
-                    tr.appendChild(titleTd);
-
-                    const linkTd = document.createElement('td');
-                    if (item.link) {
-                        const linkA = document.createElement('a');
-                        linkA.href = item.link;
-                        linkA.textContent = 'Link';
-                        linkA.target = "_blank";
-                        linkTd.appendChild(linkA);
-                    }
-                    tr.appendChild(linkTd);
-
-                    const outletTd = document.createElement('td');
-                    outletTd.textContent = item.outlet;
-                    tr.appendChild(outletTd);
-
-                    const countryTd = document.createElement('td');
-                    countryTd.textContent = item.country;
-                    tr.appendChild(countryTd);
-
-                    const contextTd = document.createElement('td');
-                    contextTd.textContent = item.context;
-                    tr.appendChild(contextTd);
-
-                    const categoryTd = document.createElement('td');
-                    categoryTd.textContent = item.category;
-                    tr.appendChild(categoryTd);
+                if (cdpIndex === 0) {
+                    row.innerHTML = `
+                        <td rowspan="${rowspan}">${item.date}</td>
+                        <td rowspan="${rowspan}">${item.title}</td>
+                        <td rowspan="${rowspan}"><a href="${item.link}" target="_blank">Link</a></td>
+                        <td rowspan="${rowspan}">${item.outlet}</td>
+                        <td rowspan="${rowspan}">${item.country}</td>
+                        <td rowspan="${rowspan}">${item.context}</td>
+                        <td rowspan="${rowspan}">${item.category}</td>
+                        <td class="data-detail-cell">${cdp.dataUseYear}</td>
+                        <td class="data-detail-cell ${cdp.provider === 'PENDING' ? 'pending-text' : ''}">${cdp.provider}</td>
+                        <td class="data-detail-cell ${cdp.platform === 'PENDING' ? 'pending-text' : ''}">${cdp.platform}</td>
+                        <td class="data-detail-cell">${cdp.representation}</td>
+                        <td class="data-detail-cell">${cdp.resolution}</td>
+                        <td class="data-detail-cell">${cdp.viz}</td>
+                    `;
                 } else {
-                    // For subsequent rows of the same article, create empty cells for the main columns
-                    for (let i = 0; i < 7; i++) {
-                        tr.appendChild(document.createElement('td'));
-                    }
+                    row.innerHTML = `
+                        <td class="data-detail-cell">${cdp.dataUseYear}</td>
+                        <td class="data-detail-cell ${cdp.provider === 'PENDING' ? 'pending-text' : ''}">${cdp.provider}</td>
+                        <td class="data-detail-cell ${cdp.platform === 'PENDING' ? 'pending-text' : ''}">${cdp.platform}</td>
+                        <td class="data-detail-cell">${cdp.representation}</td>
+                        <td class="data-detail-cell">${cdp.resolution}</td>
+                        <td class="data-detail-cell">${cdp.viz}</td>
+                    `;
                 }
-
-                const dataUseTd = document.createElement('td');
-                dataUseTd.classList.add('data-detail-cell'); // Apply the specific class
-                dataUseTd.textContent = dp.dataUseYear;
-                tr.appendChild(dataUseTd);
-
-                const providerTd = document.createElement('td');
-                providerTd.classList.add('data-detail-cell'); // Apply the specific class
-                providerTd.textContent = dp.provider;
-                tr.appendChild(providerTd);
-
-                const platformTd = document.createElement('td');
-                platformTd.classList.add('data-detail-cell'); // Apply the specific class
-                platformTd.textContent = dp.platform;
-                tr.appendChild(platformTd);
-
-                const sensorTd = document.createElement('td');
-                sensorTd.classList.add('data-detail-cell'); // Apply the specific class
-                sensorTd.textContent = dp.sensor || ''; // Placeholder, as sensor isn't in sample data
-                tr.appendChild(sensorTd);
-
-                const resTd = document.createElement('td');
-                resTd.classList.add('data-detail-cell'); // Apply the specific class
-                resTd.textContent = dp.resolution;
-                tr.appendChild(resTd);
-
-                const vizTd = document.createElement('td');
-                vizTd.classList.add('data-detail-cell'); // Apply the specific class
-                vizTd.textContent = dp.viz;
-                tr.appendChild(vizTd);
-
-                tbody.appendChild(tr);
+                tbody.appendChild(row);
             });
-        }
-        // Feed View Rendering
-        else if (currentView === 'feed') {
-          const articleItem = document.createElement('div');
-          articleItem.classList.add('article-item');
-
-          const titleLink = document.createElement('a');
-          titleLink.href = item.link;
-          titleLink.target = "_blank";
-          titleLink.textContent = item.title;
-          articleItem.appendChild(titleLink);
-
-          const detailsDiv = document.createElement('div');
-          detailsDiv.classList.add('article-details');
-          detailsDiv.textContent = `${item.date} | ${item.outlet} | ${item.country}`;
-          articleItem.appendChild(detailsDiv);
-
-          feedViewContainer.appendChild(articleItem);
-        }
-      });
-      updateFilterCount(filteredData.length);
+        });
+        updateFilterCount(filteredResults.length);
     }
 
+    function renderFeedOnlyView() { // Renamed from renderTitleOnlyView
+        let feedContainer = document.getElementById('feedViewContainer'); // Renamed ID
+        if (!feedContainer) { // Create if it doesn't exist
+            feedContainer = document.createElement('div');
+            feedContainer.id = 'feedViewContainer';
+            feedContainer.classList.add('feed-view-container'); // Renamed class
+            document.body.appendChild(feedContainer);
+        }
+        feedContainer.innerHTML = '';
+
+        const fromYear = parseInt(document.getElementById('fromYearInput').value);
+        const toYear = parseInt(document.getElementById('toYearInput').value);
+
+        const selectedOutlets = Array.from(document.querySelectorAll('.pill[data-type="outlet"].active'))
+            .map(pill => pill.getAttribute('data-value'))
+            .filter(value => value !== 'all');
+        const allOutletsActive = selectedOutlets.length === 0 || selectedOutlets.includes('all');
+
+        const filteredArticles = []; // Renamed from filteredTitles
+        const uniqueArticleTitles = new Set(); // To ensure unique articles
+
+        allData.forEach(item => {
+            const hasMatchingCdp = item.combinedDataPoints.some(cdp => {
+                return applyAllFiltersToItemAndCombinedDataPoint(item, cdp, fromYear, toYear, allOutletsActive, selectedOutlets);
+            });
+
+            if (hasMatchingCdp && item.title && !uniqueArticleTitles.has(item.title)) {
+                filteredArticles.push(item); // Push the entire item
+                uniqueArticleTitles.add(item.title);
+            }
+        });
+
+        if (filteredArticles.length === 0) {
+            feedContainer.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">No articles found matching the selected filters.</p>';
+        } else {
+            filteredArticles.forEach(item => {
+                const articleWrapper = document.createElement('div');
+                articleWrapper.classList.add('article-item'); // Apply main styling
+
+                const articleTitle = document.createElement('div');
+                articleTitle.classList.add('article-title'); // Add a class for the title text if needed
+                articleTitle.innerHTML = `<a href="${item.link}" target="_blank">${item.title}</a>`;
+
+                const articleDetails = document.createElement('div');
+                articleDetails.classList.add('article-details');
+
+                let detailsParts = [];
+                if (item.outlet) detailsParts.push(item.outlet);
+                if (item.date) detailsParts.push(item.date);
+
+                articleDetails.textContent = detailsParts.join(', ');
+
+                articleWrapper.appendChild(articleTitle);
+                articleWrapper.appendChild(articleDetails);
+
+                feedContainer.appendChild(articleWrapper);
+            });
+        }
+        updateFilterCount(filteredArticles.length);
+    }
+
+
+    function applyAllFiltersToItemAndCombinedDataPoint(item, cdp, fromYear, toYear, allOutletsActive, selectedOutlets) {
+        if (!filtersActive) return true;
+
+        const outletMatch = allOutletsActive || selectedOutlets.includes(item.outlet);
+        const regionMatch = (selectedRegion === 'all' || item.region === selectedRegion);
+        const countryMatch = (selectedFocuses.includes('all') || selectedFocuses.includes(item.country));
+
+        let publicationYearMatch = true;
+        const publicationYearPillAllActive = document.querySelector('.pill[data-type="publicationYear"][data-value="all"]').classList.contains('active');
+
+        if (!publicationYearPillAllActive) {
+            if (item.publicationYear !== null) {
+                if (fromYear && item.publicationYear < fromYear) {
+                    publicationYearMatch = false;
+                }
+                if (toYear && item.publicationYear > toYear) {
+                    publicationYearMatch = false;
+                }
+            } else {
+                publicationYearMatch = false; // If no publication year, it doesn't match a specific range
+            }
+        }
+
+
+        const providerPills = document.querySelectorAll('.pill[data-type="provider"].active');
+        const allProvidersActive = Array.from(providerPills).some(pill => pill.getAttribute('data-value') === 'all');
+        const selectedProviders = Array.from(providerPills)
+            .map(pill => pill.getAttribute('data-value'))
+            .filter(value => value !== 'all');
+
+        const resolutionCategoryPills = document.querySelectorAll('.pill[data-type="resolutionCategory"].active');
+        const allResolutionCategoriesActive = Array.from(resolutionCategoryPills).some(pill => pill.getAttribute('data-value') === 'all');
+        const selectedResolutionCategories = Array.from(resolutionCategoryPills)
+            .map(pill => pill.getAttribute('data-value'))
+            .filter(value => value !== 'all');
+
+        const yearsPills = document.querySelectorAll('.pill[data-type="years"].active');
+        const allYearsActive = Array.from(yearsPills).some(pill => pill.getAttribute('data-value') === 'all');
+        const currentSelectedYears = Array.from(yearsPills)
+                                    .map(pill => pill.getAttribute('data-value'))
+                                    .filter(value => value !== 'all');
+        selectedYears = currentSelectedYears.length === 0 && !allYearsActive ? ['all'] : currentSelectedYears;
+
+
+        const vizPills = document.querySelectorAll('.pill[data-type="viz"].active');
+        const allVizActive = Array.from(vizPills).some(pill => pill.getAttribute('data-value') === 'all');
+        const selectedViz = Array.from(vizPills)
+            .map(pill => pill.getAttribute('data-value'))
+            .filter(value => value !== 'all');
+
+        const representationPills = document.querySelectorAll('.pill[data-type="representation"].active');
+        const allRepresentationsActive = Array.from(representationPills).some(pill => pill.getAttribute('data-value') === 'all');
+        const selectedRepresentations = Array.from(representationPills)
+            .map(pill => pill.getAttribute('data-value'))
+            .filter(value => value !== 'all');
+
+        // Removed interaction filter logic
+        // const interactionPills = document.querySelectorAll('.pill[data-type="interaction"].active');
+        // const allInteractionsActive = Array.from(interactionPills).some(pill => pill.getAttribute('data-value') === 'all');
+        // const selectedInteractions = Array.from(interactionPills)
+        //     .map(pill => pill.getAttribute('data-value'))
+        //     .filter(value => value !== 'all');
+
+        const dataUseYearMatch = allYearsActive || selectedYears.includes(cdp.dataUseYear);
+        const providerMatch = allProvidersActive || selectedProviders.includes(cdp.provider);
+        const resolutionCategoryMatch = allResolutionCategoriesActive || selectedResolutionCategories.includes(cdp.resolutionCategory);
+        const vizMatch = allVizActive || selectedViz.includes(cdp.viz);
+        const representationMatch = allRepresentationsActive || selectedRepresentations.includes(cdp.representation);
+        // const interactionMatch = allInteractionsActive || selectedInteractions.includes(cdp.interaction); // Removed
+
+        return outletMatch && regionMatch && countryMatch && publicationYearMatch &&
+               dataUseYearMatch && providerMatch && resolutionCategoryMatch &&
+               vizMatch && representationMatch;
+    }
+
+
+    function filterTable() {
+        if (currentView === 'table') {
+            renderTable();
+        } else {
+            renderFeedOnlyView(); // Call the new feed rendering function
+        }
+    }
 
     function updateFilterCount(filteredCount) {
       const totalCount = allData.length;
       const statsDisplay = document.getElementById('statsDisplay');
       if (statsDisplay) {
         // Determine if any filters are actively narrowing down the literature data
-        const hasActiveFilters = document.querySelectorAll('.filter-pills .pill.active:not([data-value=\"all\"])').length > 0 ||
+        const hasActiveFilters = document.querySelectorAll('.filter-pills .pill.active:not([data-value="all"])').length > 0 ||
                                  document.getElementById('fromYearInput').value !== '' ||
                                  document.getElementById('toYearInput').value !== '';
 
@@ -1633,10 +1809,10 @@ document.getElementById('toYearInput').addEventListener('input', function () {
         if (currentView === 'table' || currentView === 'feed') { // Apply to both table and feed views
             if (hasActiveFilters && filtersActive) {
                 // Now using the CSS class for spacing instead of inline style
-                statsDisplay.innerHTML = `Articles:<span class=\"${numberSpanClass}\">${filteredCount}</span><sup style=\"font-size: 0.5em; vertical-align: super; color: lightgrey;\">/<span class=\"${numberSpanClass}\">${totalCount}</span></sup>`;
+                statsDisplay.innerHTML = `Articles:<span class="${numberSpanClass}">${filteredCount}</span><sup style="font-size: 0.5em; vertical-align: super; color: lightgrey;">/<span class="${numberSpanClass}">${totalCount}</span></sup>`;
             } else {
                 // Now using the CSS class for spacing instead of inline style
-                statsDisplay.innerHTML = `Articles:<span class=\"${numberSpanClass}\">${totalCount}</span>`;
+                statsDisplay.innerHTML = `Articles:<span class="${numberSpanClass}">${totalCount}</span>`;
             }
         }
       }
