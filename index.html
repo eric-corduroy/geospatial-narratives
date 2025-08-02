@@ -55,9 +55,7 @@
     .nav a.active {
       color: #000; /* Changed from #5f56ff to #000 */
     }
-    .pending-text {
-    color: #1900ff; /* Or any color you prefer, e.g., orange, red, etc. */
-  }
+  
     .csv-upload {
       display: none;
     }
@@ -566,6 +564,9 @@
       'GRAD' 0,
       'opsz' 24
     }
+      .pending-text {
+    color: #1900ff; /* Or any color you prefer, e.g., orange, red, etc. */
+  }
 
     /* --- Responsive Design --- */
 
@@ -1237,12 +1238,12 @@ document.getElementById('toYearInput').addEventListener('input', function () {
             Country: 'United States',
             Context: 'Urban development patterns',
             Category: 'Environment',
-            'Data use': '2023; 2024',
+            'Data use': '2022; 2023',
             Provider: 'PENDING',
             Platform: 'PENDING',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Optical; Hyperspectral',
-            Viz: 'RGB; NRG',
+            Resolution: 'PENDING',
+            Representation: 'PENDING',
+            Viz: 'PENDING',
             // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
             'How To': 'Tutorial available'
           },
@@ -1625,21 +1626,21 @@ document.getElementById('toYearInput').addEventListener('input', function () {
                         <td rowspan="${rowspan}">${item.country}</td>
                         <td rowspan="${rowspan}">${item.context}</td>
                         <td rowspan="${rowspan}">${item.category}</td>
-                        <td class="data-detail-cell">${cdp.dataUseYear}</td>
+                        <td class="data-detail-cell ${cdp.dataUseYear === 'PENDING' ? 'pending-text' : ''}">${cdp.dataUseYear}</td>
                         <td class="data-detail-cell ${cdp.provider === 'PENDING' ? 'pending-text' : ''}">${cdp.provider}</td>
                         <td class="data-detail-cell ${cdp.platform === 'PENDING' ? 'pending-text' : ''}">${cdp.platform}</td>
-                        <td class="data-detail-cell">${cdp.representation}</td>
-                        <td class="data-detail-cell">${cdp.resolution}</td>
-                        <td class="data-detail-cell">${cdp.viz}</td>
+                        <td class="data-detail-cell ${cdp.representation === 'PENDING' ? 'pending-text' : ''}">${cdp.representation}</td>
+                        <td class="data-detail-cell ${cdp.resolution === 'PENDING' ? 'pending-text' : ''}">${cdp.resolution}</td>
+                        <td class="data-detail-cell ${cdp.viz === 'PENDING' ? 'pending-text' : ''}">${cdp.viz}</td>
                     `;
                 } else {
                     row.innerHTML = `
-                        <td class="data-detail-cell">${cdp.dataUseYear}</td>
+                        <td class="data-detail-cell ${cdp.dataUseYear === 'PENDING' ? 'pending-text' : ''}">${cdp.dataUseYear}</td>
                         <td class="data-detail-cell ${cdp.provider === 'PENDING' ? 'pending-text' : ''}">${cdp.provider}</td>
                         <td class="data-detail-cell ${cdp.platform === 'PENDING' ? 'pending-text' : ''}">${cdp.platform}</td>
-                        <td class="data-detail-cell">${cdp.representation}</td>
-                        <td class="data-detail-cell">${cdp.resolution}</td>
-                        <td class="data-detail-cell">${cdp.viz}</td>
+                        <td class="data-detail-cell ${cdp.representation === 'PENDING' ? 'pending-text' : ''}">${cdp.representation}</td>
+                        <td class="data-detail-cell ${cdp.resolution === 'PENDING' ? 'pending-text' : ''}">${cdp.resolution}</td>
+                        <td class="data-detail-cell ${cdp.viz === 'PENDING' ? 'pending-text' : ''}">${cdp.viz}</td>
                     `;
                 }
                 tbody.appendChild(row);
