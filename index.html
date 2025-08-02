@@ -6,12 +6,18 @@
   <title>Geospatial Narratives</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Geist&family=Geist+Mono&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=filter_list" />
   <style>
     /* Add box-sizing to all elements for consistent box model behavior */
     *, *::before, *::after {
       box-sizing: border-box;
+    }
+
+    /* Text selection styling */
+    ::selection {
+      background: rgb(221, 255, 109); /* Red background when selecting text */
+      color: rgb(0, 0, 0); /* White text on selection */
     }
 
     body {
@@ -31,14 +37,14 @@
       align-items: center;
       padding: 3px 40px 3px 20px; /* Increased top padding to move lower */
       font-size: 17.5px;
-      font-weight: bold;
+      font-weight: 450;
       color: #000;
       gap: 10px;
       background: rgb(221, 255, 109);
     }
     .nav a {
       font-size: 17.5px;
-      text-decoration: none;
+      font-weight: 450;
       color: rgb(155, 180, 72);
       border-bottom: none;
       padding: 5px 10px;
@@ -49,11 +55,23 @@
     .nav a.active {
       color: #000; /* Changed from #5f56ff to #000 */
     }
+  
     .csv-upload {
       display: none;
     }
+
+       /* New style for the update date */
+    .update-date {
+        font-family: 'Geist Mono', monospace;
+        font-size: 15px; /* Smaller font size for date */
+        font-weight: 300;
+        color: #9f9e9e; /* Softer color for date */
+        padding: 10px 0 0 29px; /* Padding to position it */
+    }
+
     .stats {
       font-size: 96px; /* Same as the counter text */
+      font-weight: 400;
       padding-top: 20px;
       padding-bottom: 10px;
       padding-left: 20px;
@@ -75,9 +93,9 @@
       border-top: 1px solid #000;
     }
     .filter-group-header {
-      padding: 8px 20px; /* Adjusted padding */
+      padding: 6px 20px; /* Adjusted padding */
       font-size: 18px;
-      font-weight: bold;
+      font-weight: 500;
       background: #e6e6e6;
       cursor: pointer;
       display: flex;
@@ -107,7 +125,7 @@
     }
     .filter-title {
       font-size: 14px; /* Made smaller */
-      font-weight: bold;
+      font-weight: 500;
       margin-top: 10px; /* Reduced space */
       margin-bottom: 5px; /* Reduced space */
       color: #666; /* Closer to background gray */
@@ -180,7 +198,7 @@
       background: #fff;
       table-layout: fixed;
     }
-    th, td {
+    th {
       text-align: left;
       padding: 4px 12px;
       border-bottom: 1px solid #D3D3D3;
@@ -188,6 +206,18 @@
       font-family: 'Geist Mono', monospace;
       vertical-align: top;
       font-size: 13px; /* Base font size */
+      font-weight: 500;
+      word-wrap: break-word; /* Allows text to break to the next line */
+    }
+    td {
+      text-align: left;
+      padding: 4px 12px;
+      border-bottom: 1px solid #D3D3D3;
+      border-top: 1px solid #D3D3D3;
+      font-family: 'Geist Mono', monospace;
+      vertical-align: top;
+      font-size: 13px; /* Base font size */
+      font-weight: 400;
       word-wrap: break-word; /* Allows text to break to the next line */
     }
     /* Specific styles for columns 1-8 */
@@ -342,8 +372,8 @@
 
     .filter-toggle-label, .feed-toggle-label {
       font-size: 18px;
-      font-weight: bold;
-      color: #000;
+      font-weight: 500;
+      color: #000000;
     }
 
     /* The switch - the box around the slider */
@@ -476,10 +506,10 @@
 
     .feed-view-container .article-item {
       font-size: 80px; /* Increased font size, similar to quotes */
-      font-weight: bold;
+      font-weight: 500;
       margin-bottom: 20px;
       line-height: 1.2;
-      color: #000;
+      color: #000000;
       border-bottom: 1px solid #eee; /* Light separator */
       padding-bottom: 15px;
       cursor: pointer; /* Clickable */
@@ -508,7 +538,7 @@
 
     .article-details {
       font-size: 14px; /* Details font size */
-      font-weight: normal; /* Not bold */
+      font-weight: 350; /* Not bold */
       color: #969696; /* A bit lighter color for details */
       margin-top: 5px; /* Reduced space above details */
       text-align: left; /* Aligned to the left */
@@ -534,6 +564,9 @@
       'GRAD' 0,
       'opsz' 24
     }
+      .pending-text {
+    color: #1900ff; /* Or any color you prefer, e.g., orange, red, etc. */
+  }
 
     /* --- Responsive Design --- */
 
@@ -555,6 +588,7 @@
         font-size: 18px;
         padding: 3px 8px;
       }
+    
       .stats {
         font-size: 60px;
         padding: 15px 20px 5px 20px;
@@ -654,13 +688,19 @@
         font-size: 17px;
         padding: 3px 8px;
       }
+      .update-date {
+        font-size: 12px;
+        padding: 10px 0 0 13px;
+      }
       .stats {
-        font-size: 40px;
-        padding-top: 30px;
+        font-size: 42px;
+        padding-top: 17px;
+        padding-left: 1.5px;
+        padding-bottom: 10px;
         padding-left: 10px;
       }
       .toggles-container {
-        padding: 0 20px 10px 15px;
+        padding: 0 20px 10px 12px;
         gap: 15px;
       }
       .filter-toggle-label, .feed-toggle-label {
@@ -668,7 +708,7 @@
       }
       .filter-group-header {
         font-size: 16px;
-        padding: 6px 16px; /* Adjusted padding */
+        padding: 6px 15px; /* Adjusted padding */
       }
       .filter-group-content {
         padding: 0 15px;
@@ -743,27 +783,17 @@
 
       /* Mobile-specific spacing for article count numbers */
       .article-count-number {
-        margin-left: 20px;
+        margin-left: 8px;
       }
 
       sup .article-count-number {
         margin-left: 0px;
+        font-size: 75%; /* Adjust as needed, e.g., 60% for slightly larger */
+        position: relative;
+        top: -0.2em;
       }
     }
-  
-table tbody tr:hover {
-  background-color: #2445ff;
-  color: #fff;
-}
-table tbody tr:hover a {
-  background-color: #2445ff;
-  color: #fff;
-}
-table tbody tr {
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-</style>
+  </style>
 </head>
 <body>
   <div id="fixed-header-area">
@@ -771,6 +801,9 @@ table tbody tr {
       <a href="index.html" class="active">Index</a>
       <a href="literacy.html">Literacy</a>
       <a href="about.html">About</a>
+    </div>
+      <div class="update-date">
+        updated: 2025-07-15
     </div>
     <div class="stats">
       <span id="loadingStatus">Loading data...</span>
@@ -1090,526 +1123,127 @@ document.getElementById('toYearInput').addEventListener('input', function () {
       document.addEventListener('keydown', hideOverlay);
     });
 
-    async function loadDataFromBackend() {
+    const loadDataFromBackend = async () => {
         const loadingStatus = document.getElementById('loadingStatus');
         const statsDisplay = document.getElementById('statsDisplay');
         try {
             loadingStatus.textContent = 'Loading data from server...';
             const response = await fetch('./data.csv');
             if (!response.ok) {
-                // If the file is not found or other HTTP error, trigger fallback
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const csvText = await response.text();
-            Papa.parse(csvText, {
-                header: true,
-                skipEmptyLines: true,
-                dynamicTyping: false,
-                complete: function(results) {
-                    const parsedData = results.data;
-                    allData = parsedData.map(row => {
-                        // Ensure required fields exist, provide defaults if missing
-                        const date = row.Date || '';
-                        const publicationYear = date ? new Date(date).getFullYear() : null;
+            const parsedData = Papa.parse(csvText, { header: true, skipEmptyLines: true }).data;
 
-                        const providers = row.Provider ? row.Provider.split(/[,;]/).map(p => p.trim()).filter(p => p) : [''];
-                        const resolutions = row.Resolution ? row.Resolution.split(/[,;]/).map(r => r.trim()).filter(r => r) : [''];
-                        const platforms = row.Platform ? row.Platform.split(/[,;]/).map(p => p.trim()).filter(p => p) : [''];
-                        const representations = row.Representation ? row.Representation.split(/[,;]/).map(r => r.trim()).filter(r => r) : [''];
-                        const vizs = row.Viz ? row.Viz.split(/[,;]/).map(v => v.trim()).filter(v => v) : [''];
+            const articlesMap = new Map(); // Use a Map to group rows by article link
 
-                        const dataUseYears = extractYears(row['Data use'] || '');
-                        if (dataUseYears.length === 0) dataUseYears.push('');
+            parsedData.forEach(row => {
+                const articleLink = row.Link; // Assuming 'Link' is unique for each article
 
-                        let combinedDataPoints = [];
-
-                        const hasProviderData = providers.some(p => p !== '') || resolutions.some(r => r !== '') || platforms.some(p => p !== '') ||
-                                                representations.some(r => r !== '') || vizs.some(v => v !== '');
-
-                        if (!hasProviderData && dataUseYears.length > 0) {
-                            dataUseYears.forEach(year => {
-                                combinedDataPoints.push({
-                                    dataUseYear: year,
-                                    provider: '',
-                                    platform: '',
-                                    resolution: '',
-                                    resolutionCategory: '',
-                                    representation: '',
-                                    viz: ''
-                                });
-                            });
-                        } else if (hasProviderData) {
-                            dataUseYears.forEach(year => {
-                                const currentMaxLength = Math.max(providers.length, resolutions.length, platforms.length, representations.length, vizs.length);
-                                for (let i = 0; i < currentMaxLength; i++) {
-                                    combinedDataPoints.push({
-                                        dataUseYear: year,
-                                        provider: providers[i] || providers[0] || '',
-                                        platform: platforms[i] || platforms[0] || '',
-                                        resolution: resolutions[i] || resolutions[0] || '',
-                                        resolutionCategory: getMeterCategory(resolutions[i] || resolutions[0] || ''),
-                                        representation: representations[i] || representations[0] || '',
-                                        viz: vizs[i] || vizs[0] || ''
-                                    });
-                                }
-                            });
-                        } else {
-                            combinedDataPoints.push({
-                                dataUseYear: '',
-                                provider: '',
-                                platform: '',
-                                resolution: '',
-                                resolutionCategory: '',
-                                viz: ''
-                            });
-                        }
-
-                        return {
-                            date: date,
-                            publicationYear: publicationYear,
-                            title: row.Title || '',
-                            link: row.Link || '',
-                            outlet: row.Outlet || '',
-                            country: row.Country || '',
-                            region: countryRegions[row.Country] || '',
-                            context: row.Context || '',
-                            category: row.Category || '',
-                            combinedDataPoints: combinedDataPoints,
-                        };
+                if (!articlesMap.has(articleLink)) {
+                    // If this is the first row for this article, initialize its consolidated data
+                    articlesMap.set(articleLink, {
+                        date: row.Date || '',
+                        title: row.Title || '',
+                        link: row.Link || '',
+                        outlet: row.Outlet || '',
+                        country: row.Country || '',
+                        context: row.Context || '',
+                        category: row.Category || '',
+                        // Initialize arrays to collect all data points for this article
+                        dataUses: [],
+                        providers: [],
+                        platforms: [],
+                        resolutions: [],
+                        representations: [],
+                        vizs: []
                     });
-                    initializeFilters();
-                    filterTable();
-                    loadingStatus.style.display = 'none';
-                    statsDisplay.style.display = 'block';
                 }
+
+                // Get the consolidated article object
+                const article = articlesMap.get(articleLink);
+
+                // Append data from the current row to the consolidated arrays
+                // Ensure no empty strings are added if the original CSV cell is blank
+                if (row['Data use']) article.dataUses.push(...row['Data use'].split(/[,;]/).map(du => du.trim()).filter(du => du));
+                if (row.Provider) article.providers.push(...row.Provider.split(/[,;]/).map(p => p.trim()).filter(p => p));
+                if (row.Platform) article.platforms.push(...row.Platform.split(/[,;]/).map(pl => pl.trim()).filter(pl => pl));
+                if (row.Resolution) article.resolutions.push(...row.Resolution.split(/[,;]/).map(r => r.trim()).filter(r => r));
+                if (row.Representation) article.representations.push(...row.Representation.split(/[,;]/).map(r => r.trim()).filter(r => r));
+                if (row.Viz) article.vizs.push(...row.Viz.split(/[,;]/).map(v => v.trim()).filter(v => v));
             });
-        } catch (error) {
-            console.error('Error loading data from backend, falling back to sample data:', error);
-            loadSampleData();
-        }
-    }
 
-    function loadSampleData() {
-        const loadingStatus = document.getElementById('loadingStatus');
-        const statsDisplay = document.getElementById('statsDisplay');
+            // Now, transform the consolidated articles into the final allData structure
+            allData = Array.from(articlesMap.values()).map(article => {
+                // Remove duplicates from collected arrays (e.g., if 'PENDING' appears multiple times for one article)
+                article.dataUses = [...new Set(article.dataUses)];
+                article.providers = [...new Set(article.providers)];
+                article.platforms = [...new Set(article.platforms)];
+                article.resolutions = [...new Set(article.resolutions)];
+                article.representations = [...new Set(article.representations)];
+                article.vizs = [...new Set(article.vizs)];
 
-        const resolutionsList = ['<1m', '1-10m', '>10m'];
-        // const interactionsList = ['On-Scroll', 'Slider', 'Zoom']; // Removed
+                const publicationYear = article.date ? new Date(article.date).getFullYear() : null;
+                const region = countryRegions[article.country] || '';
 
-        const sampleData = [
-          {
-            Date: '2024-03-15',
-            Title: 'Überschwemmungsgebiete Experts waarschuwen: Rusland bouwt lanceerinstallaties voor hypermoderne kernraket',
-            Link: 'http://example.com/urban-expansion',
-            Outlet: 'The New York Times',
-            Country: 'United States',
-            Context: 'Urban development patterns',
-            Category: 'Environment',
-            'Data use': '2023; 2024',
-            Provider: 'Planet Labs; Maxar',
-            Platform: 'Sentinel-2; Landsat',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Optical; Hyperspectral',
-            Viz: 'RGB; NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Tutorial available'
-          },
-          {
-            Date: '2023-11-20',
-            Title: 'Deforestation in Amazon',
-            Link: 'http://example.com/deforestation',
-            Outlet: 'The Guardian',
-            Country: 'Brazil',
-            Context: 'Environmental monitoring',
-            Category: 'Environment',
-            'Data use': '2022',
-            Provider: 'ESA',
-            Platform: 'Sentinel-1',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Optical',
-            Viz: 'NDVI',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'N/A'
-          },
-          {
-            Date: '2024-01-05',
-            Title: 'Glacier Retreat in Alps',
-            Link: 'http://example.com/glacier-retreat',
-            Outlet: 'BBC',
-            Country: 'Germany',
-            Context: 'Climate change impact',
-            Category: 'Climate',
-            'Data use': '2020; 2024',
-            Provider: 'NASA',
-            Platform: 'MODIS',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Hyperspectral',
-            Viz: 'RGB',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Data publicly available'
-          },
-          {
-            Date: '2023-09-01',
-            Title: 'Crop Yield Analysis',
-            Link: 'http://example.com/crop-yield',
-            Outlet: 'Reuters',
-            Country: 'India',
-            Context: 'Agriculture and food security',
-            Category: 'Agriculture',
-            'Data use': '2023',
-            Provider: 'USGS',
-            Platform: 'Landsat',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Contact for data'
-          },
-          {
-            Date: '2024-02-10',
-            Title: 'Coastal Erosion Study',
-            Link: 'http://example.com/coastal-erosion',
-            Outlet: 'CNN',
-            Country: 'Japan',
-            Context: 'Disaster preparedness',
-            Category: 'Environment',
-            'Data use': '2024',
-            Provider: 'Airbus',
-            Platform: 'SPOT',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Optical',
-            Viz: 'NDVI',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Report access limited'
-          },
-          {
-            Date: '2023-07-25',
-            Title: 'Urban Population Density',
-            Link: 'http://example.com/urban-density',
-            Outlet: 'The New York Times',
-            Country: 'France',
-            Context: 'Demographic trends',
-            Category: 'Demographics',
-            'Data use': '2020; 2021; 2022',
-            Provider: 'OpenStreetMap',
-            Platform: 'Open Data',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Hyperspectral',
-            Viz: 'RGB',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Data available via API'
-          },
-          {
-            Date: '2024-04-01',
-            Title: 'Arctic Ice Melt',
-            Link: 'http://example.com/arctic-ice',
-            Outlet: 'The Guardian',
-            Country: 'Canada',
-            Context: 'Climate change research',
-            Category: 'Climate',
-            'Data use': '2023; 2024',
-            Provider: 'NASA; ESA',
-            Platform: 'CryoSat-2; ICESat-2',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar; Optical',
-            Viz: 'NRG; NDVI',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Scientific paper'
-          },
-          {
-            Date: '2023-10-10',
-            Title: 'Desertification in Africa',
-            Link: 'http://example.com/desertification',
-            Outlet: 'BBC',
-            Country: 'Sudan',
-            Context: 'Land degradation',
-            Category: 'Environment',
-            'Data use': '2021',
-            Provider: 'USGS',
-            Platform: 'Landsat',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Optical',
-            Viz: 'RGB',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'University study'
-          },
-          {
-            Date: '2024-03-01',
-            Title: 'Wildfire Tracking',
-            Link: 'http://example.com/wildfire',
-            Outlet: 'CNN',
-            Country: 'United States',
-            Context: 'Emergency response',
-            Category: 'Disaster',
-            'Data use': '2024',
-            Provider: 'NOAA; NASA',
-            Platform: 'GOES; VIIRS',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Hyperspectral',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Public dashboard'
-          },
-          {
-            Date: '2023-08-12',
-            Title: 'Historical City Growth',
-            Link: 'http://example.com/city-growth',
-            Outlet: 'Washington Post',
-            Country: 'United Kingdom',
-            Context: 'Urban history',
-            Category: 'History',
-            'Data use': '1950; 2000; 2020',
-            Provider: 'Ordnance Survey',
-            Platform: 'Historical Maps',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NDVI',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Archival research'
-          },
-          {
-            Date: '2024-05-20',
-            Title: 'Ocean Plastic Accumulation',
-            Link: 'http://example.com/ocean-plastic',
-            Outlet: 'Sky News',
-            Country: 'Japan',
-            Context: 'Marine pollution',
-            Category: 'Environment',
-            'Data use': '2024',
-            Provider: 'Sentinel Hub; ESA',
-            Platform: 'Sentinel-3',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Optical; Hyperspectral',
-            Viz: 'RGB; NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Ongoing research'
-          },
-          {
-            Date: '2023-06-01',
-            Title: 'Volcanic Activity Monitoring',
-            Link: 'http://example.com/volcano',
-            Outlet: 'Reuters',
-            Country: 'Italy',
-            Context: 'Geological hazards',
-            Category: 'Geology',
-            'Data use': '2023',
-            Provider: 'USGS',
-            Platform: 'GPS; Seismometers',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NDVI',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Scientific publication'
-          },
-          {
-            Date: '2024-01-25',
-            Title: 'Water Scarcity in Middle East',
-            Link: 'http://example.com/water-scarcity',
-            Outlet: 'The Guardian',
-            Country: 'Iraq',
-            Context: 'Resource management',
-            Category: 'Environment',
-            'Data use': '2020; 2021; 2022; 2023; 2024',
-            Provider: 'NASA',
-            Platform: 'GRACE',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Optical; Radar',
-            Viz: 'RGB; NDVI',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'UN Report'
-          },
-          {
-            Date: '2023-04-18',
-            Title: 'Arctic Shipping Routes',
-            Link: 'http://example.com/arctic-routes',
-            Outlet: 'BBC',
-            Country: 'Russia',
-            Context: 'Geopolitics; Climate Change',
-            Category: 'Geopolitics',
-            'Data use': '2023',
-            Provider: 'ESA; Private Firms',
-            Platform: 'Sentinel-1; Ice charts',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Hyperspectral',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Navigational guides'
-          },
-          {
-            Date: '2024-02-29',
-            Title: 'Disease Spread Mapping',
-            Link: 'http://example.com/disease-spread',
-            Outlet: 'The New York Times',
-            Country: 'United States',
-            Context: 'Public Health',
-            Category: 'Health',
-            'Data use': '2024',
-            Provider: 'CDC; WHO',
-            Platform: 'Health data',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar; Optical',
-            Viz: 'NDVI; RGB',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-          },
-          {
-            Date: '2023-05-05',
-            Title: 'Illegal Mining in Amazon',
-            Link: 'http://example.com/illegal-mining',
-            Outlet: 'The Guardian',
-            Country: 'Brazil',
-            Context: 'Environment',
-            Category: 'Environment',
-            'Data use': '2023',
-            Provider: 'Planet Labs',
-            Platform: 'PlanetScope',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Optical',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'NGO report'
-          },
-          {
-            Date: '2024-04-10',
-            Title: 'Infrastructure Development',
-            Link: 'http://example.com/infrastructure',
-            Outlet: 'Washington Post',
-            Country: 'China',
-            Context: 'Economic development',
-            Category: 'Development',
-            'Data use': '2020; 2024',
-            Provider: 'Maxar; Airbus',
-            Platform: 'WorldView; Pleiades',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Hyperspectral; Radar',
-            Viz: 'RGB; NDVI',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Analyst brief'
-          },
-          {
-            Date: '2023-03-03',
-            Title: 'Refugee Camp Expansion',
-            Link: 'http://example.com/refugee-camp',
-            Outlet: 'Reuters',
-            Country: 'Syria',
-            Context: 'Humanitarian crisis',
-            Category: 'Humanitarian',
-            'Data use': '2023',
-            Provider: 'UNITAR/UNOSAT; Maxar',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Optical',
-            Viz: 'NDVI',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'UN Report'
-          },
-          {
-            Date: '2024-03-22',
-            Title: 'Election Monitoring',
-            Link: 'http://example.com/election-monitoring',
-            Outlet: 'BBC',
-            Country: 'Ukraine',
-            Context: 'Political observation',
-            Category: 'Politics',
-            'Data use': '2024',
-            Provider: 'OSCE; DigitalGlobe',
-            Platform: 'Satellite Imagery; Ground reports',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Hyperspectral',
-            Viz: 'RGB',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-          },
-          {
-            Date: '2023-11-01',
-            Title: 'Military Base Construction',
-            Link: 'http://example.com/military-base',
-            Outlet: 'CNN',
-            Country: 'North Korea',
-            Context: 'National Security',
-            Category: 'Security',
-            'Data use': '2023',
-            Provider: 'NGA; Private Satellite',
-            Platform: 'Satellite Imagery',
-            Resolution: resolutionsList[Math.floor(Math.random() * resolutionsList.length)],
-            Representation: 'Radar',
-            Viz: 'NRG',
-            // Interaction: interactionsList[Math.floor(Math.random() * resolutionsList.length)], // Removed
-            'How To': 'Intelligence analysis'
-          }
-        ];
-        allData = sampleData.map(row => {
-            const date = row.Date || '';
-            const publicationYear = date ? new Date(date).getFullYear() : null;
+                // Determine the maximum number of data points for this consolidated article
+                // Ensure that even if all arrays are empty, there's at least one data point to display an empty row if needed
+                const maxLen = Math.max(
+                    article.dataUses.length,
+                    article.providers.length,
+                    article.platforms.length,
+                    article.resolutions.length,
+                    article.representations.length,
+                    article.vizs.length,
+                    1 // Ensure at least one cdp for articles with no specific data points
+                );
 
-            const providers = row.Provider ? row.Provider.split(/[,;]/).map(p => p.trim()).filter(p => p) : [''];
-            const resolutions = row.Resolution ? row.Resolution.split(/[,;]/).map(r => r.trim()).filter(r => r) : [''];
-            const platforms = row.Platform ? row.Platform.split(/[,;]/).map(p => p.trim()).filter(p => p) : [''];
-            const representations = row.Representation ? row.Representation.split(/[,;]/).map(r => r.trim()).filter(r => r) : [''];
-            const vizs = row.Viz ? row.Viz.split(/[,;]/).map(v => v.trim()).filter(v => v) : [''];
+                // Create combinedDataPoints based on the consolidated, de-duplicated lists
+                const combinedDataPoints = Array.from({ length: maxLen }).map((_, i) => ({
+                    dataUseYear: article.dataUses[i] || article.dataUses[0] || '', // Use first if subsequent is missing
+                    provider: article.providers[i] || article.providers[0] || '',
+                    platform: article.platforms[i] || article.platforms[0] || '',
+                    resolution: article.resolutions[i] || article.resolutions[0] || '',
+                    resolutionCategory: getMeterCategory(article.resolutions[i] || article.resolutions[0] || ''),
+                    representation: article.representations[i] || article.representations[0] || '',
+                    viz: article.vizs[i] || article.vizs[0] || ''
+                }));
 
-            const dataUseYears = extractYears(row['Data use'] || '');
-            if (dataUseYears.length === 0) dataUseYears.push('');
-
-            let combinedDataPoints = [];
-
-            const hasProviderData = providers.some(p => p !== '') || resolutions.some(r => r !== '') || platforms.some(p => p !== '') ||
-                                    representations.some(r => r !== '') || vizs.some(v => v !== '');
-
-            if (!hasProviderData && dataUseYears.length > 0) {
-                dataUseYears.forEach(year => {
-                    combinedDataPoints.push({
-                        dataUseYear: year,
+                return {
+                    date: article.date,
+                    publicationYear: publicationYear,
+                    title: article.title,
+                    link: article.link,
+                    outlet: article.outlet,
+                    country: article.country,
+                    region: region,
+                    context: article.context,
+                    category: article.category,
+                    combinedDataPoints: combinedDataPoints.filter(cdp =>
+                        Object.values(cdp).some(value => value !== '')
+                    ).length > 0 ? combinedDataPoints : [{ // If all cdp fields are empty, ensure one empty cdp
+                        dataUseYear: '',
                         provider: '',
                         platform: '',
                         resolution: '',
                         resolutionCategory: '',
                         representation: '',
                         viz: ''
-                    });
-                });
-            } else if (hasProviderData) {
-                dataUseYears.forEach(year => {
-                    const currentMaxLength = Math.max(providers.length, resolutions.length, platforms.length, representations.length, vizs.length);
-                    for (let i = 0; i < currentMaxLength; i++) {
-                        combinedDataPoints.push({
-                            dataUseYear: year,
-                            provider: providers[i] || providers[0] || '',
-                            platform: platforms[i] || platforms[0] || '',
-                            resolution: resolutions[i] || resolutions[0] || '',
-                            resolutionCategory: getMeterCategory(resolutions[i] || resolutions[0] || ''),
-                            representation: representations[i] || representations[0] || '',
-                            viz: vizs[i] || vizs[0] || ''
-                        });
-                    }
-                });
-            } else {
-                combinedDataPoints.push({
-                    dataUseYear: '',
-                    provider: '',
-                    platform: '',
-                    resolution: '',
-                    resolutionCategory: '',
-                    viz: ''
-                });
-            }
+                    }]
+                };
+            });
 
-            return {
-                date: date,
-                publicationYear: publicationYear,
-                title: row.Title || '',
-                link: row.Link || '',
-                outlet: row.Outlet || '',
-                country: row.Country || '',
-                region: countryRegions[row.Country] || '',
-                context: row.Context || '',
-                category: row.Category || '',
-                combinedDataPoints: combinedDataPoints,
-            };
-        });
-        initializeFilters();
-        filterTable();
-        loadingStatus.style.display = 'none';
-        statsDisplay.style.display = 'block';
-    }
+            initializeFilters();
+            filterTable();
+            loadingStatus.style.display = 'none';
+            statsDisplay.style.display = 'block';
+
+        } catch (error) {
+            console.error('Error loading or parsing data:', error);
+            loadingStatus.textContent = 'Failed to load data.'; // Indicate failure to user
+            statsDisplay.style.display = 'none'; // Hide stats if data load fails
+        }
+    };
 
 
     function initializeFilters() {
@@ -1845,21 +1479,21 @@ document.getElementById('toYearInput').addEventListener('input', function () {
                         <td rowspan="${rowspan}">${item.country}</td>
                         <td rowspan="${rowspan}">${item.context}</td>
                         <td rowspan="${rowspan}">${item.category}</td>
-                        <td class="data-detail-cell">${cdp.dataUseYear}</td>
-                        <td class="data-detail-cell">${cdp.provider}</td>
-                        <td class="data-detail-cell">${cdp.platform}</td>
-                        <td class="data-detail-cell">${cdp.representation}</td>
-                        <td class="data-detail-cell">${cdp.resolution}</td>
-                        <td class="data-detail-cell">${cdp.viz}</td>
+                        <td class="data-detail-cell ${cdp.dataUseYear === 'PENDING' ? 'pending-text' : ''}">${cdp.dataUseYear}</td>
+                        <td class="data-detail-cell ${cdp.provider === 'PENDING' ? 'pending-text' : ''}">${cdp.provider}</td>
+                        <td class="data-detail-cell ${cdp.platform === 'PENDING' ? 'pending-text' : ''}">${cdp.platform}</td>
+                        <td class="data-detail-cell ${cdp.representation === 'PENDING' ? 'pending-text' : ''}">${cdp.representation}</td>
+                        <td class="data-detail-cell ${cdp.resolution === 'PENDING' ? 'pending-text' : ''}">${cdp.resolution}</td>
+                        <td class="data-detail-cell ${cdp.viz === 'PENDING' ? 'pending-text' : ''}">${cdp.viz}</td>
                     `;
                 } else {
                     row.innerHTML = `
-                        <td class="data-detail-cell">${cdp.dataUseYear}</td>
-                        <td class="data-detail-cell">${cdp.provider}</td>
-                        <td class="data-detail-cell">${cdp.platform}</td>
-                        <td class="data-detail-cell">${cdp.representation}</td>
-                        <td class="data-detail-cell">${cdp.resolution}</td>
-                        <td class="data-detail-cell">${cdp.viz}</td>
+                        <td class="data-detail-cell ${cdp.dataUseYear === 'PENDING' ? 'pending-text' : ''}">${cdp.dataUseYear}</td>
+                        <td class="data-detail-cell ${cdp.provider === 'PENDING' ? 'pending-text' : ''}">${cdp.provider}</td>
+                        <td class="data-detail-cell ${cdp.platform === 'PENDING' ? 'pending-text' : ''}">${cdp.platform}</td>
+                        <td class="data-detail-cell ${cdp.representation === 'PENDING' ? 'pending-text' : ''}">${cdp.representation}</td>
+                        <td class="data-detail-cell ${cdp.resolution === 'PENDING' ? 'pending-text' : ''}">${cdp.resolution}</td>
+                        <td class="data-detail-cell ${cdp.viz === 'PENDING' ? 'pending-text' : ''}">${cdp.viz}</td>
                     `;
                 }
                 tbody.appendChild(row);
