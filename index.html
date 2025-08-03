@@ -1292,7 +1292,7 @@ document.getElementById('toYearInput').addEventListener('input', function () {
 
         // Append other values
         values.forEach(value => {
-            if (value && value !== 'all') { // Ensure 'all' isn't added again
+            if (value && value !== 'all' && value !== 'TBA') { // Skip 'TBA'
                 const button = document.createElement('button');
                 button.classList.add('pill');
                 button.setAttribute('data-type', type);
