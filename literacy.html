@@ -227,7 +227,7 @@
     }
 
     /* Fixed width for specific columns */
-    th:nth-child(1), td:nth-child(1) { width: 8%; min-width: 8%; max-width: 8%; } /* Year */
+    th:nth-child(1), td:nth-child(1) { width: 4%; min-width: 4%; max-width: 4%; } /* Year */
     th:nth-child(2), td:nth-child(2) { width: 20%; min-width: 20%; max-width: 20%; } /* Title */
     th:nth-child(3), td:nth-child(3) { width: 5%; min-width: 5%; max-width: 5%; } /* Link */
     th:nth-child(4), td:nth-child(4) { width: 12%; min-width: 12%; max-width: 12%; } /* Author */
@@ -494,7 +494,11 @@
       'GRAD' 0,
       'opsz' 24
     }
-
+    /* Hide the 8th column (Quote(s)) in the table */
+      th:nth-child(8),
+      td:nth-child(8) {
+        display: none;
+      }
 
     /* --- Responsive Design --- */
 
@@ -1365,8 +1369,8 @@
                 <td>${item.author}</td>
                 <td>${item.platformPublisher}</td>
                 <td>${item.category}</td>
-                <td>${item.type}</td> <td>${item.quote}</td>
-            `;
+                <td>${item.type}</td> 
+               `; // Removed the <td>${item.quote}</td>
             tbody.appendChild(row);
         });
         updateFilterCount(filteredResults.length);
