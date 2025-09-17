@@ -443,6 +443,11 @@
         border-bottom: none; /* Removed the underline */
         padding-bottom: 0; /* Removed padding */
     }
+    
+    /* New rule for TBA terms */
+    .tba-term {
+        color: #ff0000; /* A red color */
+    }
 
     .terms-view-container .term-item {
         font-size: 48px; /* Large font size for individual terms */
@@ -1473,45 +1478,47 @@
                 termElement.classList.add('term-item');
                 termElement.textContent = termItem.term;
                 termElement.setAttribute('data-term', termItem.term); // Store term text
-                termElement.setAttribute('data-definition', termItem.definition); // NEW: Store definition on the element for easy access
 
-                // NEW: Add click listener for definition display
-                termElement.addEventListener('click', function() {
-                    let definitionText = this.getAttribute('data-definition');
-                    const clickedTermElement = this;
+                // NEW: Check if the definition is "TBA"
+                const isTBA = termItem.definition.trim().toLowerCase() === 'tba';
+                if (isTBA) {
+                    termElement.classList.add('tba-term');
+                    termElement.setAttribute('data-definition', '');
+                    termElement.style.cursor = 'default';
+                } else {
+                    termElement.setAttribute('data-definition', termItem.definition);
+                }
 
-                    // If the clicked term's definition is already open, close it
-                    if (currentOpenDefinitionElement && currentOpenDefinitionElement.previousElementSibling === clickedTermElement) {
-                        currentOpenDefinitionElement.remove();
-                        currentOpenDefinitionElement = null;
-                        return; // Exit as definition is now closed
-                    }
+                if (!isTBA) {
+                    termElement.addEventListener('click', function() {
+                        let definitionText = this.getAttribute('data-definition');
+                        const clickedTermElement = this;
 
-                    // If another definition is open, close it first
-                    if (currentOpenDefinitionElement) {
-                        currentOpenDefinitionElement.remove();
-                        currentOpenDefinitionElement = null; // Clear reference
-                    }
+                        if (currentOpenDefinitionElement && currentOpenDefinitionElement.previousElementSibling === clickedTermElement) {
+                            currentOpenDefinitionElement.remove();
+                            currentOpenDefinitionElement = null;
+                            return;
+                        }
 
-                    // Open the new definition if definitionText exists
-                    if (definitionText) {
-                        // Use the new formatDefinitionText function
-                        // Adjusted maxCharsPerLine for better visual fitting in columns
-                        const maxCharsPerLine = 33;
-                        const formattedDefinition = formatDefinitionText(definitionText, maxCharsPerLine);
+                        if (currentOpenDefinitionElement) {
+                            currentOpenDefinitionElement.remove();
+                            currentOpenDefinitionElement = null;
+                        }
 
-                        const definitionElement = document.createElement('div');
-                        definitionElement.classList.add('term-definition');
-                        definitionElement.classList.add('active'); // Make it visible
-                        definitionElement.innerHTML = formattedDefinition; // Use innerHTML for <br> tags
+                        if (definitionText) {
+                            const maxCharsPerLine = 33;
+                            const formattedDefinition = formatDefinitionText(definitionText, maxCharsPerLine);
 
-                        // Insert the definition right after the clicked term element
-                        clickedTermElement.parentNode.insertBefore(definitionElement, clickedTermElement.nextSibling);
+                            const definitionElement = document.createElement('div');
+                            definitionElement.classList.add('term-definition', 'active');
+                            definitionElement.innerHTML = formattedDefinition;
 
-                        currentOpenDefinitionElement = definitionElement; // Store reference to the newly opened definition
-                    }
-                });
-
+                            clickedTermElement.parentNode.insertBefore(definitionElement, clickedTermElement.nextSibling);
+                            currentOpenDefinitionElement = definitionElement;
+                        }
+                    });
+                }
+                
                 columns[currentColumnIndex].appendChild(termElement);
                 displayedTermCount++;
             });
