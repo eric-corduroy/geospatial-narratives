@@ -444,17 +444,18 @@
         padding-bottom: 0; /* Removed padding */
     }
     
-    /* New rule for TBA terms with increased specificity */
-    .terms-view-container .tba-term {
-        color: #ff0000; /* A red color */
-    }
-
+    /* This is the rule setting the term color to black by default */
     .terms-view-container .term-item {
         font-size: 48px; /* Large font size for individual terms */
         line-height: 0.9; /* Adjusted line height to be smaller */
         color: #000;
         margin-top: 10px; /* Add margin for spacing between terms and letter */
         cursor: pointer; /* Indicate clickability */
+    }
+
+    /* This is the rule to make TBA terms red. It must be after the .term-item rule to take precedence. */
+    .terms-view-container .tba-term {
+        color: #ff0000; /* A red color */
     }
 
     .term-definition {
@@ -723,7 +724,7 @@
       <a href="about.html">About</a>
     </div>
      <div class="update-date">
-        updated: 2025-09-17
+        updated: 2025-07-15
     </div>
     <div class="stats">
       <span id="loadingStatus">Loading data...</span>
