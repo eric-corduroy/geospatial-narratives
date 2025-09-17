@@ -9,9 +9,11 @@ Date,Title,Link,Outlet,Region,Country,Context,Category,Data use,Provider,Platfor
 2024-09-25,How a U.S. Ally Uses Aid as a Cover in War,https://www.nytimes.com/2024/09/21/world/africa/uae-sudan-civil-war.html,New York Times,Europe,Sudan,Sudanese civil war,Armed Conflict,"2023,2024,2023,2024","Airbus,Airbus,Blacksky,Planet Labs","Pleiades Neo,Pleiades Neo,None,Planet Scope","<1m,TBA,1m-10m,1m-10m","Radar,Optical,Optical,Optical","RGB,RGB,NDVI,NDVI","Comparison,Single,Single,Single",None
 2022-10-10,Ukraine war: What do satellite images of the Kerch Bridge explosion tell us about the cause of the blast?,https://news.sky.com/story/ukraine-war-what-do-satellite-images-of-the-kerch-bridge-explosion-tell-us-about-the-cause-of-the-blast-12717323,Sky News,Asia,Ukraine,Ukraine War,Armed Conflict,"2022,2022","Maxar,Planet Labs","WorldView,SkySat","<1m,<1m","Single,Comparison","RGB,RGB","None,Slider"
 2022-09-19,Pakistan and its submerged cities,https://www.reuters.com/graphics/PAKISTAN-WEATHER/FLOODS/zgvomodervd/,Reuters,Asia,Pakistan,Pakistan Floods,Flooding,2022,ESA,Sentinel-2,1m-10m,Optical,RGB,On Scroll,
-
-
-
+2022-08-02,The Illegal Airstrips Bringing Toxic Mining to Brazil’s Indigenous Land,https://www.nytimes.com/interactive/2022/08/02/world/americas/brazil-airstrips-illegal-mining.html,The New York Times,South America,Brazil,Illigal Mining,"Mining, Ecocide","2020, 2020, 2021, 2022","Airbus, Planet Labs, Planet Labs, Planet Labs","PENDING, Scope, Scope, SkySat","1m-10m, 1m-10m, 1m-10m, <1m",Comparison,"RGB, RGB, RGB, RGB",Scroll,
+2021-11-03,"In Ukraine, there are about 20,000 fires on arable land yearly",https://texty.org.ua/projects/105282/ukraine-there-are-about-20000-fires-arable-land-yearly/,Texty,Europe,Ukraine,Wirldfires,Ecology,"2018, 2019, 2020, 2021","ESA, ESA, NASA/NOAA, NASA/NOAA","Sentinel-2, Sentinel-2, FIRMS, FIRMS","1m-10m, 1m-10m, >10m, >10m","Single, Single","RGB, RGB, Detection, Detection",Click,
+2021-10-19,"Russia allows methane
+leaks at planet’s peril",https://www.washingtonpost.com/climate-environment/interactive/2021/russia-greenhouse-gas-emissions/?utm_campaign=wp_main&utm_medium=social&utm_source=twitter,Washington Post,Asia,Russia,Methane Leak,Pollution,"2021, 2021","ESA, NASA/NOAA","Sentinel-5P, Suomi NPP",">10m, >10m","Single, Single","Methane, RGB","Zoom on Scroll, Zoom on Scroll",
+2021-08-18,Das Drama vom Kabul Airport,https://www.zeit.de/politik/ausland/2021-08/flughafen-kabul-satellitenbilder-situation-chaos,Die Zeit,Asia,Afghanistan,2021 Kabul airlift,Armed Conflict,"2021, 2021, 2021","Maxar, Planet Labs, Planet Labs","Worldview, Scope, SkySat","<1m, 1m-10m, <1m","Single, Single, Time Series","RGB, RGB, RGB",–,
 
 
 
