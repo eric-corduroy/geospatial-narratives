@@ -875,9 +875,12 @@
               <div class="filter-pills" id="meters-filter-pills">
                   <button class="pill active" data-type="resolutionCategory" data-value="all">All</button>
                   <button class="pill" data-type="resolutionCategory" data-value="<1m">&lt;1m</button>
-                  <button class="pill" data-type="resolutionCategory" data-value="1-10m">1-10m</button>
-                  <button class="pill" data-type="resolutionCategory" data-value=">10m">&gt;10m</button>
-              </div>
+                  <button class="pill" data-type="resolutionCategory" data-value="1-5m">1-5m</button>
+                  <button class="pill" data-type="resolutionCategory" data-value="5-30m">5-30m</button>
+                  <button class="pill" data-type="resolutionCategory" data-value="30-250m">30-250m</button>
+                  <button class="pill" data-type="resolutionCategory" data-value="250m-1km">250m-1km</button>
+                  <button class="pill" data-type="resolutionCategory" data-value=">1km">&gt;1km</button>
+                  </div>
 
               <div class="filter-title">Visualization:</div>
               <div class="filter-pills" id="viz-filter-pills">
@@ -1166,32 +1169,46 @@
     // --- GLOBAL FUNCTIONS ---
     // Moved getMeterCategory here to be accessible by both loadDataFromBackend and loadSampleData
     function getMeterCategory(resolution) {
-      if (!resolution) return '';
-      const lowerCaseResolution = resolution.toLowerCase();
-      // Exact string matches first for clarity and direct handling
-      if (lowerCaseResolution.includes('<1m')) {
-        return '<1m';
-      }
-      if (lowerCaseResolution.includes('1-10m')) {
-        return '1-10m';
-      }
-      if (lowerCaseResolution.includes('>10m')) {
-        return '>10m';
-      }
-      // Numerical parsing as a fallback or for specific number values
-      const numMatch = resolution.match(/(\d+\.?\d*)/);
-      if (numMatch) {
-        const res = parseFloat(numMatch[1]);
-        if (res > 0 && res < 1) {
-          return '<1m';
-        } else if (res >= 1 && res <= 10) {
-          return '1-10m';
-        } else if (res > 10) {
-          return '>10m';
+        if (!resolution) return '';
+        const lowerCaseResolution = resolution.toLowerCase();
+        
+        // Handle exact string matches first (e.g., if the category text is directly in the data)
+        if (lowerCaseResolution.includes('<1m')) return '<1m';
+        if (lowerCaseResolution.includes('1-5m')) return '1-5m';
+        if (lowerCaseResolution.includes('5-30m')) return '5-30m';
+        if (lowerCaseResolution.includes('30-250m')) return '30-250m';
+        if (lowerCaseResolution.includes('250m-1km')) return '250m-1km';
+        if (lowerCaseResolution.includes('>1km')) return '>1km';
+
+        // Numerical parsing for resolutions in meters or kilometers
+        const numMatch = resolution.match(/(\d+\.?\d*)/);
+        if (numMatch) {
+            let res = parseFloat(numMatch[1]);
+            let unit = (lowerCaseResolution.includes('km') || lowerCaseResolution.includes('kilometers')) ? 'km' : 'm';
+
+            // Convert everything to meters for comparison
+            if (unit === 'km') {
+                res *= 1000;
+            }
+
+            if (res > 0 && res < 1) {
+                return '<1m';
+            } else if (res >= 1 && res <= 5) {
+                return '1-5m';
+            } else if (res > 5 && res <= 30) {
+                return '5-30m';
+            } else if (res > 30 && res <= 250) {
+                return '30-250m';
+            } else if (res > 250 && res <= 1000) { // 1000m is 1km
+                return '250m-1km';
+            } else if (res > 1000) {
+                return '>1km';
+            }
         }
-      }
-      return '';
+        
+        return '';
     }
+    // --- END GLOBAL FUNCTIONS ---
 
     function extractYears(dataUseString) {
         if (!dataUseString) return [];
