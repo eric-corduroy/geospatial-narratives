@@ -825,6 +825,7 @@
     let filtersActive = false;
     let currentView = 'table'; // Initialize to default
     let currentOpenDefinitionElement = null; // Global variable to track the currently open definition
+    let termToActivateOnRender = null; // NEW: Global variable to store the term slug to activate on render
 
     // NEW: View mapping for URL hash
     const viewMap = {
@@ -838,6 +839,20 @@
         if (!yearString) return [];
         const yearMatches = String(yearString).match(/\b\d{4}\b/g); // Ensure it's treated as string
         return yearMatches ? Array.from(new Set(yearMatches)).sort() : [];
+    }
+
+    // NEW: Helper function to create a URL-friendly slug
+    function slugify(text) {
+        if (!text) return '';
+        return text.toString().toLowerCase()
+            .replace(/\s+/g, '_')           // Replace spaces with _
+            .replace(/[^\w\-]+/g, '')       // Remove all non-word chars except -
+            .replace(/\-\-+/g, '_')         // Replace multiple - with single _ (if any dashes remain)
+            .replace(/^-+/, '')             // Trim - from start of text
+            .replace(/-+$/, '')             // Trim - from end of text
+            .replace(/^-+/, '')             // Final check for leading/trailing underscores
+            .replace(/_+$/, '')
+            .replace(/^_/, '');
     }
 
     function adjustContentViewHeight() {
@@ -892,27 +907,49 @@
     // NEW: Function to determine the view from the URL hash
     function getInitialViewFromHash() {
         const hash = window.location.hash.substring(1).toLowerCase();
-        return viewMap[hash] || 'table'; // Default to 'table'
+        termToActivateOnRender = null; // Reset
+
+        if (hash.startsWith('glossary_')) {
+            termToActivateOnRender = hash.substring('glossary_'.length);
+            return 'terms';
+        }
+        if (hash === 'quotes') return 'quote';
+        if (hash === 'glossary') return 'terms'; // Base glossary hash
+        
+        return 'table'; // Default to 'table'
     }
 
     // NEW: Function to update the URL hash
-    function updateHash(viewName) {
+    function updateHash(viewName, termSlug = null) {
         let newHash = '';
         if (viewName === 'quote') {
             newHash = '#quotes';
         } else if (viewName === 'terms') {
-            newHash = '#glossary';
+            newHash = termSlug ? `#glossary_${termSlug}` : '#glossary';
         }
         
         // Use replaceState to change the hash without adding to the history stack
-        if (window.location.hash !== newHash) {
+        if (window.location.hash.toLowerCase() !== newHash.toLowerCase()) {
             history.replaceState(null, null, newHash || ' ');
         }
     }
     
     // NEW: Function to set view and toggles based on hash (used by hashchange listener)
     function updateViewFromHash(hash) {
-        const view = viewMap[hash] || 'table';
+        let view = viewMap[hash] || 'table';
+        let termSlug = null;
+        
+        if (hash.startsWith('glossary_')) {
+            view = 'terms';
+            termSlug = hash.substring('glossary_'.length);
+        }
+        
+        // Handle base glossary hash
+        if (hash === 'glossary') {
+            view = 'terms';
+            termSlug = null;
+        }
+
         currentView = view;
         
         const quotesToggle = document.getElementById('quotesToggle');
@@ -920,9 +957,53 @@
         
         quotesToggle.checked = (view === 'quote');
         termsToggle.checked = (view === 'terms');
-        
+
+        // Set the term to be activated if in terms view
+        termToActivateOnRender = (view === 'terms') ? termSlug : null;
+
         updateView(false); // Call updateView, but tell it not to update the hash
     }
+
+    // New/Refactored: Function to handle term click logic (display, hash update, etc.)
+    function handleTermActivation(clickedTermElement, termItem) {
+        const definitionText = termItem.definition;
+        const termSlug = slugify(termItem.term);
+
+        // 1. Toggle Definition Display Logic
+        if (currentOpenDefinitionElement && currentOpenDefinitionElement.previousElementSibling === clickedTermElement) {
+            // If the same element is clicked again, close it and revert to base glossary hash
+            currentOpenDefinitionElement.remove();
+            currentOpenDefinitionElement = null;
+            updateHash('terms', null); // Update hash to #glossary
+            return;
+        }
+
+        // Close any currently open definition
+        if (currentOpenDefinitionElement) {
+            currentOpenDefinitionElement.remove();
+            currentOpenDefinitionElement = null;
+        }
+
+        // Open the new definition
+        if (definitionText) {
+            const maxCharsPerLine = 33;
+            const formattedDefinition = formatDefinitionText(definitionText, maxCharsPerLine);
+
+            const definitionElement = document.createElement('div');
+            definitionElement.classList.add('term-definition', 'active');
+            definitionElement.innerHTML = formattedDefinition;
+
+            clickedTermElement.parentNode.insertBefore(definitionElement, clickedTermElement.nextSibling);
+            currentOpenDefinitionElement = definitionElement;
+
+            // 2. Update URL Hash to the specific term
+            updateHash('terms', termSlug);
+            
+            // 3. Scroll to the element to ensure visibility (important when the definition expands)
+            clickedTermElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
 
     // Modified updateView to take an optional parameter to skip hash update
     function updateView(updateHashState = true) {
@@ -987,7 +1068,7 @@
       
       quotesToggle.checked = (currentView === 'quote');
       termsToggle.checked = (currentView === 'terms');
-      updateHash(currentView); // Set the hash correctly on initial load based on the determined view.
+      // updateHash(currentView); // Initial hash is set by getInitialViewFromHash which handles deep links
       // --- END INITIAL HASH AND VIEW SETUP ---
 
 
@@ -1049,6 +1130,7 @@
           } else if (!termsToggle.checked) {
               currentView = 'table'; // Default to table if no other view is selected
           }
+          termToActivateOnRender = null; // Clear term slug when switching views
           updateView(); // This now updates the hash
       });
 
@@ -1059,6 +1141,7 @@
           } else if (!quotesToggle.checked) {
               currentView = 'table'; // Default to table if no other view is selected
           }
+          termToActivateOnRender = null; // Clear term slug when switching views
           updateView(); // This now updates the hash
       });
       
@@ -1527,6 +1610,7 @@
 
         let currentColumnIndex = 0;
         let displayedTermCount = 0;
+        let foundTermElement = null; // To store the element that matches termToActivateOnRender
 
         sortedLetters.forEach(letter => {
             const letterHeader = document.createElement('div');
@@ -1539,6 +1623,10 @@
                 termElement.classList.add('term-item');
                 termElement.textContent = termItem.term;
                 termElement.setAttribute('data-term', termItem.term); // Store term text
+                
+                // NEW: Assign unique ID for hash navigation
+                const termSlug = slugify(termItem.term);
+                termElement.id = `glossary_${termSlug}`;
 
                 // NEW: Check if the definition is "TBA"
                 const isTBA = termItem.definition.trim().toLowerCase() === 'tba';
@@ -1551,43 +1639,49 @@
                 }
 
                 if (!isTBA) {
+                    // Refactored to use the central activation function
                     termElement.addEventListener('click', function() {
-                        let definitionText = this.getAttribute('data-definition');
-                        const clickedTermElement = this;
-
-                        if (currentOpenDefinitionElement && currentOpenDefinitionElement.previousElementSibling === clickedTermElement) {
-                            currentOpenDefinitionElement.remove();
-                            currentOpenDefinitionElement = null;
-                            return;
-                        }
-
-                        if (currentOpenDefinitionElement) {
-                            currentOpenDefinitionElement.remove();
-                            currentOpenDefinitionElement = null;
-                        }
-
-                        if (definitionText) {
-                            const maxCharsPerLine = 33;
-                            const formattedDefinition = formatDefinitionText(definitionText, maxCharsPerLine);
-
-                            const definitionElement = document.createElement('div');
-                            definitionElement.classList.add('term-definition', 'active');
-                            definitionElement.innerHTML = formattedDefinition;
-
-                            clickedTermElement.parentNode.insertBefore(definitionElement, clickedTermElement.nextSibling);
-                            currentOpenDefinitionElement = definitionElement;
-                        }
+                        handleTermActivation(this, termItem);
                     });
                 }
                 
                 columns[currentColumnIndex].appendChild(termElement);
                 displayedTermCount++;
+
+                // NEW: Check if this is the element we need to activate from the URL hash
+                if (termToActivateOnRender && termSlug === termToActivateOnRender) {
+                    foundTermElement = termElement;
+                }
             });
 
             currentColumnIndex = (currentColumnIndex + 1) % numColumns;
         });
 
         columns.forEach(col => termsContainer.appendChild(col));
+
+        // NEW: If a term was specified in the URL, activate it after rendering
+        if (foundTermElement) {
+            // Find the term item data again to pass to handleTermActivation
+            const termName = foundTermElement.getAttribute('data-term');
+            const initialLetter = termName.charAt(0).toUpperCase();
+            const termItem = termsData[initialLetter].find(item => slugify(item.term) === termToActivateOnRender);
+
+            if (termItem) {
+                // Manually trigger the activation logic
+                handleTermActivation(foundTermElement, termItem);
+                
+                // Ensure it scrolls into view, compensating for the fixed header
+                const headerHeight = document.getElementById('fixed-header-area').offsetHeight;
+                const elementPosition = foundTermElement.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + termsContainer.scrollTop - headerHeight;
+
+                termsContainer.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+            }
+            termToActivateOnRender = null; // Clear flag after activation
+        }
 
         updateFilterCount(displayedTermCount);
     }
