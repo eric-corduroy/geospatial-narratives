@@ -168,6 +168,24 @@
       color: white;
       border-color: #000; /* Changed from #5f56ff to #000 */
     }
+    
+    /* --- NEW LINK PILL STYLE --- */
+    .link-pill a {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 12px;
+        background: rgb(221, 255, 109); /* Yellow/Green Background */
+        color: #000; /* Black text */
+        text-decoration: none;
+        font-weight: 500;
+        border: none;
+        transition: background 0.2s ease;
+    }
+    .link-pill a:hover {
+        background: rgb(180, 210, 80); /* Slightly darker yellow/green on hover */
+    }
+    /* --- END NEW LINK PILL STYLE --- */
+
     .year-range-filter {
       display: flex;
       gap: 10px;
@@ -684,6 +702,10 @@
         margin-top: 8px;
         padding-left: 8px;
       }
+      /* Ensure link-pill text is visible in responsive view if its column is visible */
+      .link-pill a {
+        font-size: 12px;
+      }
     }
 
    /* For screens smaller than 480px (mobile phones) */
@@ -800,6 +822,11 @@
         font-size: 75%; /* Adjust as needed, e.g., 60% for slightly larger */
         position: relative;
         top: -0.2em;
+      }
+      /* Ensure link-pill text is visible in mobile view if its column is visible */
+      .link-pill a {
+        font-size: 10px;
+        padding: 3px 6px;
       }
     }
   </style>
@@ -1723,11 +1750,14 @@ document.getElementById('toYearInput').addEventListener('input', function () {
                     row.classList.add('last-cdp-of-article');
                 }
 
+                // Use the link-pill class for the Link <td> content
+                const linkCellContent = `<a href="${item.link}" target="_blank">Link</a>`;
+
                 if (cdpIndex === 0) {
                     row.innerHTML = `
                         <td rowspan="${rowspan}">${item.date}</td>
                         <td rowspan="${rowspan}">${item.title}</td>
-                        <td rowspan="${rowspan}"><a href="${item.link}" target="_blank">Link</a></td>
+                        <td rowspan="${rowspan}" class="link-pill">${linkCellContent}</td>
                         <td rowspan="${rowspan}">${item.outlet}</td>
                         <td rowspan="${rowspan}">${item.country}</td>
                         <td rowspan="${rowspan}">${item.context}</td>
