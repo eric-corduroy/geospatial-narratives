@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet">
   <link rel="icon" type="image/png" href="circle.png">
   <style>
     /* Add box-sizing to all elements for consistent box model behavior */
@@ -155,11 +156,26 @@
     .info-column p,
     .info-column ul,
     .info-column li {
-      font-size: 17.4px; /* Explicitly set all to 30px */
-      line-height: 23px; /* Explicitly set all to 36px */
+      font-family: 'Geist Mono', monospace;
+      font-size: 16px; /* Explicitly set all to 30px */
+      text-align: left;
+      max-width: 60ch; /* Keeps line length readable */
+      line-height: 22px; /* Explicitly set all to 36px */
       font-weight: 300; /* Changed to regular font weight */
       color: #1e1e1e;
     }
+
+    /* Small text for references or footnotes */
+.info-column p.small-text {
+    font-size: 0.7em;       /* smaller than default 16px */
+    line-height: 1.2;        /* tight but readable */
+    width: 100%;             /* take full width of column */
+    max-width: none;         /* override parent max-width */
+    text-indent: -1.2em;      /* move first line back */
+    padding-left: 1.2em;
+    color: #878787;          /* optional color */
+    margin: 0 0 1em 0;       /* spacing below */
+}
 
     .info-column h1 {
       margin-top: 0;
@@ -188,7 +204,7 @@
     sup {
         vertical-align: baseline;
         position: relative;
-        color: #373dff;
+        color: #878787;
         top: -0.4em;
         font-size: 0.75em;
         line-height: 0;
@@ -207,7 +223,7 @@
   background-color: rgb(221, 255, 109); /* or transparent, or #000 */
   color: black; /* or white if background is dark */
   }
-
+  
 
     /* --- Responsive Design --- */
 
@@ -335,7 +351,7 @@
       <a href="about.html" class="active">About</a>
     </div>
     <div class="update-date">
-        updated: 2025-09-17
+        updated: 2025-10-10
     </div>
     <div class="main-content-wrapper-header">
       <div class="stats">
@@ -343,7 +359,7 @@
       </div>
       <div class="about-tabs">
           <button class="about-tab-button active-tab" data-target="conceptContent">Concept</button>
-          <button class="about-tab-button" data-target="methodologyContent">Method</button>
+          <button class="about-tab-button" data-target="methodContent">Method</button>
           <button class="about-tab-button" data-target="disclaimerContent">Disclaimer</button>
           <button class="about-tab-button" data-target="submitContent">Submit</button>
       </div>
@@ -353,26 +369,38 @@
   <div class="scrollable-content-area">
     <div id="conceptContent" class="info-columns-container about-content-section active">
       <div class="info-column">
-          <p>Geospatial Narratives is a project and critical toolkit developed in response to the increasing visibility and narrative use of satellite imagery in today's media environment. At a time when deepfakes, disinformation and visual manipulation are ever more common, the ability to critically assess images – especially those that appear objective or “scientific” – is no longer a luxury, but a public necessity.</p>
-          <p>The platform explores how satellite data is used to shape public narratives in journalism, crisis reporting and beyond. Through archiving and ( extended) contextualisation of these uses, Geospatial Narratives makes them searchable, comparable and accessible for critical reflection.</p>  
+          <p>Geospatial Narratives is a project and <mark>critical toolkit</mark> developed in response to the increasing visibility and narrative use of satellite imagery in today's media environment. At a time when deepfakes, disinformation and visual manipulation are ever more common, the ability to critically assess images – especially those that appear objective or “scientific” – is no longer a luxury, but a public necessity.</p>
+          <p>The platform explores how satellite data is used to shape public narratives in journalism, crisis reporting and beyond. Through archiving and (extended) contextualisation of these uses, Geospatial Narratives makes them <mark>searchable</mark>, <mark>comparable</mark> and <mark>accessible</mark> for critical reflection.</p>  
           <p>Once reserved exclusively for military or government agencies, satellite images are now omnipresent. But despite their ubiquity and increasing availability, they are often misunderstood, misinterpreted or taken for granted. Satellite images are commonly perceived as neutral, purely observational or even omniscient – particularly due to our conditioning by tools such as Google Earth, which make aerial imagery seem familiar and trustworthy. However, this visual familiarity is misleading.</p>
          </div>
       <div class="info-column">
-          <p>Satellite images are not ‘images’ in the traditional photographic sense. They are data – scientifically measured, influenced by environmental factors and digitally processed. They require complex decisions about sensors, wavelengths, band combinations, image stitching and enhancement techniques, and are subject to control by companies and geopolitical factors in terms of access. Therefore, their use in the media – whether to document conflicts, visualise climate change, or simply embellish reporting – requires a more informed and critical literacy than is currently widespread.</p>
-          <p>Scholars from fields such as media studies and architecture, including Laura Kurgan and Lisa Parks, have long argued that the public should have access not only to images, but also to the context, technologies, and political frameworks that shape those images. As Kurgan already stated in 2013: <mark>‘With every image, we should be able to ask questions about its technology, its location data, its ownership, its legibility, and its source.’</mark></p>
-          <p>Geospatial Narratives responds to this need and attempts to create a framework for knowledge transfer in this regard.</p>      
+          <p>Satellite images are not “images” in the usual photographic sense.
+They are data — scientifically measured, shaped by environmental factors, and digitally processed.
+Their production involves informed choices about aspects such as sensors, wavelengths, band combinations, stitching, and enhancement, and they are subject to control by companies and geopolitical factors in terms of access.
+Their use in the media — whether to report conflicts, show climate change, or decorate stories — calls for a more informed and critical literacy than is currently common.</p>
+          <p>Scholars from fields such as media studies and architecture — including Laura Kurgan and Lisa Parks — have long argued that the public should have access not only to satellite images themselves, but also to the <mark>contexts</mark>, <mark>technologies</mark>, and <mark>political frameworks</mark> that shape them. As Kurgan already noted in 2013: “With every image, we should be able to ask questions about its technology, its location data, its ownership, its legibility, and its source.”<sup> 1</sup></p>
+          <p>Geospatial Narratives responds to this need and attempts to create a framework for knowledge transfer in this regard.</p>  
+          <p class="small-text">1 Kurgan, Laura. “Close up at a distance: mapping, technology, and politics.” Zone Books, 2013</p>    
          </div>
     </div>
 
-    <div id="methodologyContent" class="info-columns-container about-content-section">
+    <div id="methodContent" class="info-columns-container about-content-section">
       <div class="info-column">
-          <p>The information presented on this platform combines explicit details from published articles with interpretive insights drawn from experience working with satellite imagery as both a visual and technical medium.</p>
-          <p>While information about the article, such as source, publication date, headline and geographical area, can be easily extracted, the satellite images accompanying these narratives often lack the necessary context. Who took the picture? Which sensor was used? What exactly are we seeing?</p>
-          <p>To help address these gaps, I draw on publicly available data about satellite capabilities, visual clues within the imagery, and an interpretive sensibility developed through regular engagement with geospatial data. When the satellite or sensor is named, it's often possible to infer the type — optical, radar, or hyperspectral — based on known specifications. How the imagery is visualized (true color, false color, or derived indices like NDVI) depends on sensor characteristics, processing decisions, and the thematic focus of the article, be it flooding, wildfires, or deforestation.</p>
+          <p>Information on this platform combines clear details from published articles with insights developed through working with satellite imagery as both a visual and technical medium.
+While details such as publication date, source, headline, and geographic context are easy to extract, the satellite images that accompany them often lack context. Who took the image? Which sensor was used? What exactly are we seeing?</p>
+          <p>To address these gaps, I draw on publicly available data about satellite capabilities, visual clues within the imagery, and an interpretive sensibility developed through regular engagement with geospatial data.
+This approach breaks down into key aspects that guide how the imagery is read and categorized:</p>
+          <p><mark>Provider</mark> and <mark>Platform</mark> are closely linked and together define the origin and structure of satellite data. The provider is the entity responsible for producing or managing the data — from commercial companies like Planet or Maxar to public agencies such as NASA, ESA, or NOAA. The platform refers to the satellite (constellation) collecting the data, shaping when and how areas are observed based on its orbit and sensor design. Together, these fields determine access, licensing, update cycles, and form the foundation for understanding all other metadata.</p>
+          <p><mark>Sensor</mark> — the instrument carried by the platform, defining how data is captured. Sensors differ in their physical principles and the portion of the electromagnetic spectrum they measure.</p>
       </div>
       <div class="info-column">
-          <p><mark>Resolution</mark>, however, remains particularly difficult to determine. It's rarely stated, and often visually distorted by cropping, rescaling, or digital post-processing—making precise identification impossible. In such cases, I refer to the known native resolution of likely sensors and categorize images into three general resolution bands: <1m, 1–10m, or >10m.</p>
-          <p>A certain degree of approximation and deviation is therefore inevitable with this approach. However, this scope for interpretation is not a shortcoming, but rather part of the critical examination: how much do we really know when we are shown a satellite image? And what remains hidden and invisible to us?</p>
+          <p><mark>Domain</mark> refers to the primary focus of observation, though overlaps exist.
+While weather covers clouds, storms, and precipitation for forecasting, atmosphere includes measurements of gases, temperature, and radiation for climate and air quality.
+Land focuses on Earth’s surface — changes in vegetation, urban environements, and water bodies.
+Ocean involves sea temperature, color, waves, and currents for marine and climate research.</p>
+          <p><mark>Visualisation</mark> — whether shown in true color, false color, or as derived indices such as NDVI, is shaped by sensor properties, available band combinations, processing choices, and the intended thematic focus — from floods and wildfires to deforestation.</p>
+          <p><mark>Resolution</mark> — the size of each pixel and the apparent scale of objects — is often hard to determine. It's rarely stated and can be visually altered by cropping, rescaling, or post-processing, making precise identification difficult. To address this and maintain consistency, I group images into broad categories from <1 m to >1 km. These are not strict resolution bands, but flexible margins that account for differences in sensor types, scale, and context — whether optical, radar, weather, or atmospheric. This approach supports meaningful comparison while acknowledging the variability of satellite data</p>
+          <p>Some degree of approximation is inevitable. But this room for interpretation isn’t a flaw — it’s part of the critical process: how much do we really know when looking at a satellite image, and what remains hidden or unseen?</p>
       </div>
     </div>
 
@@ -380,28 +408,36 @@
     <div id="disclaimerContent" class="info-columns-container about-content-section">
       <div class="info-column">
           <p>Curation for this platform follows an editorial practice: iterative, subjective, and open to new perspectives.</p>
-          <p>This applies not only to the content in the Index section, but also to the accompanying theoretical materials within Literacy. Both sections are designed as curated accompanying materials and conceptual tools to encourage a reflective engagement with the narrative and analytical use of satellite data. They do not claim to be exhaustive or academically authoritative, but rather invite open, interdisciplinary dialogue.</p>
+          <p>This applies not only to the material in the Index section but also to the essays in Literacy.
+Both parts act as curated resources and tools that invite reflection on how satellite data is used — both as narrative and as analysis.
+They do not aim to be complete or academically final, but rather to open space for shared and cross-disciplinary discussion.</p>
           <p><mark>The index</mark> collects examples in which satellite images are used in journalistic, investigative, activist or artistic contexts. It traces how such images circulate and attempts to highlight their narrative, political and media dimensions - and at the same time to fill gaps in public documentation.
 The archive does not offer a comprehensive overview, but represents a curated selection characterised by narrative relevance, linguistic accessibility and a focus on predominantly Western, English-language sources. I recognise the limitations of this perspective and welcome suggestions for expansion.</p>
       </div>
       <div class="info-column">
-          <p><mark>The article list</mark> brings together a deliberately diverse range of perspectives: from (popular) scientific publications and media-theoretical or philosophical texts to journalistic reports and NGO-based analyses. It includes books, online articles, essays, interviews, and videos that exemplify how satellite imagery is used within cultural, political, and media discourse.
-The selection is guided by criteria such as narrative and analytical relevance, linguistic accessibility, and interdisciplinary significance.</p>
-          <p><mark>The glossary</mark> expands this collection with a hybrid vocabulary: a mixture of technical terms, scientific concepts and critical or poetic figures of thought from fields such as remote sensing, media theory, design research and philosophy. Some entries provide basic definitions of how satellite technologies work, while others serve as food for thought – metaphors, conceptual frameworks or tools for questioning our perception and use of these technologies.</p>
+        <p><mark>The article list</mark> brings together a deliberately diverse set of perspectives: from popular science and media-theoretical or philosophical texts to journalistic reports and NGO analyses.
+It includes books, online articles, essays, interviews, and videos that show how satellite imagery is used in cultural, political, and media discourse.
+Selections are guided by criteria such as narrative and analytical relevance, clear language, and interdisciplinary significance.</p>
+          <p><mark>The glossary</mark> expands the collection with a hybrid vocabulary: a mix of technical terms, scientific concepts, and critical or poetic ideas from fields such as remote sensing, media theory, design research, and philosophy.
+Some entries give basic definitions of how satellite technologies work, while others offer food for thought — metaphors, conceptual frameworks, or tools to question how we perceive and use these technologies.</p>
           <p>All entries (see Method) have been included without prior authorisation from the original authors or publications. Deletions may be requested at any time.</p>
     </div>
     </div>
 
     <div id="submitContent" class="info-columns-container about-content-section">
       <div class="info-column">
-        <p>This platform serves as an open, collective, ever-evolving resource for the critical study of satellite data as media in narrative and investigative contexts. It invites contributions that expand the scope of the archive and promote a better public understanding of how satellite data is used, interpreted and circulated.</p>
+        <p>This platform is an open, collective, and growing resource for studying satellite data as a medium in stories and investigations.
+It invites contributions that expand the archive and help people understand how satellite data is used, read, and circulated.</p>
         <p>Submissions may fall into two categories:</p>
         <p><mark>Narrative Use:</mark> examples in which satellite imagery plays a central role in narratives, analyses or reports. These can be news articles, visual studies or artistic works that use satellite data for more than just illustration.</p>
-        <p><mark>Satellite Literacy:</mark> contributions that promote a critical examination of the medium itself. This includes basic explanations as well as more interpretative or speculative considerations. Contributions may cover key concepts from the fields of remote sensing, media theory, design research, critical geography or philosophy.</p></p>
+        <p><mark>Satellite Literacy:</mark> contributions that explore and question the medium itself.
+This includes both simple explanations and more reflective or speculative ideas.
+Contributions may cover concepts from fields suchs as remote sensing, critical geography, design research, media theory or philosophy.</p>
       </div>
       <div class="info-column">
-        <p>Contributions from different application contexts, regions and cultures are welcome. This archive is based on the conviction that satellite images are never neutral. Their narrative potential, biases and blind spots only become apparent through different perspectives. Accordingly, I also recognize the limitations of my own perspective, which is primarily shaped by Western, English- and German-language media.</p>
-        <p>Submissions are reviewed based on their relevance, contextual clarity, and alignment with the platform’s editorial focus. Items used decoratively or without critical framing may fall outside the scope of the archive.</p>        
+        <p>Contributions from different application contexts, regions and cultures are welcome. This archive is based on the conviction that satellite images are never neutral. Their narrative potential, biases and blind spots only become apparent through different perspectives. I also acknowledge the limits of my own perspective, which is shaped mainly by Western, English-, and German-language media.</p>
+        <p>Submissions are reviewed for relevance, clarity, and fit with the platform’s focus.
+Images used purely for decoration — such as in news reports for visual annotation — or without critical context may fall outside the archive’s scope.</p>
         <p>To propose an entry — whether case study, text, or glossary term - or simply to provide feedback, please use the form below or reach out via <a href="mailto:mail@julianpeschel.info">email</a>.</p>
         <p>
           <a href="https://forms.gle/oGPPKSaUN9uHzagp7" target="_blank" style="display: inline-block; padding: 15px 30px; background-color: rgb(221, 255, 109); color: black; text-decoration: none; border-radius: 5px; font-family: 'Geist Mono', monospace; font-size: 18px; font-weight: 600; text-align: center; cursor: pointer;">
@@ -413,33 +449,65 @@ The selection is guided by criteria such as narrative and analytical relevance, 
 
   </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // Set active nav link on page load
-      document.querySelectorAll('.nav a').forEach(link => {
-        link.classList.remove('active'); // Remove active from all links first
-      });
-      document.querySelector('.nav a[href="about.html"]').classList.add('active');
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const tabButtons = document.querySelectorAll('.about-tab-button');
+  const contentSections = document.querySelectorAll('.about-content-section');
 
-      const tabButtons = document.querySelectorAll('.about-tab-button');
-      const contentSections = document.querySelectorAll('.about-content-section');
+  // Function to activate a section by its target ID (e.g., 'conceptContent')
+  function activateSection(targetId) {
+    // Check if the target content section actually exists
+    const targetSection = document.getElementById(targetId);
+    if (!targetSection) {
+      // Fallback to default if the ID is invalid
+      targetId = 'conceptContent';
+    }
 
-      tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-          // Remove 'active-tab' class from all buttons
-          tabButtons.forEach(btn => btn.classList.remove('active-tab'));
-          // Add 'active-tab' class to the clicked button
-          button.classList.add('active-tab');
+    // Update visible content
+    contentSections.forEach(section => section.classList.toggle('active', section.id === targetId));
+    
+    // Update tab button active state
+    const targetData = targetId.replace('Content', '');
+    tabButtons.forEach(btn => btn.classList.toggle('active-tab', btn.dataset.target === targetId)); // Use targetId here as dataset.target is the full ID
 
-          // Hide all content sections
-          contentSections.forEach(section => section.classList.remove('active'));
+    // Update URL hash without reloading
+    const hashData = targetId.replace('Content', '');
+    history.replaceState(null, null, `#${hashData}`);
+  }
 
-          // Show the target content section
-          const targetId = button.dataset.target;
-          document.getElementById(targetId).classList.add('active');
-        });
-      });
+  // Function to determine the section from the URL hash
+  function getSectionIdFromHash() {
+    // Get the hash part of the URL (e.g., '#concept' -> 'concept')
+    const hash = window.location.hash.substring(1); 
+    
+    // Construct the expected content ID (e.g., 'concept' -> 'conceptContent')
+    // We expect the hash to be the short form ('concept', 'methodology', etc.)
+    if (hash && document.getElementById(`${hash}Content`)) {
+        return `${hash}Content`;
+    }
+    // Default fallback to 'conceptContent'
+    return 'conceptContent';
+  }
+
+  // Handle tab button clicks: FIX implemented here to use the correct data-target attribute
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      // button.dataset.target is the full ID: 'conceptContent', 'methodologyContent', etc.
+      const targetId = button.dataset.target;
+      activateSection(targetId);
     });
-  </script>
+  });
+
+  // Activate the section on initial load based on the hash
+  const initialSectionId = getSectionIdFromHash();
+  activateSection(initialSectionId);
+  
+  // Listen for hash changes (e.g., when the user clicks the back/forward button in the browser)
+  window.addEventListener('hashchange', () => {
+    activateSection(getSectionIdFromHash());
+  });
+});
+</script>
+
 </body>
 </html>
