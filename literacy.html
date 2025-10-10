@@ -823,8 +823,15 @@
     let allData = [];
     let termsData = {}; // To store terms loaded from CSV
     let filtersActive = false;
-    let currentView = 'table'; // 'table', 'quote', or 'terms'
+    let currentView = 'table'; // Initialize to default
     let currentOpenDefinitionElement = null; // Global variable to track the currently open definition
+
+    // NEW: View mapping for URL hash
+    const viewMap = {
+        'quotes': 'quote',
+        'glossary': 'terms',
+        'table': 'table'
+    };
 
     // --- GLOBAL FUNCTIONS ---
     function extractYears(yearString) {
@@ -882,6 +889,70 @@
         return lines.join('<br>');
     }
 
+    // NEW: Function to determine the view from the URL hash
+    function getInitialViewFromHash() {
+        const hash = window.location.hash.substring(1).toLowerCase();
+        return viewMap[hash] || 'table'; // Default to 'table'
+    }
+
+    // NEW: Function to update the URL hash
+    function updateHash(viewName) {
+        let newHash = '';
+        if (viewName === 'quote') {
+            newHash = '#quotes';
+        } else if (viewName === 'terms') {
+            newHash = '#glossary';
+        }
+        
+        // Use replaceState to change the hash without adding to the history stack
+        if (window.location.hash !== newHash) {
+            history.replaceState(null, null, newHash || ' ');
+        }
+    }
+    
+    // NEW: Function to set view and toggles based on hash (used by hashchange listener)
+    function updateViewFromHash(hash) {
+        const view = viewMap[hash] || 'table';
+        currentView = view;
+        
+        const quotesToggle = document.getElementById('quotesToggle');
+        const termsToggle = document.getElementById('termsToggle');
+        
+        quotesToggle.checked = (view === 'quote');
+        termsToggle.checked = (view === 'terms');
+        
+        updateView(false); // Call updateView, but tell it not to update the hash
+    }
+
+    // Modified updateView to take an optional parameter to skip hash update
+    function updateView(updateHashState = true) {
+        const tableViewContainer = document.getElementById('tableViewContainer');
+        const quoteOnlyViewContainer = document.getElementById('quoteOnlyViewContainer');
+        const termsViewContainer = document.getElementById('termsViewContainer');
+
+        if (updateHashState) {
+            updateHash(currentView);
+        }
+
+        // Hide all view containers first
+        tableViewContainer.classList.add('hidden');
+        quoteOnlyViewContainer.classList.add('hidden');
+        termsViewContainer.classList.add('hidden');
+
+        // Show the active view container
+        if (currentView === 'table') {
+            tableViewContainer.classList.remove('hidden');
+        } else if (currentView === 'quote') {
+            quoteOnlyViewContainer.classList.remove('hidden');
+        } else if (currentView === 'terms') {
+            termsViewContainer.classList.remove('hidden');
+        }
+        
+        filterTable(); 
+        adjustContentViewHeight();
+    }
+
+
     // --- END GLOBAL FUNCTIONS ---
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -908,13 +979,25 @@
     });
   });
 
+      // --- INITIAL HASH AND VIEW SETUP ---
+      const initialView = getInitialViewFromHash();
+      currentView = initialView;
+      const quotesToggle = document.getElementById('quotesToggle');
+      const termsToggle = document.getElementById('termsToggle');
+      
+      quotesToggle.checked = (currentView === 'quote');
+      termsToggle.checked = (currentView === 'terms');
+      updateHash(currentView); // Set the hash correctly on initial load based on the determined view.
+      // --- END INITIAL HASH AND VIEW SETUP ---
+
+
       // Load both CSVs concurrently
       Promise.all([
         loadLiteratureData(),
         loadTermsData()
       ]).then(() => {
         initializeFilters();
-        filterTable(); // Initial render after all data is loaded
+        updateView(false); // Initial render after all data is loaded. Hash already set.
         document.getElementById('loadingStatus').style.display = 'none';
         document.getElementById('statsDisplay').style.display = 'block';
       }).catch(error => {
@@ -924,7 +1007,7 @@
         loadSampleLiteratureData();
         loadSampleTermsData();
         initializeFilters();
-        filterTable();
+        updateView(false); // Initial render with fallback data. Hash already set.
         document.getElementById('statsDisplay').style.display = 'block';
       });
 
@@ -958,10 +1041,7 @@
         filterTable();
       });
 
-      // View Toggle Switches
-      const quotesToggle = document.getElementById('quotesToggle');
-      const termsToggle = document.getElementById('termsToggle');
-
+      // View Toggle Switches - MODIFIED TO USE NEW updateView
       quotesToggle.addEventListener('change', function() {
           if (this.checked) {
               currentView = 'quote';
@@ -969,7 +1049,7 @@
           } else if (!termsToggle.checked) {
               currentView = 'table'; // Default to table if no other view is selected
           }
-          updateView();
+          updateView(); // This now updates the hash
       });
 
       termsToggle.addEventListener('change', function() {
@@ -979,11 +1059,14 @@
           } else if (!quotesToggle.checked) {
               currentView = 'table'; // Default to table if no other view is selected
           }
-          updateView();
+          updateView(); // This now updates the hash
       });
-
-      // Set initial state based on currentView (which defaults to 'table')
-      updateView();
+      
+      // NEW: Listen for hash changes (back/forward button or manual URL edit)
+      window.addEventListener('hashchange', () => {
+          const newHash = window.location.hash.substring(1).toLowerCase();
+          updateViewFromHash(newHash);
+      });
 
 
       // Set active nav link
@@ -1331,29 +1414,6 @@
         });
         adjustContentViewHeight();
     }
-
-    function updateView() {
-        const tableViewContainer = document.getElementById('tableViewContainer');
-        const quoteOnlyViewContainer = document.getElementById('quoteOnlyViewContainer');
-        const termsViewContainer = document.getElementById('termsViewContainer');
-
-        // Hide all view containers first
-        tableViewContainer.classList.add('hidden');
-        quoteOnlyViewContainer.classList.add('hidden');
-        termsViewContainer.classList.add('hidden');
-
-        // Show the active view container
-        if (currentView === 'table') {
-            tableViewContainer.classList.remove('hidden');
-        } else if (currentView === 'quote') {
-            quoteOnlyViewContainer.classList.remove('hidden');
-        } else if (currentView === 'terms') {
-            termsViewContainer.classList.remove('hidden');
-        }
-        filterTable(); // Re-render content for the active view (table, quotes, and terms still filter)
-        adjustContentViewHeight();
-    }
-
 
     function renderTable() {
         const tbody = document.querySelector('table tbody');
