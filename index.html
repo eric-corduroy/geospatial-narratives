@@ -222,13 +222,13 @@
       font-weight: 400;
       word-wrap: break-word; /* Allows text to break to the next line */
     }
-    /* Specific styles for columns 1-8 */
+    /* Specific styles for columns 1-7 (Narrative-specific data) */
     th:nth-child(-n+7),
     td:nth-child(-n+7) {
       border-bottom: 1px solid #000;
     }
     th:nth-child(-n+7) {
-      border-top: none; /* No top border for header cells in columns 1-8 */
+      border-top: none; /* No top border for header cells in columns 1-7 */
     }
     td:nth-child(-n+7) {
       border-top: 1px solid #000;
@@ -277,6 +277,7 @@
       min-width: 8%;
       max-width: 8%;
     }
+    /* Fixed width for Data Detail Columns (8-14) */
     th:nth-child(8),
     td:nth-child(8) {
       width: 3.5%; /* Data use */
@@ -295,21 +296,27 @@
       min-width: 6%;
       max-width: 6%;
     }
-    th:nth-child(11),
+    th:nth-child(11), /* Sensor (Representation) */
     td:nth-child(11) {
-      width: 7%; /* Representation */
-      min-width: 7%;
-      max-width: 7%;
+      width: 6%; /* Was 7% */
+      min-width: 6%;
+      max-width: 6%;
     }
-    th:nth-child(12),
+    th:nth-child(12), /* New: Domain */
     td:nth-child(12) {
-      width: 4%; /* Resolution */
-      min-width: 4%;
-      max-width: 4%;
+      width: 3%; /* New */
+      min-width: 3%;
+      max-width: 3%;
     }
-    th:nth-child(13),
+    th:nth-child(13), /* Res (Resolution) */
     td:nth-child(13) {
-      width: 4%; /* Viz */
+      width: 3%; /* Was 4% */
+      min-width: 3%;
+      max-width: 3%;
+    }
+    th:nth-child(14), /* Viz */
+    td:nth-child(14) {
+      width: 4%; /* Keep */
       min-width: 4%;
       max-width: 4%;
     }
@@ -621,13 +628,13 @@
         width: 60px;
       }
 
-      /* HIDE ALL COLUMNS FROM THE 4TH ONWARDS FOR SMALL VIEWPORT */
+      /* HIDE ALL COLUMNS FROM THE 5TH ONWARDS FOR SMALL VIEWPORT (Columns 8-14 are hidden) */
       th:nth-child(n+5),
       td:nth-child(n+5) {
         display: none;
       }
 
-      /* Adjust widths for the first three visible columns to fill the viewport */
+      /* Adjust widths for the first four visible columns to fill the viewport */
       th:nth-child(1),
       td:nth-child(1) {
         width: 20%; /* Date */
@@ -648,7 +655,7 @@
       }
        th:nth-child(4),
       td:nth-child(4) {
-        width: 25%; /* Link */
+        width: 25%; /* Outlet */
         min-width: 25%;
         max-width: 25%;
       }
@@ -877,15 +884,20 @@
                   <button class="pill active" data-type="viz" data-value="all">All</button>
               </div>
 
-              <div class="filter-title">Data Use Year:</div>
-              <div class="filter-pills" id="years-filter-pills">
-                  <button class="pill active" data-type="years" data-value="all">All</button>
-                  </div>
-
               <div class="filter-title">Representation:</div>
               <div class="filter-pills" id="representation-filter-pills">
                   <button class="pill active" data-type="representation" data-value="all">All</button>
               </div>
+
+              <div class="filter-title">Domain:</div>
+              <div class="filter-pills" id="domain-filter-pills">
+                  <button class="pill active" data-type="domain" data-value="all">All</button>
+              </div>
+
+              <div class="filter-title">Data Use Year:</div>
+              <div class="filter-pills" id="years-filter-pills">
+                  <button class="pill active" data-type="years" data-value="all">All</button>
+                  </div>
           </div>
       </div>
 
@@ -932,7 +944,7 @@
           <th>Provider</th>
           <th>Platform</th>
           <th>Sensor</th>
-          <th>Res</th>
+          <th>Domain</th> <th>Res</th>
           <th>Viz</th>
           </tr>
       </thead>
@@ -1373,6 +1385,7 @@ document.getElementById('toYearInput').addEventListener('input', function () {
                         platforms: [],
                         resolutions: [],
                         representations: [],
+                        domains: [], // NEW: Initialize domains array
                         vizs: []
                     });
                 }
@@ -1387,6 +1400,7 @@ document.getElementById('toYearInput').addEventListener('input', function () {
                 if (row.Platform) article.platforms.push(...row.Platform.split(/[,;]/).map(pl => pl.trim()).filter(pl => pl));
                 if (row.Resolution) article.resolutions.push(...row.Resolution.split(/[,;]/).map(r => r.trim()).filter(r => r));
                 if (row.Representation) article.representations.push(...row.Representation.split(/[,;]/).map(r => r.trim()).filter(r => r));
+                if (row.Domain) article.domains.push(...row.Domain.split(/[,;]/).map(d => d.trim()).filter(d => d)); // NEW: Populate domains
                 if (row.Viz) article.vizs.push(...row.Viz.split(/[,;]/).map(v => v.trim()).filter(v => v));
             });
 
@@ -1398,6 +1412,7 @@ document.getElementById('toYearInput').addEventListener('input', function () {
                 article.platforms = [...new Set(article.platforms)];
                 article.resolutions = [...new Set(article.resolutions)];
                 article.representations = [...new Set(article.representations)];
+                article.domains = [...new Set(article.domains)]; // NEW: De-duplicate domains
                 article.vizs = [...new Set(article.vizs)];
 
                 const publicationYear = article.date ? new Date(article.date).getFullYear() : null;
@@ -1411,6 +1426,7 @@ document.getElementById('toYearInput').addEventListener('input', function () {
                     article.platforms.length,
                     article.resolutions.length,
                     article.representations.length,
+                    article.domains.length, // NEW: Include domains length
                     article.vizs.length,
                     1 // Ensure at least one cdp for articles with no specific data points
                 );
@@ -1423,6 +1439,7 @@ document.getElementById('toYearInput').addEventListener('input', function () {
                     resolution: article.resolutions[i] || article.resolutions[0] || '',
                     resolutionCategory: getMeterCategory(article.resolutions[i] || article.resolutions[0] || ''),
                     representation: article.representations[i] || article.representations[0] || '',
+                    domain: article.domains[i] || article.domains[0] || '', // NEW: Add domain
                     viz: article.vizs[i] || article.vizs[0] || ''
                 }));
 
@@ -1445,6 +1462,7 @@ document.getElementById('toYearInput').addEventListener('input', function () {
                         resolution: '',
                         resolutionCategory: '',
                         representation: '',
+                        domain: '', // NEW: Add empty domain
                         viz: ''
                     }]
                 };
@@ -1476,9 +1494,10 @@ document.getElementById('toYearInput').addEventListener('input', function () {
         const uniqueRepresentations = [...new Set(allData.flatMap(item => item.combinedDataPoints.map(cdp => cdp.representation).filter(r => r)))];
         populatePills('representation-filter-pills', uniqueRepresentations, 'representation');
 
-        // Removed interaction filter initialization
-        // const uniqueInteractions = [...new Set(allData.flatMap(item => item.combinedDataPoints.map(cdp => cdp.interaction).filter(i => i)))];
-        // populatePills('interaction-filter-pills', uniqueInteractions, 'interaction');
+        // NEW: Initialize Domain filter
+        const uniqueDomains = [...new Set(allData.flatMap(item => item.combinedDataPoints.map(cdp => cdp.domain).filter(d => d)))];
+        populatePills('domain-filter-pills', uniqueDomains, 'domain');
+
 
         // Populate Data Use Years
         const uniqueYears = [...new Set(allData.flatMap(item => item.combinedDataPoints.map(cdp => cdp.dataUseYear).filter(y => y)))].sort().reverse();
@@ -1700,7 +1719,7 @@ document.getElementById('toYearInput').addEventListener('input', function () {
                         <td class="data-detail-cell ${cdp.provider === 'TBA' ? 'tba-text' : ''}">${cdp.provider}</td>
                         <td class="data-detail-cell ${cdp.platform === 'TBA' ? 'tba-text' : ''}">${cdp.platform}</td>
                         <td class="data-detail-cell ${cdp.representation === 'TBA' ? 'tba-text' : ''}">${cdp.representation}</td>
-                        <td class="data-detail-cell ${cdp.resolution === 'TBA' ? 'tba-text' : ''}">${cdp.resolution}</td>
+                        <td class="data-detail-cell ${cdp.domain === 'TBA' ? 'tba-text' : ''}">${cdp.domain}</td> <td class="data-detail-cell ${cdp.resolution === 'TBA' ? 'tba-text' : ''}">${cdp.resolution}</td>
                         <td class="data-detail-cell ${cdp.viz === 'TBA' ? 'tba-text' : ''}">${cdp.viz}</td>
                     `;
                 } else {
@@ -1709,7 +1728,7 @@ document.getElementById('toYearInput').addEventListener('input', function () {
                         <td class="data-detail-cell ${cdp.provider === 'TBA' ? 'tba-text' : ''}">${cdp.provider}</td>
                         <td class="data-detail-cell ${cdp.platform === 'TBA' ? 'tba-text' : ''}">${cdp.platform}</td>
                         <td class="data-detail-cell ${cdp.representation === 'TBA' ? 'tba-text' : ''}">${cdp.representation}</td>
-                        <td class="data-detail-cell ${cdp.resolution === 'TBA' ? 'tba-text' : ''}">${cdp.resolution}</td>
+                        <td class="data-detail-cell ${cdp.domain === 'TBA' ? 'tba-text' : ''}">${cdp.domain}</td> <td class="data-detail-cell ${cdp.resolution === 'TBA' ? 'tba-text' : ''}">${cdp.resolution}</td>
                         <td class="data-detail-cell ${cdp.viz === 'TBA' ? 'tba-text' : ''}">${cdp.viz}</td>
                     `;
                 }
@@ -1837,23 +1856,25 @@ document.getElementById('toYearInput').addEventListener('input', function () {
             .map(pill => pill.getAttribute('data-value'))
             .filter(value => value !== 'all');
 
-        // Removed interaction filter logic
-        // const interactionPills = document.querySelectorAll('.pill[data-type="interaction"].active');
-        // const allInteractionsActive = Array.from(interactionPills).some(pill => pill.getAttribute('data-value') === 'all');
-        // const selectedInteractions = Array.from(interactionPills)
-        //     .map(pill => pill.getAttribute('data-value'))
-        //     .filter(value => value !== 'all');
+        // NEW: Domain filter logic
+        const domainPills = document.querySelectorAll('.pill[data-type="domain"].active');
+        const allDomainsActive = Array.from(domainPills).some(pill => pill.getAttribute('data-value') === 'all');
+        const selectedDomains = Array.from(domainPills)
+            .map(pill => pill.getAttribute('data-value'))
+            .filter(value => value !== 'all');
+
 
         const dataUseYearMatch = allYearsActive || selectedYears.includes(cdp.dataUseYear);
         const providerMatch = allProvidersActive || selectedProviders.includes(cdp.provider);
         const resolutionCategoryMatch = allResolutionCategoriesActive || selectedResolutionCategories.includes(cdp.resolutionCategory);
         const vizMatch = allVizActive || selectedViz.includes(cdp.viz);
         const representationMatch = allRepresentationsActive || selectedRepresentations.includes(cdp.representation);
-        // const interactionMatch = allInteractionsActive || selectedInteractions.includes(cdp.interaction); // Removed
+        const domainMatch = allDomainsActive || selectedDomains.includes(cdp.domain); // NEW: Domain Match
+
 
         return outletMatch && regionMatch && countryMatch && publicationYearMatch &&
                dataUseYearMatch && providerMatch && resolutionCategoryMatch &&
-               vizMatch && representationMatch;
+               vizMatch && representationMatch && domainMatch; // NEW: Include domainMatch
     }
 
 
