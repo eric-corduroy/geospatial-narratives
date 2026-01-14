@@ -1220,7 +1220,7 @@
         if (lowerCaseResolution.includes('5-30m')) return '5-30m';
         if (lowerCaseResolution.includes('30-250m')) return '30-250m';
         if (lowerCaseResolution.includes('250m-1km')) return '250m-1km';
-        if (lowerCaseResolution.includes('>1km')) return '>1km';
+        if (lowerCaseResolution.includes('1km-10km')) return '1km-10km';
 
         // Numerical parsing for resolutions in meters or kilometers
         const numMatch = resolution.match(/(\d+\.?\d*)/);
