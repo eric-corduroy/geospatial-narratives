@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About – Geospatial Narratives</title>
+  <!-- ============================================================
+       SEO
+  ============================================================ -->
+  <meta name="description"
+        content="About Geospatial Narratives — concept, method, disclaimer and submission guidelines.">
+  <meta name="author" content="Geospatial Narratives">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="http://www.geospatial-narratives.info/about.html">
+  <!-- ============================================================
+       FONTS
+  ============================================================ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap"
+        rel="stylesheet">
+  <link rel="icon" type="image/png" href="circle.png">
+  <style>
+    /* ============================================================
+       COLOR TOKENS — identical to index.html
+    ============================================================ */
+    :root {
+      --color-accent:             #f5ffaa;
+      --color-accent-hover:       #a7b060;
+      --color-accent-link:        #a7b060;
+      --color-black:              #000000;
+      --color-white:              #ffffff;
+      --color-bg:                 #f2f2f2;
+      --color-nav-bg:             #f5ffaa;
+      --color-text-primary:       #000000;
+      --color-text-body:          #1e1e1e;
+      --color-text-muted:         #9f9e9e;
+      --color-text-link:          #997b21;
+      --color-text-link-external: #222222;
+      --color-text-ref:           #878787;
+      --color-selection-bg:       #f5ffaa;
+      --color-selection-text:     #000000;
+      --color-mark-bg:            #f5ffaa;
+      --color-tab-inactive:       #cfcfcf;
+    }
+    /* ============================================================
+       RESET / BASE
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; }
+    ::selection {
+      background: var(--color-selection-bg);
+      color:      var(--color-selection-text);
+    }
+    body {
+      font-family: 'Geist Mono', monospace;
+      background:  var(--color-bg);
+      margin:  0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      text-rendering: optimizeLegibility;
+    }
+    /* ============================================================
+       LINKS
+    ============================================================ */
+    a {
+      color: var(--color-text-link);
+      text-decoration: none;
+      border-bottom: none;
+    }
+    a[href^="http"],
+    a[href^="mailto"] {
+      color: var(--color-text-link-external);
+    }
+    /* ============================================================
+       NAVIGATION — matches index.html exactly
+    ============================================================ */
+    .nav {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 3px 40px 3px 20px;
+      font-size: 17.5px;
+      font-weight: 450;
+      color: var(--color-text-primary);
+      gap: 10px;
+      background: var(--color-nav-bg);
+    }
+    .nav a {
+      font-size: 17.5px;
+      font-weight: 450;
+      color: var(--color-accent-link);
+      border-bottom: none;
+      padding: 5px 10px;
+    }
+    .nav a:hover  { color: var(--color-text-primary); }
+    .nav a.active { color: var(--color-text-primary); }
+    /* ============================================================
+       FIXED HEADER AREA
+    ============================================================ */
+    .fixed-header-content {
+      position: sticky;
+      top: 0;
+      width: 100%;
+      background: var(--color-bg);
+      z-index: 100;
+    }
+    .main-content-wrapper-header {
+      padding: 0 20px;
+    }
+    /* ============================================================
+       UPDATE DATE — matches index.html
+    ============================================================ */
+    .update-date {
+      font-family: 'Geist Mono', monospace;
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--color-text-muted);
+      padding: 10px 0 0 29px;
+    }
+    /* ============================================================
+       DISPLAY TITLE — matches .stats in index.html
+    ============================================================ */
+    .stats {
+      font-size: 96px;
+      font-weight: 400;
+      padding-top: 10px;
+      padding-bottom: 10px;
+      padding-left: 0;
+      color: var(--color-text-primary);
+    }
+    /* ============================================================
+       TAB NAVIGATION — sizes from about2.html
+    ============================================================ */
+    .about-tabs {
+      display: flex;
+      gap: 20px;
+      padding-top: 20px;
+      padding-left: 10px;
+      padding-bottom: 2px;
+    }
+    .about-tab-button {
+      background: none;
+      border: none;
+      font-family: 'Geist Mono', monospace;
+      font-size: 20px;
+      font-weight: 300;
+      color: var(--color-tab-inactive);
+      cursor: pointer;
+      padding: 0;
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+    .about-tab-button:hover      { color: var(--color-text-primary); }
+    .about-tab-button.active-tab {
+      color: var(--color-text-primary);
+      font-weight: 300;
+    }
+    /* ============================================================
+       SCROLLABLE CONTENT AREA
+    ============================================================ */
+    .scrollable-content-area {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 0 20px;
+      background: var(--color-bg);
+    }
+    /* ============================================================
+       CONTENT SECTIONS (tab panels)
+       — display controlled here only, NOT in .info-columns-container
+    ============================================================ */
+    .about-content-section        { display: none; }
+    .about-content-section.active { display: flex; }
+    /* ============================================================
+       TWO-COLUMN LAYOUT — from about2.html
+       — no display property here; handled by .about-content-section
+    ============================================================ */
+    .info-columns-container {
+      flex-direction: row;
+      gap: 3.3vw;
+      padding-bottom: 20px;
+      padding-top: 0;
+      padding-left: 10px;
+    }
+    /* ============================================================
+       COLUMN TEXT STYLES — sizes from about2.html
+    ============================================================ */
+    .info-column {
+      flex: 1 1 31.7vw;
+      max-width: 31.7vw;
+      font-family: 'Geist Mono', monospace;
+      font-size: 16px;
+      line-height: 22px;
+      font-weight: 300;
+      color: var(--color-text-body);
+    }
+    .info-column h1,
+    .info-column h2,
+    .info-column p,
+    .info-column ul,
+    .info-column li {
+      font-family: 'Geist Mono', monospace;
+      font-size: 16px;
+      line-height: 22px;
+      font-weight: 300;
+      color: var(--color-text-body);
+      text-align: left;
+      max-width: 60ch;
+    }
+    .info-column h1 {
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+    .info-column h2 {
+      margin-top: 30px;
+      margin-bottom: 10px;
+    }
+    .info-column p  { margin-bottom: 20px; }
+    .info-column ul {
+      list-style-type: disc;
+      margin-left: 40px;
+      margin-bottom: 20px;
+    }
+    .info-column li { margin-bottom: 10px; }
+    /* Small reference / footnote text */
+    .info-column p.small-text {
+      font-size:    0.7em;
+      line-height:  1.2;
+      width:        100%;
+      max-width:    none;
+      text-indent:  -1.2em;
+      padding-left: 1.2em;
+      color: var(--color-text-ref);
+      margin: 0 0 1em 0;
+    }
+    /* ============================================================
+       INLINE ELEMENTS
+    ============================================================ */
+    sup {
+      vertical-align: baseline;
+      position: relative;
+      top: -0.4em;
+      font-size: 0.75em;
+      line-height: 0;
+      color: var(--color-text-ref);
+    }
+    p mark {
+      background-color: var(--color-mark-bg);
+      color: var(--color-text-primary);
+    }
+    /* ============================================================
+       CTA BUTTON
+    ============================================================ */
+    .cta-button {
+      display: inline-block;
+      padding: 15px 30px;
+      background-color: var(--color-accent);
+      color: var(--color-text-primary);
+      text-decoration: none;
+      border-radius: 5px;
+      font-family: 'Geist Mono', monospace;
+      font-size: 18px;
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      border: none;
+    }
+    .cta-button:hover {
+      background-color: var(--color-accent-hover);
+      color: var(--color-white);
+    }
+    /* ============================================================
+       RESPONSIVE — ≤ 768px (tablets)
+    ============================================================ */
+    @media (max-width: 768px) {
+      .nav { padding: 15px 20px 15px 15px; font-size: 18px; gap: 5px; }
+      .nav a { font-size: 18px; padding: 3px 8px; }
+      .main-content-wrapper-header { padding: 0 15px; }
+      .update-date { font-size: 13px; padding: 8px 0 0 15px; }
+      .stats { font-size: 60px; padding-top: 15px; padding-bottom: 5px; }
+      .about-tabs { gap: 15px; padding-top: 8px; padding-bottom: 15px; }
+      .about-tab-button { font-size: 18px; }
+      .scrollable-content-area { padding: 0 15px; }
+      /* stack columns */
+      .about-content-section.active { flex-direction: column; }
+      .info-columns-container { padding-bottom: 15px; gap: 15px; padding-left: 0; }
+      .info-column {
+        flex-basis: auto;
+        max-width: none;
+        min-width: auto;
+      }
+      .info-column,
+      .info-column h1,
+      .info-column h2,
+      .info-column p,
+      .info-column ul,
+      .info-column li {
+        font-size: 20px;
+        line-height: 28px;
+        font-weight: 400;
+      }
+      .info-column h1 { margin-bottom: 15px; }
+      .info-column h2 { margin-top: 20px; margin-bottom: 8px; }
+      .info-column p  { margin-bottom: 15px; }
+      .info-column ul { margin-left: 25px; margin-bottom: 15px; }
+      .info-column li { margin-bottom: 8px; }
+    }
+    /* ============================================================
+       RESPONSIVE — ≤ 480px (mobile)
+    ============================================================ */
+    @media (max-width: 480px) {
+      .nav { padding: 5px 20px 5px 5px; font-size: 18px; gap: 5px; }
+      .nav a { font-size: 17px; padding: 2px 8px; }
+      .main-content-wrapper-header { padding: 0 10px; }
+      .update-date { font-size: 12px; padding: 10px 0 0 13px; }
+      .stats {
+        font-size: 46px;
+        padding-top: 15px;
+        padding-left: 1.5px;
+        padding-bottom: 20px;
+        line-height: 50px;
+      }
+      .about-tabs {
+        padding-bottom: 10px;
+        padding-left: 3px;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .about-tab-button { font-size: 15px; }
+      .scrollable-content-area { padding: 0 3px 40px; }
+      /* stack columns */
+      .about-content-section.active { flex-direction: column; }
+      .info-columns-container { padding-bottom: 0; gap: 0; padding-left: 0; }
+      .info-column {
+        flex-basis: auto;
+        max-width: none;
+      }
+      .info-column,
+      .info-column h1,
+      .info-column h2,
+      .info-column p,
+      .info-column ul,
+      .info-column li {
+        font-size: 15px;
+        line-height: 20px;
+        font-weight: 400;
+        padding-left: 4.5px;
+      }
+      .info-column h1 { margin-bottom: 10px; }
+      .info-column h2 { margin-top: 15px; margin-bottom: 5px; }
+      .info-column p  { margin-bottom: 10px; }
+      .info-column ul { margin-left: 20px; margin-bottom: 10px; }
+      .info-column li { margin-bottom: 5px; }
+      .cta-button { font-size: 15px; padding: 12px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+       FIXED HEADER
+  ============================================================ -->
+  <div class="fixed-header-content">
+    <div class="nav">
+      <a href="index.html">Index</a>
+      <a href="literacy.html">Literacy</a>
+      <a href="about.html" class="active">About</a>
+    </div>
+    <div class="update-date">updated: 2026-05-28</div>
+    <div class="main-content-wrapper-header">
+      <div class="stats">Geospatial Narratives</div>
+      <div class="about-tabs">
+        <button class="about-tab-button active-tab" data-target="conceptContent">Concept</button>
+        <button class="about-tab-button"             data-target="disclaimerContent">Context</button>
+        <button class="about-tab-button"             data-target="methodContent">Method</button>
+        <button class="about-tab-button"             data-target="submitContent">Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SCROLLABLE CONTENT
+  ============================================================ -->
+  <div class="scrollable-content-area">
+
+    <!-- CONCEPT ------------------------------------------------ -->
+    <div id="conceptContent" class="info-columns-container about-content-section active">
+      <div class="info-column">
+        <p>Geospatial Narratives is a platform designed to promote <mark>critical media literacy</mark> in the 
+            use of satellite data, developed in response to their increasing narrative role 
+            in today's media landscape.
+       
+        <p>The project examines how satellite data shapes reporting in journalism and beyond,  
+           highlighting its potential as a tool for transparency and accountability through 
+           investigative research, while equally addressing observed inconsistencies and lack of 
+           attribution and contextualisation. By archiving and situating these uses, the platform renders them <mark>searchable</mark>,
+           <mark>comparable</mark> and <mark>accessible</mark> – offering critical reflection and providing references for analysis.</p>
+    
+        
+        <p><mark>Index</mark>: collects examples in which satellite data is used in journalistic and investigative 
+           contexts. It aims to trace how such images circulate and seeks to highlight their narrative, political,  
+           and media dimensions — while simultaneously filling gaps in public documentation. 
+           Rather than reflecting an all-encompassing overview, it represents a curated selection characterized 
+           by narrative relevance, linguistic accessibility of the author, and a primary focus on national media outles. I am 
+           aware of the limitations of this perspective and welcome suggestions for its expansion.</p>
+      </div>
+      <div class="info-column">
+       <p><mark>Article list</mark>: brings together a deliberately diverse set of perspectives: from popular science, 
+           media-theoretical, and philosophical texts to journalistic reports and analyses by NGOs. It includes books, online 
+           articles, essays, interviews, and videos that show how satellite data is utilised in cultural, political, and media discourse.</p> 
+
+       <p><mark>Glossary</mark>: expands the platform with a hybrid vocabulary: a blend of technical and scientific terms, and critical or poetic 
+          ideas drawn from fields such as remote sensing, media theory, design research, and philosophy. Some entries give basic definitions of how 
+          satellite technologies work, while others offer food for thought — metaphors, conceptual frameworks, or tools to question how we perceive 
+          and use these technologies.</p>
+
+       <p><mark>Disclaimer</mark>: curation on this platform follows an editorial practice: iterative, subjective, open to new perspectives. 
+          The selection makes no claim to completeness; rather, it aims to open up a space for interdisciplinary discourse.
+          All entries have been included without prior permission of the authors, publications or media outlets. Requests for removal may be submitted at any time.</p>
+      
+      </div>
+    </div>
+
+    <!-- CONTEXT --------------------------------------------- -->
+    <div id="disclaimerContent" class="info-columns-container about-content-section">
+      <div class="info-column">
+        <p>Once strictly reserved for military or government agencies, satellite images have become 
+           a central visual language of journalism, ranging from illustrative annotation to investigative
+           practices that empirically challenge state and private narratives. Yet their photographic 
+           appearance often obscures underlying <mark>modes of data production</mark>, while scientific embeddedness lends 
+           imagery an evidentiary status that is rarely questioned.</p>
+        
+        <p>Information on sensors, providers, processing methods, resolution, or verification chains is 
+           frequently missing or difficult to trace. Classical verification through ground truthing is often 
+           inapplicable in investigative contexts; instead, verification increasingly relies on other media 
+           that are themselves potentially ambiguous. Structures of truth and reference consequently become 
+           destabilised, a development further intensified by AI-generated <mark>‘geographic deepfakes’</mark> which are no 
+           longer a hypothetical possibility but an existing reality.<sup></sup></p>
+
+        <p>These developments not only intensify the need for verification, but may also undermine 
+           confidence in satellite-based evidence as a whole, even in cases where genuine data is used. And while fact-checking 
+           departments have now issued guidelines for verifying fake satellite imagery<sup></sup>, this highlights a key problem: 
+           such contextual information is often incomplete from the outset or is provided inconsistently.</p>
+      </div>
+      <div class="info-column">
+        <p>Captions, annotations, and source attributions often merge visually and semantically, complicating 
+           citation practices and long-term verifiability – and further fueling mistrust in contexts where journalistic 
+           credibility is already coming under increasing pressure.</p>
+
+        <p>Scholars from fields such as architecture and media studies, including Laura Kurgan and
+           Lisa Parks, have long argued that these images should be viewed within the context of the 
+          <mark>technologies</mark> and <mark>political frameworks</mark> that shape them. As Kurgan 
+           already noted in 2013: "With every image, we should be able to ask about its 
+           technology, its location data, its ownership, its readability, and its source."<sup>1</sup></p>
+
+        <p>Against this backdrop, “Geospatial Narratives” seeks to respond to this need by exploring how such a framework could be developed to support these requirements.</p>
+
+        <p class="small-text">1 Kurgan, Laura. "Close up at a distance: mapping, technology, and politics." Zone Books, 2013</p>
+      </div>
+    </div>
+
+    <!-- METHOD ------------------------------------------------- -->
+    <div id="methodContent" class="info-columns-container about-content-section">
+      <div class="info-column">
+      <p>Information on this platform combines clear details from published articles with the 
+         author’s personal interpretations, gained through working with satellite data as a 
+         visual and technical medium. While some information can be inferred from the context 
+         of the article, specific details — such as the satellite platform or resolution — are often
+         missing, which would make it possible to understand and, ideally, reproduce the use and 
+         analysis of the data.</p>
+      <p>To address these gaps, I draw on publicly available data about satellite capabilities,
+         visual clues within the imagery, and an interpretive sensibility developed through regular
+         engagement with geospatial data.</p>
+      <p><mark>Provider</mark>: the entity responsible for obtaining the data, ranging
+         from commercial companies such as Planet or Vantor (formerly Maxar) to government agencies 
+         such as NASA, ESA, or NOAA.</p>
+      <p><mark>Platform</mark>: the satellite (constellation) that collects the data and, based on 
+         its sensor capabilities, enables further aspects to be inferred and determined.</p>
+      <p><mark>Sensor</mark>: the instrument(s) used by the platform that determine how data is 
+          collected. Sensors differ in terms of their physical operating principles and the part of 
+          the electromagnetic spectrum they measure.</p>
+      </div>
+      <div class="info-column">
+      <p><mark>Domain</mark>: the primary thematic focus of the observation, including: 
+          weather (clouds, storms, and precipitation for forecasting purposes); 
+          atmosphere (measurements of gases, temperature, and air quality); land (surface changes in vegetation, 
+          urban environments, and water bodies) and ocean (sea temperature, water color, 
+          waves and currents).</p>
+
+      <p><mark>Visualisation</mark>: the representation of sensor data for analysis and improved readability, 
+          determined by the sensor's available spectral bands and processing applied. The result can be true‑color
+          images (mimicking natural human vision), false‑color images (highlighting features that would otherwise
+          be less visible), or derived indices (calculated by mathematically combining bands to quantify a specific 
+          condition).</p>
+      <p><mark>Resolution</mark>: the size of individual pixels, based on the sensor 
+         capabilities. This information is rarely mentioned and can also be visually altered through 
+         post-processing, resampling, or cropping, making it difficult to identify with precision. 
+         To account for this, each resolution is assigned to one of several categories — flexible 
+         ranges that take into account differences in sensor types.</p>
+      <p>This method inevitably involves a certain degree of approximation. However, this margin 
+         for interpretation should not be viewed as a shortcoming, but rather as part of the critical
+         reflection: How much do we really know when we look at a satellite image, and what remains 
+         hidden or absent?</p>
+      </div>
+    </div>
+
+    
+
+    <!-- SUBMIT -------------------------------------------------- -->
+    <div id="submitContent" class="info-columns-container about-content-section">
+      <div class="info-column">
+        <p>This platform is an open, collective, and growing resource for studying satellite data
+        as a medium in stories and investigations. It invites contributions that expand the archive
+        and help people understand how satellite data is used, read, and circulated.</p>
+        <p>Submissions may fall into two categories:</p>
+        <p><mark>Narrative Use:</mark> examples in which satellite data plays a central role in
+        narratives, analyses or reports. These can be news articles, visual studies or artistic
+        works that use satellite data for more than just illustration.</p>
+        <p><mark>Satellite Literacy:</mark> contributions that explore and question the medium
+        itself. This includes both simple explanations and more reflective or speculative ideas.
+        Contributions may cover concepts from fields such as remote sensing, critical geography,
+        design research, media theory or philosophy.</p>
+      </div>
+      <div class="info-column">
+        <p>Contributions from different application contexts, regions and cultures are welcome.
+           Only through a variety of perspectives can the narrative potential, inherent biases, 
+           and blind spots in the use of satellite data be brought to light. I am also aware of 
+           the limitations of my own perspective, which is primarily shaped by Western, 
+           English- and German-language media.</p>
+        <p>Submissions are reviewed for relevance, clarity, and fit with the platform's focus.
+        Images used purely for visual decoration or without critical context may fall outside 
+        the archive's scope.</p>
+        
+        <p>To propose an entry — whether case study, text, or glossary term — or simply to
+        provide feedback, please use the form below or reach out via
+        <a href="mailto:mail@julianpeschel.info">email</a>.</p>
+        <p>
+          <a href="https://forms.gle/oGPPKSaUN9uHzagp7"
+             target="_blank"
+             class="cta-button">Open Contact Form</a>
+        </p>
+      </div>
+    </div>
+
+  </div><!-- /scrollable-content-area -->
+
+  <!-- ============================================================
+       SCRIPTS
+  ============================================================ -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const tabButtons      = document.querySelectorAll('.about-tab-button');
+      const contentSections = document.querySelectorAll('.about-content-section');
+
+      function activateSection(targetId) {
+        if (!document.getElementById(targetId)) targetId = 'conceptContent';
+        contentSections.forEach(s =>
+          s.classList.toggle('active', s.id === targetId)
+        );
+        tabButtons.forEach(btn =>
+          btn.classList.toggle('active-tab', btn.dataset.target === targetId)
+        );
+        history.replaceState(null, null, `#${targetId.replace('Content', '')}`);
+      }
+
+      function getSectionIdFromHash() {
+        const hash = window.location.hash.substring(1);
+        return (hash && document.getElementById(`${hash}Content`))
+          ? `${hash}Content`
+          : 'conceptContent';
+      }
+
+      tabButtons.forEach(btn =>
+        btn.addEventListener('click', () => activateSection(btn.dataset.target))
+      );
+
+      activateSection(getSectionIdFromHash());
+
+      window.addEventListener('hashchange', () =>
+        activateSection(getSectionIdFromHash())
+      );
+    });
+  </script>
+</body>
+</html>
